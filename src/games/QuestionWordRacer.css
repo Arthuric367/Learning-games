@@ -1,0 +1,286 @@
+.racer-container {
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+    overflow-y: auto;
+}
+
+.racer-start-screen,
+.racer-win-screen {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 50px;
+    border-radius: 30px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 90%;
+    width: auto;
+    min-height: auto;
+    justify-content: center;
+}
+
+.racer-start-screen h1,
+.racer-win-screen h1 {
+    color: #2c3e50;
+    font-size: 3rem;
+    margin: 0;
+    text-shadow: none;
+}
+
+.racer-start-screen p {
+    color: #555;
+    font-size: 1.5rem;
+    margin: 5px 0;
+}
+
+.start-btn,
+.restart-btn,
+.back-btn {
+    font-size: 2rem;
+    padding: 15px 40px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 5px 0 #388E3C;
+    font-weight: normal;
+}
+
+.start-btn,
+.restart-btn {
+    background: #4caf50;
+    color: white;
+}
+
+.back-btn {
+    background-color: #FF9800;
+    box-shadow: 0 5px 0 #F57C00;
+    color: white;
+}
+
+.start-btn:active,
+.restart-btn:active,
+.back-btn:active {
+    transform: translateY(5px);
+    box-shadow: none;
+}
+
+.car-celebration {
+    font-size: 5rem;
+    margin: 20px;
+    animation: wiggle 1s infinite;
+}
+
+@keyframes wiggle {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-10deg);
+    }
+
+    75% {
+        transform: rotate(10deg);
+    }
+}
+
+.race-scene {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.hud {
+    height: 60px;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    color: white;
+    font-size: 1.5rem;
+    z-index: 10;
+}
+
+.home-btn-small {
+    background: none;
+    border: 2px solid white;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+}
+
+.track-view {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #87CEEB;
+}
+
+.track-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background-image: url('../assets/race_track_bg.png');
+    background-size: 50% 100%;
+    background-repeat: repeat-x;
+    animation: scrollTrack linear infinite;
+}
+
+@keyframes scrollTrack {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.player-car {
+    position: absolute;
+    bottom: 20%;
+    left: 10%;
+    width: 200px;
+    transition: bottom 0.3s;
+}
+
+.player-car img {
+    width: 100%;
+    height: auto;
+}
+
+.dino-overlay {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px !important;
+    animation: bite 0.5s infinite;
+}
+
+@keyframes bite {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-10deg) scale(1.1);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.shaking {
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(8px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-16px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(16px, 0, 0);
+    }
+}
+
+.message-area {
+    height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    color: #D32F2F;
+    font-weight: bold;
+}
+
+.question-dashboard {
+    height: 250px;
+    background: #2c3e50;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    border-top: 5px solid #F1C40F;
+}
+
+.question-dashboard h2 {
+    color: white;
+    margin: 0;
+    font-size: 2rem;
+}
+
+.options-grid {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.racer-option-btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 20px;
+    font-size: 1.5rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #2980b9;
+    transition: transform 0.1s;
+}
+
+.racer-option-btn:active {
+    transform: translateY(5px);
+    box-shadow: none;
+}
+
+.speed-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255, 255, 255, 0.1) 50px, rgba(255, 255, 255, 0.1) 100px);
+    pointer-events: none;
+    z-index: 5;
+}

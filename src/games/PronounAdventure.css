@@ -1,0 +1,152 @@
+.app-container {
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+    /* Sky blue background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+}
+
+.start-screen,
+.win-screen,
+.milestone-screen {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 50px;
+    border-radius: 30px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 90%;
+}
+
+.start-screen h1,
+.win-screen h1 {
+    color: #2c3e50;
+    font-size: 3rem;
+    margin: 0;
+}
+
+.start-btn,
+.restart-btn,
+.continue-btn,
+.back-btn {
+    font-size: 2rem;
+    padding: 15px 40px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 5px 0 #388E3C;
+}
+
+.back-btn {
+    background-color: #FF9800;
+    box-shadow: 0 5px 0 #F57C00;
+}
+
+.start-btn:active,
+.restart-btn:active,
+.continue-btn:active,
+.back-btn:active {
+    transform: translateY(5px);
+    box-shadow: none;
+}
+
+.game-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.progress {
+    font-size: 1.5rem;
+    color: #555;
+    margin-top: 20px;
+}
+
+.home-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 2rem;
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #4CAF50;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.home-btn:hover {
+    transform: scale(1.1);
+}
+
+.home-btn:active {
+    transform: scale(0.95);
+}
+
+.win-image-container {
+    width: 300px;
+    height: 300px;
+    margin: 20px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    animation: dance 1s infinite alternate;
+}
+
+.win-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@keyframes dance {
+    from {
+        transform: rotate(-10deg);
+    }
+
+    to {
+        transform: rotate(10deg);
+    }
+}
+
+/* Shake animation for incorrect answer */
+.shake {
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(8px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-16px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(16px, 0, 0);
+    }
+}

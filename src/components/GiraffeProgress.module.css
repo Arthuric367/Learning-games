@@ -1,0 +1,80 @@
+.container {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 90%;
+  max-width: 600px;
+  transition: all 0.3s ease;
+}
+
+.milestone {
+  flex-direction: column;
+  padding: 40px;
+  transform: scale(1.1);
+}
+
+.milestone .imageContainer {
+  width: 200px;
+  height: 200px;
+  margin-right: 0;
+  margin-bottom: 20px;
+}
+
+.milestone .message {
+  font-size: 2rem;
+  text-align: center;
+}
+
+.imageContainer {
+  width: 80px;
+  height: 80px;
+  margin-right: 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #FF9800;
+  background: #FFF3E0;
+}
+
+.giraffeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.message {
+  margin: 0 0 5px 0;
+  font-weight: bold;
+  color: #E65100;
+}
+
+.progressBarContainer {
+  width: 100%;
+  height: 15px;
+  background-color: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background-color: #4CAF50;
+  transition: width 0.5s ease-in-out;
+}
+
+.scoreText {
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: right;
+}

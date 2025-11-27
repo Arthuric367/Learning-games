@@ -1,0 +1,344 @@
+.blaster-container {
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+    overflow-y: auto;
+}
+
+.blaster-start-screen,
+.blaster-win-screen,
+.blaster-gameover-screen {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 50px;
+    border-radius: 30px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 90%;
+    width: auto;
+    justify-content: center;
+}
+
+.blaster-start-screen h1,
+.blaster-win-screen h1,
+.blaster-gameover-screen h1 {
+    color: #2c3e50;
+    font-size: 3rem;
+    margin: 0;
+}
+
+.blaster-start-screen p {
+    color: #555;
+    font-size: 1.5rem;
+    margin: 5px 0;
+}
+
+.start-screen-image {
+    max-width: 400px;
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.level-selection {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.level-btn {
+    font-size: 1.8rem;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    min-width: 250px;
+}
+
+.level-btn.level-2 {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.level-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+}
+
+.level-btn:active {
+    transform: translateY(0);
+}
+
+.level-btn small {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.back-btn,
+.restart-btn {
+    font-size: 2rem;
+    padding: 15px 40px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 5px 0 #388E3C;
+}
+
+.back-btn {
+    background-color: #FF9800;
+    box-shadow: 0 5px 0 #F57C00;
+}
+
+.back-btn:active,
+.restart-btn:active {
+    transform: translateY(5px);
+    box-shadow: none;
+}
+
+.victory-emoji {
+    font-size: 5rem;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* Game Scene */
+.game-scene {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.hud {
+    height: 60px;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    color: white;
+    font-size: 1.2rem;
+    z-index: 10;
+}
+
+.category-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.category-emoji {
+    font-size: 2rem;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+}
+
+.home-btn-small {
+    background: none;
+    border: 2px solid white;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+}
+
+.game-area {
+    flex: 1;
+    position: relative;
+    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+    overflow: hidden;
+}
+
+.monster-boss {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 5;
+}
+
+.monster-boss img {
+    width: 150px;
+    height: auto;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.boss-health {
+    margin-top: 10px;
+    font-size: 1.5rem;
+}
+
+.heart {
+    margin: 0 2px;
+}
+
+.bubbles-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.bubble {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(100, 200, 255, 0.6));
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: transform 0.2s;
+    animation: bubbleFloat 2s ease-in-out infinite;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.bubble:hover {
+    transform: scale(1.1);
+}
+
+.bubble.rainbow {
+    background: linear-gradient(135deg,
+            violet, indigo, blue, green, yellow, orange, red);
+    animation: rainbowShine 2s linear infinite, bubbleFloat 2s ease-in-out infinite;
+}
+
+@keyframes bubbleFloat {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(10px);
+    }
+}
+
+@keyframes rainbowShine {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        filter: hue-rotate(360deg);
+    }
+}
+
+.fighter {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+}
+
+.fighter img {
+    width: 120px;
+    height: auto;
+    animation: fighterHover 1.5s ease-in-out infinite;
+}
+
+@keyframes fighterHover {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.message-area {
+    height: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .blaster-start-screen h1,
+    .blaster-win-screen h1,
+    .blaster-gameover-screen h1 {
+        font-size: 2rem;
+    }
+
+    .level-btn {
+        font-size: 1.4rem;
+        padding: 15px 20px;
+        min-width: 200px;
+    }
+
+    .monster-boss img {
+        width: 100px;
+    }
+
+    .bubble {
+        width: 80px;
+        height: 80px;
+        font-size: 1rem;
+    }
+
+    .fighter img {
+        width: 80px;
+    }
+}

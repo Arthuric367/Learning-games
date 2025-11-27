@@ -1,0 +1,193 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { questionWords } from '../data/questionWords';
+import { speak, playSound } from '../utils/audio';
+import './QuestionWordRacer.css';
+import raceCarImg from '../assets/race_car.svg';
+import shieldIcon from '../assets/shield_icon.png';
+import dinoAttackImg from '../assets/dino_attack.svg';
+import startScreenImg from '../assets/racer_start.png';
+
+// Fisher-Yates Shuffle
+const shuffleArray = (array) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+};
+
+const WIN_SCORE = 15;
+
+function QuestionWordRacer({ onBackToMenu }) {
+    const [gameState, setGameState] = useState('start'); // start, racing, win, gameover
+    const [questions, setQuestions] = useState([]);
+    const [currentQIndex, setCurrentQIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [speed, setSpeed] = useState(0); // 0 to 100 visual speed
+    const [shields, setShields] = useState(0);
+    const [streak, setStreak] = useState(0);
+    const [isAttacked, setIsAttacked] = useState(false);
+    const [message, setMessage] = useState('');
+
+    const currentQuestion = questions[currentQIndex];
+
+    useEffect(() => {
+        if (gameState === 'racing') {
+            // Game loop or periodic checks could go here
+            // For now, we rely on event-based updates
+        }
+    }, [gameState]);
+
+    const handleStart = () => {
+        // Get 20 random questions and shuffle their options
+        const randomQuestions = shuffleArray(questionWords).slice(0, 20).map(q => ({
+            ...q,
+            options: shuffleArray([...q.options])
+        }));
+        setQuestions(randomQuestions);
+        setScore(0);
+        setCurrentQIndex(0);
+        setSpeed(20); // Initial speed
+        setShields(0);
+        setStreak(0);
+        setGameState('racing');
+        setMessage("Go! Answer to speed up!");
+        speak("Ready? Go! Answer the questions to race!");
+    };
+
+    const triggerDinoAttack = () => {
+        setIsAttacked(true);
+        playSound('incorrect'); // Use incorrect sound as warning for now
+
+        setTimeout(() => {
+            if (shields > 0) {
+                setShields(prev => prev - 1);
+                setMessage("Shield blocked the Dino!");
+                speak("Shield blocked the Dino!");
+            } else {
+                setSpeed(prev => Math.max(10, prev - 30));
+                setMessage("Dino slowed you down!");
+                speak("Oh no! The Dino slowed you down!");
+            }
+            setIsAttacked(false);
+        }, 1500);
+    };
+
+    const handleAnswer = (selectedOption) => {
+        if (gameState !== 'racing') return;
+
+        if (selectedOption === currentQuestion.answer) {
+            // Correct
+            playSound('correct');
+            const newScore = score + 1;
+            setScore(newScore);
+            setSpeed(prev => Math.min(100, prev + 15));
+
+            const newStreak = streak + 1;
+            setStreak(newStreak);
+
+            if (newStreak % 3 === 0) {
+                setShields(prev => prev + 1);
+                setMessage("Shield Unlocked! 🛡️");
+                speak("Shield Unlocked!");
+            } else {
+                setMessage("Speed Up! 🏎️💨");
+            }
+
+            if (newScore >= WIN_SCORE) {
+                setGameState('win');
+                speak("You crossed the finish line! Winner!");
+            } else {
+                // Next question
+                if (currentQIndex < questions.length - 1) {
+                    setCurrentQIndex(prev => prev + 1);
+
+                    // Random Dino Attack chance (20%)
+                    if (Math.random() < 0.2) {
+                        triggerDinoAttack();
+                    }
+                } else {
+                    // Ran out of questions but haven't won? Loop or win?
+                    // Let's just win if they finished all available questions for now
+                    setGameState('win');
+                }
+            }
+        } else {
+            // Incorrect
+            playSound('incorrect');
+            setSpeed(prev => Math.max(10, prev - 10));
+            setStreak(0);
+            setMessage("Slowed down... Try again!");
+        }
+    };
+
+    return (
+        <div className="racer-container">
+            {gameState === 'start' && (
+                <div className="racer-start-screen">
+                    <h1>🏎️ Question Word Racer 🏎️</h1>
+                    <img src={startScreenImg} alt="Racing Car" className="start-screen-image" />
+                    <p>Answer correctly to speed up!</p>
+                    <p>Get 3 right in a row to get a Shield 🛡️</p>
+                    <p>Watch out for Dino Attacks! 🦖</p>
+                    <button className="start-btn" onClick={handleStart}>Start Race! (開始)</button>
+                    <button className="back-btn" onClick={onBackToMenu}>Back to Menu</button>
+                </div>
+            )}
+
+            {gameState === 'racing' && (
+                <div className="race-scene">
+                    <div className="hud">
+                        <div className="score-box">🏁 {score} / {WIN_SCORE}</div>
+                        <div className="shield-box">🛡️ {shields}</div>
+                        <button className="home-btn-small" onClick={onBackToMenu}>🏠</button>
+                    </div>
+
+                    <div className="track-view">
+                        <div
+                            className="track-bg"
+                            style={{ animationDuration: `${200 / speed}s` }}
+                        ></div>
+
+                        <div className={`player-car ${isAttacked ? 'shaking' : ''}`}>
+                            <img src={raceCarImg} alt="Car" />
+                            {isAttacked && <img src={dinoAttackImg} className="dino-overlay" alt="Dino" />}
+                        </div>
+
+                        <div className="speed-lines" style={{ opacity: speed / 100 }}></div>
+                    </div>
+
+                    <div className="message-area">{message}</div>
+
+                    <div className="question-dashboard">
+                        <h2>{currentQuestion.question}</h2>
+                        <div className="options-grid">
+                            {currentQuestion.options.map((opt, idx) => (
+                                <button
+                                    key={idx}
+                                    className="racer-option-btn"
+                                    onClick={() => handleAnswer(opt)}
+                                >
+                                    {opt}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {gameState === 'win' && (
+                <div className="racer-win-screen">
+                    <h1>🏆 VICTORY! 🏆</h1>
+                    <p>You finished the race!</p>
+                    <div className="car-celebration">🏎️💨💨</div>
+                    <button className="restart-btn" onClick={handleStart}>Race Again</button>
+                    <button className="back-btn" onClick={onBackToMenu}>Back to Menu</button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default QuestionWordRacer;
