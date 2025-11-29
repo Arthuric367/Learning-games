@@ -69,6 +69,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
     const [currentCategory, setCurrentCategory] = useState(null);
     const [currentMonster, setCurrentMonster] = useState(getRandomMonster()); // Random monster
     const [isShooting, setIsShooting] = useState(false); // Track shooting animation
+    const [isHit, setIsHit] = useState(false); // Track boss hit animation
     const [message, setMessage] = useState('');
     const bubbleIdCounter = useRef(0);
     const gameLoopRef = useRef(null);
@@ -116,7 +117,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
 
         const newBubble = {
             id: bubbleIdCounter.current++,
-            x: Math.random() * 80 + 10, // Random x position 10-90%
+            x: Math.random() * 50 + 35, // Random x position 35-85% (avoiding monster on left)
             y: 0, // Start at bottom
             content,
             isCorrect,
@@ -160,6 +161,10 @@ function WonderWorldBlaster({ onBackToMenu }) {
             // Show shooting animation
             setIsShooting(true);
             setTimeout(() => setIsShooting(false), 300); // Reset after 300ms
+
+            // Show explosion on boss
+            setIsHit(true);
+            setTimeout(() => setIsHit(false), 500);
 
             const newBossHealth = bossHealth - 1;
             setBossHealth(newBossHealth);
@@ -244,7 +249,8 @@ function WonderWorldBlaster({ onBackToMenu }) {
 
                     <div className="game-area">
                         <div className="monster-boss">
-                            <img src={currentMonster} alt="Monster Boss" />
+                            <img src={currentMonster} alt="Monster Boss" className={isHit ? 'boss-hit' : ''} />
+                            {isHit && <div className="explosion-effect">💥</div>}
                             <div className="boss-health">
                                 {[...Array(5)].map((_, i) => (
                                     <span key={i} className={i < bossHealth ? 'heart filled' : 'heart'}>

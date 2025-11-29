@@ -188,17 +188,78 @@
 
 .monster-boss {
     position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    z-index: 5;
+    top: 50px;
+    left: 30px;
+    width: auto;
+    height: 100vh;
+    min-height: 200px;
+    max-height: 600px;
+    z-index: 2;
+    transition: transform 0.1s;
 }
 
 .monster-boss img {
-    width: 150px;
-    height: auto;
+    width: auto;
+    height: 100%;
+    object-fit: contain;
     animation: float 3s ease-in-out infinite;
+}
+
+.boss-hit {
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+    filter: brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(5);
+}
+
+.explosion-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+    z-index: 10;
+    pointer-events: none;
+    animation: explode 0.5s ease-out forwards;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translateX(5px);
+    }
+
+    20%,
+    80% {
+        transform: translateX(-5px);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translateX(5px);
+    }
+
+    40%,
+    60% {
+        transform: translateX(-5px);
+    }
+}
+
+@keyframes explode {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
 }
 
 @keyframes float {
@@ -280,14 +341,13 @@
 
 .fighter {
     position: absolute;
-    bottom: 50px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 70px;
+    right: 70px;
     z-index: 5;
 }
 
 .fighter img {
-    width: 120px;
+    width: 100px;
     height: auto;
     animation: fighterHover 1.5s ease-in-out infinite;
 }
@@ -330,8 +390,12 @@
         min-width: 200px;
     }
 
-    .monster-boss img {
-        width: 100px;
+    .monster-boss {
+        height: 18vh;
+        min-height: 150px;
+        max-height: 300px;
+        left: 10px;
+        top: 30px;
     }
 
     .bubble {
@@ -340,7 +404,11 @@
         font-size: 1rem;
     }
 
+    .fighter {
+        right: 20px;
+    }
+
     .fighter img {
-        width: 80px;
+        width: 60px;
     }
 }
