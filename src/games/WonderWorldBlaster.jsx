@@ -1,10 +1,52 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { categories } from '../data/categories';
-import { speak, playSound } from '../utils/audio';
+import { speak, speakWithFemaleVoice, speakEncouraging, playSound } from '../utils/audio';
 import './WonderWorldBlaster.css';
-import monsterBossImg from '../assets/monster_boss.png';
+// Import all monsters from cutemonsters directory
+import abyssalBeastImg from '../assets/cutemonsters/abyssal beast.png';
+import automatonFighterImg from '../assets/cutemonsters/automaton fighter.png';
+import boglingImg from '../assets/cutemonsters/bogling.png';
+import dryadImg from '../assets/cutemonsters/dryad.png';
+import fishImg from '../assets/cutemonsters/fish.png';
+import glisteningFishImg from '../assets/cutemonsters/glistening fish.png';
+import livingBoulderImg from '../assets/cutemonsters/living boulder.png';
+import merfolkImg from '../assets/cutemonsters/merfolk.png';
+import minotaurImg from '../assets/cutemonsters/minotaur.png';
+import plantBehemothImg from '../assets/cutemonsters/plant behemoth.png';
+import plantSpriteImg from '../assets/cutemonsters/plant sprite.png';
+import sharkImg from '../assets/cutemonsters/shark.png';
+import snowWormImg from '../assets/cutemonsters/snow worm.png';
+import tentacleMonsterImg from '../assets/cutemonsters/tentacle monster.png';
+import tigerImg from '../assets/cutemonsters/tiger.png';
+import turtleImg from '../assets/cutemonsters/turtle.png';
 import airFighterImg from '../assets/air_fighter.png';
+import airFighterShootImg from '../assets/air_fighter_shoot.png';
 import startScreenImg from '../assets/sky_background.png';
+
+// Array of all monster images
+const monsterImages = [
+    abyssalBeastImg,
+    automatonFighterImg,
+    boglingImg,
+    dryadImg,
+    fishImg,
+    glisteningFishImg,
+    livingBoulderImg,
+    merfolkImg,
+    minotaurImg,
+    plantBehemothImg,
+    plantSpriteImg,
+    sharkImg,
+    snowWormImg,
+    tentacleMonsterImg,
+    tigerImg,
+    turtleImg
+];
+
+// Get a random monster image
+const getRandomMonster = () => {
+    return monsterImages[Math.floor(Math.random() * monsterImages.length)];
+};
 
 // Fisher-Yates Shuffle
 const shuffleArray = (array) => {
@@ -25,6 +67,8 @@ function WonderWorldBlaster({ onBackToMenu }) {
     const [combo, setCombo] = useState(0);
     const [bubbles, setBubbles] = useState([]);
     const [currentCategory, setCurrentCategory] = useState(null);
+    const [currentMonster, setCurrentMonster] = useState(getRandomMonster()); // Random monster
+    const [isShooting, setIsShooting] = useState(false); // Track shooting animation
     const [message, setMessage] = useState('');
     const bubbleIdCounter = useRef(0);
     const gameLoopRef = useRef(null);
@@ -94,9 +138,12 @@ function WonderWorldBlaster({ onBackToMenu }) {
         const randomCategory = categories[Math.floor(Math.random() * categories.length)];
         setCurrentCategory(randomCategory);
 
+        // Pick a random monster
+        setCurrentMonster(getRandomMonster());
+
         setGameState('playing');
         setMessage(`Find the ${randomCategory.name}!`);
-        speak(`Get ready! Pop the bubbles with ${randomCategory.name}!`);
+        speakEncouraging(`Get ready! Pop the bubbles with ${randomCategory.name}!`);
     };
 
     const handleShoot = (bubbleId) => {
@@ -109,6 +156,11 @@ function WonderWorldBlaster({ onBackToMenu }) {
         if (bubble.isCorrect) {
             // Correct hit
             playSound('correct');
+
+            // Show shooting animation
+            setIsShooting(true);
+            setTimeout(() => setIsShooting(false), 300); // Reset after 300ms
+
             const newBossHealth = bossHealth - 1;
             setBossHealth(newBossHealth);
 
@@ -127,7 +179,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
             if (newBossHealth <= 0) {
                 // Boss defeated
                 setGameState('win');
-                speak('Amazing! You defeated the monster!');
+                speakEncouraging('Amazing! You defeated the monster!');
             }
         } else {
             // Incorrect hit
@@ -141,7 +193,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
 
                 if (newLives <= 0) {
                     setGameState('gameover');
-                    speak('Game Over! Try again!');
+                    speakEncouraging('Game Over! Try again!');
                 }
             } else {
                 setMessage('❌ Wrong! Try again!');
@@ -192,7 +244,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
 
                     <div className="game-area">
                         <div className="monster-boss">
-                            <img src={monsterBossImg} alt="Monster Boss" />
+                            <img src={currentMonster} alt="Monster Boss" />
                             <div className="boss-health">
                                 {[...Array(5)].map((_, i) => (
                                     <span key={i} className={i < bossHealth ? 'heart filled' : 'heart'}>
@@ -219,7 +271,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
                         </div>
 
                         <div className="fighter">
-                            <img src={airFighterImg} alt="Fighter" />
+                            <img src={isShooting ? airFighterShootImg : airFighterImg} alt="Fighter" />
                         </div>
                     </div>
 

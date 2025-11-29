@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import GameScene from '../components/GameScene';
 import GiraffeProgress from '../components/GiraffeProgress';
 import { questions as originalQuestions } from '../data/questions';
-import { speak, playSound } from '../utils/audio';
+import { speak, speakWithFemaleVoice, speakEncouraging, playSound } from '../utils/audio';
 import startScreenImg from '../assets/pronoun_start.png';
 import './PronounAdventure.css';
 
@@ -33,7 +33,7 @@ function PronounAdventure({ onBackToMenu }) {
         setCurrentQuestionIndex(0);
         // Show baby giraffe first
         setGameState('milestone');
-        speak("Let's play! Look at the baby giraffe.");
+        speakEncouraging("Let's play! Look at the baby giraffe.");
     };
 
     const handleMilestoneContinue = () => {
@@ -44,7 +44,7 @@ function PronounAdventure({ onBackToMenu }) {
         if (selectedOption === currentQuestion.answer) {
             // Correct
             playSound('correct');
-            speak(currentQuestion.audioText); // Read the full sentence
+            speakWithFemaleVoice(currentQuestion.audioText); // Read the full sentence with female voice
 
             const newScore = score + 1;
             setScore(newScore);
@@ -53,12 +53,12 @@ function PronounAdventure({ onBackToMenu }) {
                 // Check for milestones (5, 10)
                 if (newScore === 5 || newScore === 10) {
                     setGameState('milestone');
-                    speak("Wow! The giraffe is growing!");
+                    speakEncouraging("Wow! The giraffe is growing!");
                 } else if (currentQuestionIndex < questions.length - 1) {
                     setCurrentQuestionIndex(prev => prev + 1);
                 } else {
                     setGameState('win');
-                    speak("You did it! The giraffe can eat the leaves!");
+                    speakEncouraging("You did it! The giraffe can eat the leaves!");
                 }
             }, 2000); // Wait for audio/animation
         } else {

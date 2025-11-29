@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { puzzleLevels } from '../data/puzzleData';
-import { speak, playSound } from '../utils/audio';
+import { speakEncouraging, playSound } from '../utils/audio';
 import startScreenImg from '../assets/puzzle_start.png';
 import puzzle1 from '../assets/construction_puzzle_1.png';
 import puzzle2 from '../assets/construction_puzzle_2.png';
@@ -9,23 +9,30 @@ import './PuzzleMatcher.css';
 
 const puzzleImages = [puzzle1, puzzle2, puzzle3];
 
+// Fisher-Yates Shuffle
+const shuffleArray = (array) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+};
+
 function PuzzleMatcher({ onBackToMenu }) {
     const [unlockedPieces, setUnlockedPieces] = useState([]); // Array of solved question IDs
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [gameState, setGameState] = useState('start'); // start, playing, win
     const [feedback, setFeedback] = useState('');
     const [currentPuzzleImage, setCurrentPuzzleImage] = useState(puzzle1);
+    const [shuffledQuestions, setShuffledQuestions] = useState([]);
 
-    // We only show questions that haven't been solved yet
-    // But to keep the grid mapping simple, we'll iterate through them 
-    // and just reveal the corresponding grid piece.
-
-    const currentQuestion = puzzleLevels[currentQuestionIndex];
+    const currentQuestion = shuffledQuestions[currentQuestionIndex];
 
     const handleAnswer = (option) => {
         if (option === currentQuestion.answer) {
             playSound('correct');
-            speak("Correct!");
+            speakEncouraging("Correct!");
             setFeedback('Correct! 🌟');
 
             const newUnlocked = [...unlockedPieces, currentQuestion.id];
@@ -33,9 +40,9 @@ function PuzzleMatcher({ onBackToMenu }) {
 
             setTimeout(() => {
                 setFeedback('');
-                if (newUnlocked.length === puzzleLevels.length) {
+                if (newUnlocked.length === shuffledQuestions.length) {
                     setGameState('win');
-                    speak("You finished the puzzle! Great job!");
+                    speakEncouraging("You finished the puzzle! Great job!");
                 } else {
                     setCurrentQuestionIndex(prev => prev + 1);
                 }
@@ -43,7 +50,7 @@ function PuzzleMatcher({ onBackToMenu }) {
         } else {
             playSound('incorrect');
             setFeedback('Try again! ❌');
-            speak("Try again.");
+            // Note: speakEncouraging is already called within playSound('incorrect')
         }
     };
 
@@ -52,10 +59,17 @@ function PuzzleMatcher({ onBackToMenu }) {
         const randomImage = puzzleImages[Math.floor(Math.random() * puzzleImages.length)];
         setCurrentPuzzleImage(randomImage);
 
+        // Shuffle the questions first, then shuffle options for each question
+        const questionsWithShuffledOptions = shuffleArray([...puzzleLevels]).map(q => ({
+            ...q,
+            options: shuffleArray([...q.options])
+        }));
+        setShuffledQuestions(questionsWithShuffledOptions);
+
         setUnlockedPieces([]);
         setCurrentQuestionIndex(0);
         setGameState('playing');
-        speak("Let's solve the puzzle!");
+        speakEncouraging("Let's solve the puzzle!");
     };
 
     return (
@@ -120,6 +134,17 @@ function PuzzleMatcher({ onBackToMenu }) {
                                     <h2>🎉 Puzzle Complete! 🎉</h2>
                                     <p>You found the hidden picture!</p>
                                     <button className="restart-btn" onClick={() => {
+                                        // Pick a random image
+                                        const randomImage = puzzleImages[Math.floor(Math.random() * puzzleImages.length)];
+                                        setCurrentPuzzleImage(randomImage);
+
+                                        // Shuffle the questions first, then shuffle options for each question
+                                        const questionsWithShuffledOptions = shuffleArray([...puzzleLevels]).map(q => ({
+                                            ...q,
+                                            options: shuffleArray([...q.options])
+                                        }));
+                                        setShuffledQuestions(questionsWithShuffledOptions);
+
                                         setUnlockedPieces([]);
                                         setCurrentQuestionIndex(0);
                                         setGameState('playing');

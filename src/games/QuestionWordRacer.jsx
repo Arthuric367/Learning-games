@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { questionWords } from '../data/questionWords';
-import { speak, playSound } from '../utils/audio';
+import { speak, speakWithFemaleVoice, speakEncouraging, playSound } from '../utils/audio';
 import './QuestionWordRacer.css';
 import raceCarImg from '../assets/race_car.svg';
 import shieldIcon from '../assets/shield_icon.png';
-import dinoAttackImg from '../assets/dino_attack.svg';
+import dinoAttackImg from '../assets/race_dino_attack.png';
+import dinoBlockedImg from '../assets/race_dino_blocked.png';
 import startScreenImg from '../assets/racer_start.png';
 
 // Fisher-Yates Shuffle
@@ -28,6 +29,7 @@ function QuestionWordRacer({ onBackToMenu }) {
     const [shields, setShields] = useState(0);
     const [streak, setStreak] = useState(0);
     const [isAttacked, setIsAttacked] = useState(false);
+    const [wasBlocked, setWasBlocked] = useState(false);
     const [message, setMessage] = useState('');
 
     const currentQuestion = questions[currentQIndex];
@@ -40,8 +42,8 @@ function QuestionWordRacer({ onBackToMenu }) {
     }, [gameState]);
 
     const handleStart = () => {
-        // Get 20 random questions and shuffle their options
-        const randomQuestions = shuffleArray(questionWords).slice(0, 20).map(q => ({
+        // Get all questions shuffled randomly and shuffle their options
+        const randomQuestions = shuffleArray(questionWords).map(q => ({
             ...q,
             options: shuffleArray([...q.options])
         }));
@@ -53,7 +55,7 @@ function QuestionWordRacer({ onBackToMenu }) {
         setStreak(0);
         setGameState('racing');
         setMessage("Go! Answer to speed up!");
-        speak("Ready? Go! Answer the questions to race!");
+        speakEncouraging("Ready? Go! Answer the questions to race!");
     };
 
     const triggerDinoAttack = () => {
@@ -62,13 +64,15 @@ function QuestionWordRacer({ onBackToMenu }) {
 
         setTimeout(() => {
             if (shields > 0) {
+                setWasBlocked(true);
                 setShields(prev => prev - 1);
                 setMessage("Shield blocked the Dino!");
-                speak("Shield blocked the Dino!");
+                speakEncouraging("Shield blocked the Dino!");
             } else {
+                setWasBlocked(false);
                 setSpeed(prev => Math.max(10, prev - 30));
                 setMessage("Dino slowed you down!");
-                speak("Oh no! The Dino slowed you down!");
+                speakEncouraging("Oh no! The Dino slowed you down!");
             }
             setIsAttacked(false);
         }, 1500);
@@ -90,14 +94,14 @@ function QuestionWordRacer({ onBackToMenu }) {
             if (newStreak % 3 === 0) {
                 setShields(prev => prev + 1);
                 setMessage("Shield Unlocked! 🛡️");
-                speak("Shield Unlocked!");
+                speakEncouraging("Shield Unlocked!");
             } else {
                 setMessage("Speed Up! 🏎️💨");
             }
 
             if (newScore >= WIN_SCORE) {
                 setGameState('win');
-                speak("You crossed the finish line! Winner!");
+                speakEncouraging("You crossed the finish line! Winner!");
             } else {
                 // Next question
                 if (currentQIndex < questions.length - 1) {
@@ -152,7 +156,13 @@ function QuestionWordRacer({ onBackToMenu }) {
 
                         <div className={`player-car ${isAttacked ? 'shaking' : ''}`}>
                             <img src={raceCarImg} alt="Car" />
-                            {isAttacked && <img src={dinoAttackImg} className="dino-overlay" alt="Dino" />}
+                            {isAttacked && (
+                                <img
+                                    src={wasBlocked ? dinoBlockedImg : dinoAttackImg}
+                                    className="dino-overlay"
+                                    alt={wasBlocked ? "Dino Blocked" : "Dino Attack"}
+                                />
+                            )}
                         </div>
 
                         <div className="speed-lines" style={{ opacity: speed / 100 }}></div>

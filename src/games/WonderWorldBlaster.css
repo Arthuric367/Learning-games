@@ -179,7 +179,10 @@
 .game-area {
     flex: 1;
     position: relative;
-    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+    background-image: url('../assets/sky_background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     overflow: hidden;
 }
 
@@ -249,8 +252,7 @@
 }
 
 .bubble.rainbow {
-    background: linear-gradient(135deg,
-            violet, indigo, blue, green, yellow, orange, red);
+    background: linear-gradient(135deg, violet, indigo, blue, green, yellow, orange, red);
     animation: rainbowShine 2s linear infinite, bubbleFloat 2s ease-in-out infinite;
 }
 
