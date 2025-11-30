@@ -98,7 +98,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
     };
 
     const maybeSpawnBubble = () => {
-        if (Math.random() < 0.2 && bubbles.length < 6) {
+        if (Math.random() < 0.1 && bubbles.length < 6) {
             spawnBubble();
         }
     };

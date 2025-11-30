@@ -34,6 +34,14 @@ function MainMenu({ onSelectGame }) {
             emoji: '🎯✈️',
             description: 'Pop bubbles and defeat the monster!',
             color: '#9C27B0'
+        },
+        {
+            id: 'sentence-train',
+            title: 'Sentence Train',
+            subtitle: 'Sentence Structure',
+            emoji: '🚂🚃',
+            description: 'Connect cars to form sentences!',
+            color: '#FF5722'
         }
     ];
 

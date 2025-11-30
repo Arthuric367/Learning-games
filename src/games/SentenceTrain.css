@@ -1,0 +1,217 @@
+.sentence-train-container {
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%);
+    /* Sky gradient */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+}
+
+.st-header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.st-title {
+    font-size: 3rem;
+    color: #333;
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+.st-instruction {
+    font-size: 1.5rem;
+    color: #555;
+    margin-top: 10px;
+}
+
+.st-game-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+    position: relative;
+}
+
+/* Track */
+.st-track {
+    position: absolute;
+    bottom: 150px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background-color: #5D4037;
+    border-top: 5px solid #3E2723;
+    z-index: 0;
+}
+
+.st-track::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(90deg, #8D6E63 0, #8D6E63 20px, transparent 20px, transparent 40px);
+}
+
+/* Train */
+.st-train-container {
+    display: flex;
+    align-items: flex-end;
+    position: absolute;
+    bottom: 155px;
+    left: 50px;
+    transition: transform 3s ease-in-out;
+    z-index: 1;
+}
+
+.st-train-move-out {
+    transform: translateX(150vw);
+}
+
+.st-engine {
+    width: 200px;
+    height: auto;
+    margin-right: 10px;
+}
+
+.st-cars-container {
+    display: flex;
+}
+
+.st-car-slot {
+    width: 160px;
+    height: 120px;
+    margin-right: 5px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.st-car-image {
+    width: 100%;
+    height: auto;
+    position: absolute;
+    bottom: 0;
+    z-index: 1;
+}
+
+.st-drop-zone {
+    width: 120px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 2px dashed #aaa;
+    border-radius: 10px;
+    position: absolute;
+    bottom: 40px;
+    /* Adjust based on car image */
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+.st-drop-zone.st-droppable {
+    background-color: rgba(144, 238, 144, 0.5);
+    border-color: #4CAF50;
+}
+
+.st-word-card {
+    background-color: #fff;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: grab;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    user-select: none;
+    touch-action: none;
+    /* Important for touch dragging */
+}
+
+.st-word-card.st-placed {
+    cursor: default;
+    box-shadow: none;
+}
+
+/* Word Bank */
+.st-word-bank {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 50px;
+    min-height: 80px;
+    flex-wrap: wrap;
+}
+
+.st-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.st-button {
+    background-color: #FF9800;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.st-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.st-win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.st-win-title {
+    font-size: 3rem;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.st-score {
+    font-size: 2rem;
+    color: #333;
+}
+
+@keyframes popIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}

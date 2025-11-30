@@ -4,6 +4,7 @@ import PronounAdventure from './games/PronounAdventure';
 import QuestionWordRacer from './games/QuestionWordRacer';
 import PuzzleMatcher from './games/PuzzleMatcher';
 import WonderWorldBlaster from './games/WonderWorldBlaster';
+import SentenceTrain from './games/SentenceTrain';
 import './App.css';
 
 function App() {
@@ -37,6 +38,10 @@ function App() {
 
       {currentView === 'wonder-world-blaster' && (
         <WonderWorldBlaster onBackToMenu={handleBackToMenu} />
+      )}
+
+      {currentView === 'sentence-train' && (
+        <SentenceTrain onBack={handleBackToMenu} />
       )}
     </div>
   );
