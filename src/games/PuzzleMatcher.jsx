@@ -5,9 +5,12 @@ import startScreenImg from '../assets/puzzle_start.png';
 import puzzle1 from '../assets/construction_puzzle_1.png';
 import puzzle2 from '../assets/construction_puzzle_2.png';
 import puzzle3 from '../assets/construction_puzzle_3.png';
+import puzzleAmbulance from '../assets/Puzzle_ambulance.jpg';
+import puzzlePolice from '../assets/Puzzle_Police car.jpg';
+import puzzleFireEngine from '../assets/Puzzle_Fire engine.jpg';
 import './PuzzleMatcher.css';
 
-const puzzleImages = [puzzle1, puzzle2, puzzle3];
+const puzzleImages = [puzzle1, puzzle2, puzzle3, puzzleAmbulance, puzzlePolice, puzzleFireEngine];
 
 // Fisher-Yates Shuffle
 const shuffleArray = (array) => {
