@@ -348,5 +348,13 @@ export const questionWords = [
         options: ["How", "Who", "What"],
         answer: "How",
         type: "how"
+
+    },
+    {
+        id: 51,
+        question: "___ old are you?",
+        options: ["What", "How", "When"],
+        answer: "How",
+        type: "how"
     }
 ];

@@ -98,7 +98,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
     };
 
     const maybeSpawnBubble = () => {
-        if (Math.random() < 0.05 && bubbles.length < 8) {
+        if (Math.random() < 0.2 && bubbles.length < 6) {
             spawnBubble();
         }
     };
@@ -160,7 +160,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
 
             // Show shooting animation
             setIsShooting(true);
-            setTimeout(() => setIsShooting(false), 300); // Reset after 300ms
+            setTimeout(() => setIsShooting(false), 1000); // Reset after 1000ms
 
             // Show explosion on boss
             setIsHit(true);

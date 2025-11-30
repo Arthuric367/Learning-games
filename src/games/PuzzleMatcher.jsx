@@ -8,9 +8,14 @@ import puzzle3 from '../assets/construction_puzzle_3.png';
 import puzzleAmbulance from '../assets/Puzzle_ambulance.jpg';
 import puzzlePolice from '../assets/Puzzle_Police car.jpg';
 import puzzleFireEngine from '../assets/Puzzle_Fire engine.jpg';
+import carfamily1 from '../assets/car_family_puzzle_1.png';
+import carfamily2 from '../assets/car_family_puzzle_2.png';
+import carfamily3 from '../assets/car_family_puzzle_3.png';
+import carfamily4 from '../assets/car_family_puzzle_4.png';
+import carfamily5 from '../assets/car_family_puzzle_5.png';
 import './PuzzleMatcher.css';
 
-const puzzleImages = [puzzle1, puzzle2, puzzle3, puzzleAmbulance, puzzlePolice, puzzleFireEngine];
+const puzzleImages = [puzzle1, puzzle2, puzzle3, puzzleAmbulance, puzzlePolice, puzzleFireEngine, carfamily1, carfamily2, carfamily3, carfamily4, carfamily5];
 
 // Fisher-Yates Shuffle
 const shuffleArray = (array) => {
@@ -62,11 +67,13 @@ function PuzzleMatcher({ onBackToMenu }) {
         const randomImage = puzzleImages[Math.floor(Math.random() * puzzleImages.length)];
         setCurrentPuzzleImage(randomImage);
 
-        // Shuffle the questions first, then shuffle options for each question
-        const questionsWithShuffledOptions = shuffleArray([...puzzleLevels]).map(q => ({
-            ...q,
-            options: shuffleArray([...q.options])
-        }));
+        // Shuffle and pick 9 random questions, then shuffle options for each question
+        const questionsWithShuffledOptions = shuffleArray([...puzzleLevels])
+            .slice(0, 9) // Pick only 9 questions
+            .map(q => ({
+                ...q,
+                options: shuffleArray([...q.options])
+            }));
         setShuffledQuestions(questionsWithShuffledOptions);
 
         setUnlockedPieces([]);
@@ -101,7 +108,7 @@ function PuzzleMatcher({ onBackToMenu }) {
                                 <img src={currentPuzzleImage} alt="Puzzle Reward" className="reward-image" />
                                 {/* Overlay Grid */}
                                 <div className="puzzle-grid">
-                                    {puzzleLevels.map((level) => (
+                                    {shuffledQuestions.map((level) => (
                                         <div
                                             key={level.id}
                                             className={`puzzle-piece ${unlockedPieces.includes(level.id) ? 'unlocked' : 'locked'}`}
@@ -141,11 +148,13 @@ function PuzzleMatcher({ onBackToMenu }) {
                                         const randomImage = puzzleImages[Math.floor(Math.random() * puzzleImages.length)];
                                         setCurrentPuzzleImage(randomImage);
 
-                                        // Shuffle the questions first, then shuffle options for each question
-                                        const questionsWithShuffledOptions = shuffleArray([...puzzleLevels]).map(q => ({
-                                            ...q,
-                                            options: shuffleArray([...q.options])
-                                        }));
+                                        // Shuffle and pick 9 random questions, then shuffle options for each question
+                                        const questionsWithShuffledOptions = shuffleArray([...puzzleLevels])
+                                            .slice(0, 9) // Pick only 9 questions
+                                            .map(q => ({
+                                                ...q,
+                                                options: shuffleArray([...q.options])
+                                            }));
                                         setShuffledQuestions(questionsWithShuffledOptions);
 
                                         setUnlockedPieces([]);
