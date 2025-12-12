@@ -89,8 +89,10 @@ function PuzzleMatcher({ onBackToMenu }) {
                     <h1>🧩 Preposition Puzzle 🧩</h1>
                     <img src={startScreenImg} alt="Puzzle" className="start-screen-image" />
                     <p>Match prepositions to complete the puzzle!</p>
-                    <button className="start-btn" onClick={handleStart}>Start Puzzle! (開始)</button>
-                    <button className="back-btn" onClick={onBackToMenu}>Back to Menu</button>
+                    <button className="game-btn-start" onClick={handleStart}>Game Start</button>
+                    <div style={{ marginTop: '2px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
 
@@ -98,7 +100,7 @@ function PuzzleMatcher({ onBackToMenu }) {
                 <>
                     <div className="puzzle-header">
                         <h1>🧩 Preposition Puzzle 🧩</h1>
-                        <button className="back-btn-small" onClick={onBackToMenu}>Exit</button>
+                        <button className="game-btn-exit" onClick={onBackToMenu}>Exit</button>
                     </div>
 
                     <div className="game-content">
@@ -161,6 +163,9 @@ function PuzzleMatcher({ onBackToMenu }) {
                                         setCurrentQuestionIndex(0);
                                         setGameState('playing');
                                     }}>Play Again</button>
+                                    <div style={{ marginTop: '20px' }}>
+                                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                                    </div>
                                 </div>
                             )}
                         </div>

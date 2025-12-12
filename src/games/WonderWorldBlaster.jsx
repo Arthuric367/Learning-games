@@ -228,7 +228,9 @@ function WonderWorldBlaster({ onBackToMenu }) {
                         </button>
                     </div>
 
-                    <button className="back-btn" onClick={onBackToMenu}>Back to Menu</button>
+                    <div style={{ marginTop: '2px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
 
@@ -244,7 +246,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
                             <span>🔥 Combo: {combo}</span>
                             {level === 2 && <span>💖 Lives: {lives}</span>}
                         </div>
-                        <button className="home-btn-small" onClick={onBackToMenu}>🏠</button>
+                        <button className="game-btn-exit" onClick={onBackToMenu}>Exit</button>
                     </div>
 
                     <div className="game-area">
@@ -293,7 +295,9 @@ function WonderWorldBlaster({ onBackToMenu }) {
                     <p>Max Combo: {combo}</p>
                     <div className="victory-emoji">🎉✨🎊</div>
                     <button className="restart-btn" onClick={() => handleStart(level)}>Play Again</button>
-                    <button className="back-btn" onClick={onBackToMenu}>Back to Menu</button>
+                    <div style={{ marginTop: '20px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
 
@@ -303,7 +307,9 @@ function WonderWorldBlaster({ onBackToMenu }) {
                     <p>The monster got away...</p>
                     <p>Final Score: {score}</p>
                     <button className="restart-btn" onClick={() => handleStart(level)}>Try Again</button>
-                    <button className="back-btn" onClick={onBackToMenu}>Back to Menu</button>
+                    <div style={{ marginTop: '20px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
         </div>

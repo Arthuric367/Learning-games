@@ -19,27 +19,39 @@ const SentenceTrain = ({ onBack }) => {
     const [isWin, setIsWin] = useState(false);
     const [score, setScore] = useState(0);
     const [draggedWord, setDraggedWord] = useState(null);
+    const [isResetting, setIsResetting] = useState(false);
 
     useEffect(() => {
         startNewRound();
     }, []);
 
     const startNewRound = () => {
-        const randomIndex = Math.floor(Math.random() * SENTENCES.length);
-        const sentence = SENTENCES[randomIndex];
-        setCurrentSentence(sentence);
+        // Teleport to start position (Right)
+        setIsResetting(true);
 
-        // Shuffle words for the word bank
-        const words = [...sentence.words];
-        for (let i = words.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [words[i], words[j]] = [words[j], words[i]];
-        }
-        setShuffledWords(words.map((word, index) => ({ id: index, text: word })));
+        setTimeout(() => {
+            const randomIndex = Math.floor(Math.random() * SENTENCES.length);
+            const sentence = SENTENCES[randomIndex];
+            setCurrentSentence(sentence);
 
-        // Initialize placed words with nulls
-        setPlacedWords(new Array(sentence.words.length).fill(null));
-        setIsWin(false);
+            // Shuffle words for the word bank
+            const words = [...sentence.words];
+            for (let i = words.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [words[i], words[j]] = [words[j], words[i]];
+            }
+            setShuffledWords(words.map((word, index) => ({ id: index, text: word })));
+
+            // Initialize placed words with nulls
+            setPlacedWords(new Array(sentence.words.length).fill(null));
+            setIsWin(false);
+
+            // Allow animation to center to start
+            // Small delay to ensure the 'true' state was rendered
+            setTimeout(() => {
+                setIsResetting(false);
+            }, 50);
+        }, 50);
     };
 
     const handleDragStart = (e, word) => {
@@ -52,6 +64,11 @@ const SentenceTrain = ({ onBack }) => {
         // I will implement both Drag-and-Drop and Click-to-Place for better accessibility.
     };
 
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    };
+
     const handleDrop = (e, index) => {
         e.preventDefault();
         if (draggedWord && !placedWords[index]) {
@@ -59,6 +76,7 @@ const SentenceTrain = ({ onBack }) => {
         }
         setDraggedWord(null);
     };
+
     const placeWord = (word, index) => {
         console.log('Placing word:', word.text, 'at index:', index);
         const newPlacedWords = [...placedWords];
@@ -116,7 +134,7 @@ const SentenceTrain = ({ onBack }) => {
     return (
         <div className="sentence-train-container">
             <div className="st-controls">
-                <button className="st-button" onClick={onBack}>Exit</button>
+                <button className="game-btn-exit" onClick={onBack}>Exit</button>
             </div>
 
             <div className="st-header">
@@ -128,7 +146,7 @@ const SentenceTrain = ({ onBack }) => {
             <div className="st-game-area">
                 <div className="st-track"></div>
 
-                <div className={`st-train-container ${isWin ? 'st-train-move-out' : ''}`}>
+                <div className={`st-train-container ${isWin ? 'st-train-move-out' : ''} ${isResetting ? 'st-train-reset' : ''}`}>
                     <img src={trainEngineImg} alt="Engine" className="st-engine" />
                     <div className="st-cars-container">
                         {currentSentence?.words.map((_, index) => (
@@ -169,7 +187,8 @@ const SentenceTrain = ({ onBack }) => {
             {isWin && (
                 <div className="st-win-message">
                     <h2 className="st-win-title">Choo Choo! Great Job!</h2>
-                    <button className="st-button" onClick={startNewRound}>Next Sentence</button>
+                    <button className="st-button" onClick={startNewRound} style={{ marginRight: '20px' }}>Next Sentence</button>
+                    <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
                 </div>
             )}
         </div>

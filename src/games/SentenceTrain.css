@@ -1,8 +1,8 @@
 .sentence-train-container {
     width: 100%;
     height: 100vh;
-    background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%);
-    /* Sky gradient */
+    background: url('../assets/sentence_train/village_bg.png') repeat-x bottom center;
+    background-size: cover;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,6 +11,17 @@
     box-sizing: border-box;
     overflow: hidden;
     position: relative;
+    animation: moveBackground 60s linear infinite;
+}
+
+@keyframes moveBackground {
+    from {
+        background-position: 0 bottom;
+    }
+
+    to {
+        background-position: 200vw bottom;
+    }
 }
 
 .st-header {
@@ -44,23 +55,13 @@
 /* Track */
 .st-track {
     position: absolute;
-    bottom: 150px;
-    left: 0;
-    width: 100%;
-    height: 20px;
-    background-color: #5D4037;
-    border-top: 5px solid #3E2723;
+    bottom: 155px;
+    left: 10%;
+    width: 80%;
+    height: 60px;
+    background: url('../assets/sentence_train/train_rail.png') repeat-x center center;
+    background-size: auto 60px;
     z-index: 0;
-}
-
-.st-track::after {
-    content: '';
-    position: absolute;
-    top: 5px;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: repeating-linear-gradient(90deg, #8D6E63 0, #8D6E63 20px, transparent 20px, transparent 40px);
 }
 
 /* Train */
@@ -75,13 +76,66 @@
 }
 
 .st-train-move-out {
-    transform: translateX(150vw);
+    transform: translateX(-150vw);
 }
 
 .st-engine {
-    width: 200px;
+    width: 330px;
     height: auto;
     margin-right: 10px;
+    position: relative;
+    z-index: 2;
+    animation: chug 1s ease-in-out infinite alternate;
+}
+
+/* Smoke Effect */
+.st-engine::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    animation: smoke 2s infinite;
+}
+
+.st-engine::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 50px;
+    width: 15px;
+    height: 15px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    z-index: 10;
+    animation: smoke 2s infinite 0.5s;
+}
+
+@keyframes chug {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes smoke {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate(-30px, -60px) scale(3);
+        opacity: 0;
+    }
 }
 
 .st-cars-container {
@@ -139,6 +193,7 @@
     user-select: none;
     touch-action: none;
     /* Important for touch dragging */
+    color: #000;
 }
 
 .st-word-card.st-placed {
@@ -150,6 +205,7 @@
 .st-word-bank {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 20px;
     margin-bottom: 50px;
     min-height: 80px;
@@ -214,4 +270,9 @@
         transform: translate(-50%, -50%) scale(1);
         opacity: 1;
     }
+}
+
+.st-train-reset {
+    transform: translateX(150vw) !important;
+    transition: none !important;
 }

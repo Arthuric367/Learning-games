@@ -135,8 +135,10 @@ function QuestionWordRacer({ onBackToMenu }) {
                     <p>Answer correctly to speed up!</p>
                     <p>Get 3 right in a row to get a Shield 🛡️</p>
                     <p>Watch out for Dino Attacks! 🦖</p>
-                    <button className="start-btn" onClick={handleStart}>Start Race! (開始)</button>
-                    <button className="back-btn" onClick={onBackToMenu}>Back to Menu</button>
+                    <button className="game-btn-start" onClick={handleStart}>Game Start</button>
+                    <div style={{ marginTop: '2px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
 
@@ -145,7 +147,7 @@ function QuestionWordRacer({ onBackToMenu }) {
                     <div className="hud">
                         <div className="score-box">🏁 {score} / {WIN_SCORE}</div>
                         <div className="shield-box">🛡️ {shields}</div>
-                        <button className="home-btn-small" onClick={onBackToMenu}>🏠</button>
+                        <button className="game-btn-exit" onClick={onBackToMenu}>Exit</button>
                     </div>
 
                     <div className="track-view">
@@ -193,7 +195,9 @@ function QuestionWordRacer({ onBackToMenu }) {
                     <p>You finished the race!</p>
                     <div className="car-celebration">🏎️💨💨</div>
                     <button className="restart-btn" onClick={handleStart}>Race Again</button>
-                    <button className="back-btn" onClick={onBackToMenu}>Back to Menu</button>
+                    <div style={{ marginTop: '20px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
         </div>

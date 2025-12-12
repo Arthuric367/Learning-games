@@ -75,8 +75,10 @@ function PronounAdventure({ onBackToMenu }) {
                 <div className="start-screen">
                     <h1>Dino & Friends <br /> Pronoun Adventure</h1>
                     <img src={startScreenImg} alt="Dino Picnic" className="start-screen-image" />
-                    <button className="start-btn" onClick={handleStart}>開始遊戲 (Start)</button>
-                    <button className="back-btn" onClick={onBackToMenu}>返回主選單 (Back to Menu)</button>
+                    <button className="game-btn-start" onClick={handleStart}>Game Start</button>
+                    <div style={{ marginTop: '2px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
 
@@ -96,7 +98,9 @@ function PronounAdventure({ onBackToMenu }) {
                         question={currentQuestion}
                         onAnswer={handleAnswer}
                     />
-                    <button className="home-btn" onClick={onBackToMenu}>🏠</button>
+                    <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                        <button className="game-btn-exit" onClick={onBackToMenu}>Exit</button>
+                    </div>
                 </div>
             )}
 
@@ -105,8 +109,10 @@ function PronounAdventure({ onBackToMenu }) {
                     <h1>🎉 Great Job! 🎉</h1>
                     <GiraffeProgress score={15} isMilestone={true} />
                     <div className="dino-dance">🦖🦒🚗</div>
-                    <button className="restart-btn" onClick={handleStart}>再玩一次 (Play Again)</button>
-                    <button className="back-btn" onClick={onBackToMenu}>返回主選單 (Back to Menu)</button>
+                    <button className="restart-btn" onClick={handleStart}>Play Again</button>
+                    <div style={{ marginTop: '20px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
         </div>
