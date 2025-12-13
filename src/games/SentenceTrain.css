@@ -56,8 +56,8 @@
 .st-track {
     position: absolute;
     bottom: 155px;
-    left: 10%;
-    width: 80%;
+    left: 0%;
+    width: 95%;
     height: 60px;
     background: url('../assets/sentence_train/train_rail.png') repeat-x center center;
     background-size: auto 60px;

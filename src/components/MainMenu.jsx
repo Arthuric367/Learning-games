@@ -42,6 +42,14 @@ function MainMenu({ onSelectGame }) {
             emoji: '🚂🚃',
             description: 'Connect cars to form sentences!',
             color: '#FF5722'
+        },
+        {
+            id: 'listening-bridge',
+            title: 'Listening Bridge',
+            subtitle: 'Listen & Build',
+            emoji: '🌉👂',
+            description: 'Build a bridge to cross the river!',
+            color: '#8E44AD'
         }
     ];
 

@@ -129,14 +129,14 @@ function QuestionWordRacer({ onBackToMenu }) {
     return (
         <div className="racer-container">
             {gameState === 'start' && (
-                <div className="racer-start-screen">
-                    <h1>🏎️ Question Word Racer 🏎️</h1>
-                    <img src={startScreenImg} alt="Racing Car" className="start-screen-image" />
-                    <p>Answer correctly to speed up!</p>
-                    <p>Get 3 right in a row to get a Shield 🛡️</p>
-                    <p>Watch out for Dino Attacks! 🦖</p>
+                <div className="game-start-screen">
+                    <h1 className="game-start-title">🏎️ Question Word Racer 🏎️</h1>
+                    <img src={startScreenImg} alt="Racing Car" className="game-start-image" />
+                    <p className="game-start-description">Answer correctly to speed up!</p>
+                    <p className="game-start-description">Get 3 right in a row to get a Shield 🛡️</p>
+                    <p className="game-start-description">Watch out for Dino Attacks! 🦖</p>
                     <button className="game-btn-start" onClick={handleStart}>Game Start</button>
-                    <div style={{ marginTop: '2px' }}>
+                    <div style={{ marginTop: '20px' }}>
                         <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
                     </div>
                 </div>

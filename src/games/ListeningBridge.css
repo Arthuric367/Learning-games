@@ -1,0 +1,262 @@
+.listening-bridge-container {
+    width: 100%;
+    height: 100vh;
+    background-image: url('../assets/listening_bridge/background.png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+}
+
+.lb-header {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 15px 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
+}
+
+.lb-title {
+    margin: 0;
+    color: #4A235A;
+    font-size: 2em;
+    text-shadow: 1px 1px 2px white;
+}
+
+.lb-instruction {
+    font-size: 1.2em;
+    color: #333;
+    margin: 0;
+}
+
+.lb-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.game-btn-exit {
+    background-color: #E74C3C;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s;
+}
+
+.game-btn-exit:hover {
+    transform: scale(1.05);
+}
+
+.lb-game-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+}
+
+/* River banks are naturally in the background image at top and bottom */
+
+.lb-bridge-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 150px;
+    /* Height of the bridge area */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.lb-bridge-slots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    position: relative;
+}
+
+.lb-slot {
+    width: 120px;
+    height: 60px;
+    border: 3px dashed rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.lb-slot.lb-filled {
+    border: none;
+    background-color: transparent;
+}
+
+.lb-plank {
+    width: 120px;
+    height: 200px;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: #3e2723;
+    font-size: 1.2em;
+    cursor: pointer;
+    user-select: none;
+    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.3));
+    transition: transform 0.2s;
+}
+
+.lb-plank:hover {
+    transform: scale(1.05);
+}
+
+.lb-adventurer {
+    position: absolute;
+    left: 5%;
+    /* Start position */
+    top: 50%;
+    /* Center vertically in bridge area */
+    transform: translateY(-90%);
+    /* Sit on top of the bridge */
+    width: 100px;
+    height: auto;
+    transition: left 2s ease-in-out;
+    /* Smooth crossing animation */
+    z-index: 20;
+}
+
+.lb-adventurer.lb-cross {
+    left: 85%;
+    /* End position */
+}
+
+/* Word Bank at the bottom */
+.lb-word-bank {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90%;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 30;
+}
+
+.lb-replay-btn {
+    background-color: #2ECC71;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 50%;
+    font-size: 1.5em;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    margin-left: 10px;
+}
+
+.lb-win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 200;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lb-win-title {
+    color: #27AE60;
+    margin-bottom: 20px;
+}
+
+.lb-next-btn {
+    background-color: #F1C40F;
+    color: #333;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 30px;
+    font-size: 1.3em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
+    transition: transform 0.2s;
+}
+
+.lb-next-btn:hover {
+    transform: scale(1.05);
+}
+
+@keyframes popIn {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Shake animation for incorrect answer */
+.shake {
+    animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}

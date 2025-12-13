@@ -209,11 +209,11 @@ function WonderWorldBlaster({ onBackToMenu }) {
     return (
         <div className="blaster-container">
             {gameState === 'start' && (
-                <div className="blaster-start-screen">
-                    <h1>🎯 Wonder World Blaster 🎯</h1>
-                    <img src={startScreenImg} alt="Sky" className="start-screen-image" />
-                    <p>Pop the correct category bubbles!</p>
-                    <p>Defeat the monster by hitting 5 correct bubbles!</p>
+                <div className="game-start-screen">
+                    <h1 className="game-start-title">🎯 Wonder World Blaster 🎯</h1>
+                    <img src={startScreenImg} alt="Sky" className="game-start-image" />
+                    <p className="game-start-description">Pop the correct category bubbles!</p>
+                    <p className="game-start-description">Defeat the monster by hitting 5 correct bubbles!</p>
 
                     <div className="level-selection">
                         <button className="level-btn" onClick={() => handleStart(1)}>
@@ -228,7 +228,7 @@ function WonderWorldBlaster({ onBackToMenu }) {
                         </button>
                     </div>
 
-                    <div style={{ marginTop: '2px' }}>
+                    <div style={{ marginTop: '20px' }}>
                         <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
                     </div>
                 </div>

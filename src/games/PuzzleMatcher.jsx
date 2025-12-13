@@ -85,12 +85,12 @@ function PuzzleMatcher({ onBackToMenu }) {
     return (
         <div className="puzzle-container">
             {gameState === 'start' && (
-                <div className="puzzle-start-screen">
-                    <h1>🧩 Preposition Puzzle 🧩</h1>
-                    <img src={startScreenImg} alt="Puzzle" className="start-screen-image" />
-                    <p>Match prepositions to complete the puzzle!</p>
+                <div className="game-start-screen">
+                    <h1 className="game-start-title">🧩 Preposition Puzzle 🧩</h1>
+                    <img src={startScreenImg} alt="Puzzle" className="game-start-image" />
+                    <p className="game-start-description">Match prepositions to complete the puzzle!</p>
                     <button className="game-btn-start" onClick={handleStart}>Game Start</button>
-                    <div style={{ marginTop: '2px' }}>
+                    <div style={{ marginTop: '20px' }}>
                         <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
                     </div>
                 </div>

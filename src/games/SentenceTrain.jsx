@@ -13,6 +13,7 @@ const SENTENCES = [
 ];
 
 const SentenceTrain = ({ onBack }) => {
+    const [gameState, setGameState] = useState('start'); // start, playing, win
     const [currentSentence, setCurrentSentence] = useState(null);
     const [shuffledWords, setShuffledWords] = useState([]);
     const [placedWords, setPlacedWords] = useState([]);
@@ -22,8 +23,13 @@ const SentenceTrain = ({ onBack }) => {
     const [isResetting, setIsResetting] = useState(false);
 
     useEffect(() => {
-        startNewRound();
+        // No auto-start
     }, []);
+
+    const handleStart = () => {
+        setGameState('playing');
+        startNewRound();
+    };
 
     const startNewRound = () => {
         // Teleport to start position (Right)
@@ -133,63 +139,78 @@ const SentenceTrain = ({ onBack }) => {
 
     return (
         <div className="sentence-train-container">
-            <div className="st-controls">
-                <button className="game-btn-exit" onClick={onBack}>Exit</button>
-            </div>
+            {gameState === 'start' && (
+                <div className="game-start-screen">
+                    <h1 className="game-start-title">Sentence Train</h1>
+                    <img src={trainEngineImg} alt="Train Engine" className="game-start-image" />
+                    <p className="game-start-description">Build the sentence by dragging words to the train cars!</p>
+                    <button className="game-btn-start" onClick={handleStart}>Game Start</button>
+                    <div style={{ marginTop: '20px' }}>
+                        <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
+                    </div>
+                </div>
+            )}
 
-            <div className="st-header">
-                <h1 className="st-title">Sentence Train</h1>
-                <p className="st-instruction">Build the sentence: "{currentSentence?.text}"</p>
-                <div className="st-score">Score: {score}</div>
-            </div>
+            {gameState === 'playing' && (
+                <>
+                    <div className="st-controls">
+                        <button className="game-btn-exit" onClick={onBack}>Exit</button>
+                    </div>
 
-            <div className="st-game-area">
-                <div className="st-track"></div>
+                    <div className="st-header">
+                        <h1 className="st-title">Sentence Train</h1>
+                        <p className="st-instruction">Build the sentence: "{currentSentence?.text}"</p>
+                        <div className="st-score">Score: {score}</div>
+                    </div>
 
-                <div className={`st-train-container ${isWin ? 'st-train-move-out' : ''} ${isResetting ? 'st-train-reset' : ''}`}>
-                    <img src={trainEngineImg} alt="Engine" className="st-engine" />
-                    <div className="st-cars-container">
-                        {currentSentence?.words.map((_, index) => (
-                            <div key={index} className="st-car-slot">
-                                <img src={trainCarImg} alt="Car" className="st-car-image" />
-                                <div
-                                    className={`st-drop-zone ${placedWords[index] ? 'st-filled' : ''}`}
-                                    onDrop={(e) => handleDrop(e, index)}
-                                    onDragOver={handleDragOver}
-                                    onClick={() => handleSlotClick(index)}
-                                >
-                                    {placedWords[index] && (
-                                        <div className="st-word-card st-placed">
-                                            {placedWords[index].text}
+                    <div className="st-game-area">
+                        <div className="st-track"></div>
+
+                        <div className={`st-train-container ${isWin ? 'st-train-move-out' : ''} ${isResetting ? 'st-train-reset' : ''}`}>
+                            <img src={trainEngineImg} alt="Engine" className="st-engine" />
+                            <div className="st-cars-container">
+                                {currentSentence?.words.map((_, index) => (
+                                    <div key={index} className="st-car-slot">
+                                        <img src={trainCarImg} alt="Car" className="st-car-image" />
+                                        <div
+                                            className={`st-drop-zone ${placedWords[index] ? 'st-filled' : ''}`}
+                                            onDrop={(e) => handleDrop(e, index)}
+                                            onDragOver={handleDragOver}
+                                            onClick={() => handleSlotClick(index)}
+                                        >
+                                            {placedWords[index] && (
+                                                <div className="st-word-card st-placed">
+                                                    {placedWords[index].text}
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="st-word-bank">
+                        {!isWin && availableWords.map((word) => (
+                            <div
+                                key={word.id}
+                                className="st-word-card"
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, word)}
+                                onClick={() => handleWordClick(word)}
+                            >
+                                {word.text}
                             </div>
                         ))}
                     </div>
-                </div>
-            </div>
 
-            <div className="st-word-bank">
-                {!isWin && availableWords.map((word) => (
-                    <div
-                        key={word.id}
-                        className="st-word-card"
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, word)}
-                        onClick={() => handleWordClick(word)}
-                    >
-                        {word.text}
-                    </div>
-                ))}
-            </div>
-
-            {isWin && (
-                <div className="st-win-message">
-                    <h2 className="st-win-title">Choo Choo! Great Job!</h2>
-                    <button className="st-button" onClick={startNewRound} style={{ marginRight: '20px' }}>Next Sentence</button>
-                    <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
-                </div>
+                    {isWin && (
+                        <div className="st-win-message">
+                            <h2 className="st-win-title">Choo Choo! Great Job!</h2>
+                            <button className="st-button" onClick={startNewRound} style={{ marginRight: '20px' }}>Next Sentence</button>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

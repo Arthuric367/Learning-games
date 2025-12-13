@@ -72,11 +72,11 @@ function PronounAdventure({ onBackToMenu }) {
     return (
         <div className={`app-container ${shake ? 'shake' : ''}`}>
             {gameState === 'start' && (
-                <div className="start-screen">
-                    <h1>Dino & Friends <br /> Pronoun Adventure</h1>
-                    <img src={startScreenImg} alt="Dino Picnic" className="start-screen-image" />
+                <div className="game-start-screen">
+                    <h1 className="game-start-title">Dino & Friends <br /> Pronoun Adventure</h1>
+                    <img src={startScreenImg} alt="Dino Picnic" className="game-start-image" />
                     <button className="game-btn-start" onClick={handleStart}>Game Start</button>
-                    <div style={{ marginTop: '2px' }}>
+                    <div style={{ marginTop: '20px' }}>
                         <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
                     </div>
                 </div>

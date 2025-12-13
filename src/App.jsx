@@ -5,6 +5,7 @@ import QuestionWordRacer from './games/QuestionWordRacer';
 import PuzzleMatcher from './games/PuzzleMatcher';
 import WonderWorldBlaster from './games/WonderWorldBlaster';
 import SentenceTrain from './games/SentenceTrain';
+import ListeningBridge from './games/ListeningBridge';
 import './App.css';
 
 function App() {
@@ -42,6 +43,10 @@ function App() {
 
       {currentView === 'sentence-train' && (
         <SentenceTrain onBack={handleBackToMenu} />
+      )}
+
+      {currentView === 'listening-bridge' && (
+        <ListeningBridge onBack={handleBackToMenu} />
       )}
     </div>
   );
