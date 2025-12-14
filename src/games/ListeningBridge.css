@@ -142,7 +142,7 @@
     /* Center vertically in bridge area */
     transform: translateY(-90%);
     /* Sit on top of the bridge */
-    width: 100px;
+    width: 200px;
     height: auto;
     transition: left 2s ease-in-out;
     /* Smooth crossing animation */
