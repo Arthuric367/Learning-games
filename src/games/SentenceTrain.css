@@ -1,6 +1,7 @@
 .sentence-train-container {
     width: 100%;
-    height: 100vh;
+    height: 90vh;
+    /* Viewport height for iPad */
     background: url('../assets/sentence_train/village_bg.png') repeat-x bottom center;
     background-size: cover;
     display: flex;
@@ -10,6 +11,9 @@
     padding: 20px;
     box-sizing: border-box;
     overflow: hidden;
+    /* Prevent scrolling */
+    touch-action: none;
+    /* Prevent browser gestures */
     position: relative;
     animation: moveBackground 60s linear infinite;
 }

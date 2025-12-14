@@ -1,23 +1,9 @@
-export const sentences = [
-    { text: "I like the dog", words: ["I", "like", "the", "dog"] },
-    { text: "The cat is sleeping", words: ["The", "cat", "is", "sleeping"] },
-    { text: "We play in the park", words: ["We", "play", "in", "the", "park"] },
-    { text: "She has a red hat", words: ["She", "has", "a", "red", "hat"] },
-    { text: "He runs very fast", words: ["He", "runs", "very", "fast"] },
-    { text: "It is a sunny day", words: ["It", "is", "a", "sunny", "day"] },
-    { text: "I see a big bird", words: ["I", "see", "a", "big", "bird"] },
-    { text: "The sun is hot", words: ["The", "sun", "is", "hot"] },
-    { text: "My mom loves me", words: ["My", "mom", "loves", "me"] },
-    { text: "Can you help me?", words: ["Can", "you", "help", "me?"] },
-    { text: "Where is my book?", words: ["Where", "is", "my", "book?"] },
-    { text: "The fish swims in water", words: ["The", "fish", "swims", "in", "water"] },
-    { text: "I have two hands", words: ["I", "have", "two", "hands"] },
-    { text: "The sky is blue", words: ["The", "sky", "is", "blue"] },
-    { text: "He plays with a ball", words: ["He", "plays", "with", "a", "ball"] },
-    { text: "She is my friend", words: ["She", "is", "my", "friend"] },
-    { text: "We go to school", words: ["We", "go", "to", "school"] },
-    { text: "I like apple pie", words: ["I", "like", "apple", "pie"] },
-    { text: "The dog barks loud", words: ["The", "dog", "barks", "loud"] },
-    { text: "Look at the moon", words: ["Look", "at", "the", "moon"] },
-    { text: "Do you like pizza?", words: ["Do", "you", "like", "pizza?"] }
+const SENTENCES = [
+    { text: "The cat jumps", words: ["The", "cat", "jumps"] },
+    { text: "I see a dog", words: ["I", "see", "a", "dog"] },
+    { text: "She likes apple", words: ["She", "likes", "apple"] },
+    { text: "He runs fast", words: ["He", "runs", "fast"] },
+    { text: "We go home", words: ["We", "go", "home"] }
 ];
+
+export default SENTENCES;

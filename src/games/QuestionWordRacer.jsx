@@ -103,19 +103,9 @@ function QuestionWordRacer({ onBackToMenu }) {
                 setGameState('win');
                 speakEncouraging("You crossed the finish line! Winner!");
             } else {
-                // Next question
-                if (currentQIndex < questions.length - 1) {
-                    setCurrentQIndex(prev => prev + 1);
-
-                    // Random Dino Attack chance (20%)
-                    if (Math.random() < 0.2) {
-                        triggerDinoAttack();
-                    }
-                } else {
-                    // Ran out of questions but haven't won? Loop or win?
-                    // Let's just win if they finished all available questions for now
-                    setGameState('win');
-                }
+                // Pause for next question state
+                setGameState('next_question');
+                // The racing game flow is paused here, waiting for user to click "Next Question"
             }
         } else {
             // Incorrect
@@ -126,15 +116,34 @@ function QuestionWordRacer({ onBackToMenu }) {
         }
     };
 
+    const handleNextQuestion = () => {
+        // Manual advance override if needed, but auto-advance fits racing better.
+        // Keeping strict state but auto-advancing for flow.
+        // If user explicitly wants a button click for EVERY question in a RACING game, it destroys the 'race'.
+        // I will use auto-advance with a state transition, but if I MUST use a button...
+        // The prompt says "There should only 1 button to start next question."
+        // I will implement the button. It changes the game mechanic to turn-based racing.
+        if (currentQIndex < questions.length - 1) {
+            setCurrentQIndex(prev => prev + 1);
+            setGameState('racing');
+            // Random Dino Attack chance (20%) after advancing to the next question
+            if (Math.random() < 0.2) {
+                triggerDinoAttack();
+            }
+        } else {
+            // If no more questions, and not yet won (should be caught by WIN_SCORE check)
+            // This case handles if all questions are exhausted before reaching WIN_SCORE
+            setGameState('win');
+        }
+    };
+
     return (
         <div className="racer-container">
             {gameState === 'start' && (
                 <div className="game-start-screen">
                     <h1 className="game-start-title">🏎️ Question Word Racer 🏎️</h1>
                     <img src={startScreenImg} alt="Racing Car" className="game-start-image" />
-                    <p className="game-start-description">Answer correctly to speed up!</p>
-                    <p className="game-start-description">Get 3 right in a row to get a Shield 🛡️</p>
-                    <p className="game-start-description">Watch out for Dino Attacks! 🦖</p>
+                    <p className="game-start-description">Answer correctly to speed up! Get 3 right for a Shield 🛡️</p>
                     <button className="game-btn-start" onClick={handleStart}>Game Start</button>
                     <div style={{ marginTop: '20px' }}>
                         <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
@@ -189,15 +198,21 @@ function QuestionWordRacer({ onBackToMenu }) {
                 </div>
             )}
 
+            {gameState === 'next_question' && (
+                <div className="racer-start-screen">
+                    <h1>Great Job! 🏎️</h1>
+                    <p>Speed Up! +15</p>
+                    <button className="game-btn-start" onClick={handleNextQuestion}>Next Question</button>
+                </div>
+            )}
+
             {gameState === 'win' && (
                 <div className="racer-win-screen">
-                    <h1>🏆 VICTORY! 🏆</h1>
+                    <h1 style={{ color: '#2ecc71' }}>🏆 VICTORY! 🏆</h1>
                     <p>You finished the race!</p>
                     <div className="car-celebration">🏎️💨💨</div>
-                    <button className="restart-btn" onClick={handleStart}>Race Again</button>
-                    <div style={{ marginTop: '20px' }}>
-                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
-                    </div>
+                    <button className="game-btn-start" onClick={handleStart} style={{ marginBottom: '20px' }}>Race Again</button>
+                    <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
                 </div>
             )}
         </div>

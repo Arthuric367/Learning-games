@@ -2,15 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './SentenceTrain.css';
 import trainEngineImg from '../assets/sentence_train/train_engine.png';
 import trainCarImg from '../assets/sentence_train/train_car.png';
-
-// Predefined sentences
-const SENTENCES = [
-    { text: "The dog runs", words: ["The", "dog", "runs"] },
-    { text: "The cat sleeps", words: ["The", "cat", "sleeps"] },
-    { text: "I like cat", words: ["I", "like", "cat"] },
-    { text: "How old are you?", words: ["How", "old", "are", "you?"] },
-    { text: "Where do you live?", words: ["Where", "do", "you", "live?"] }
-];
+import SENTENCES from '../data/sentenceTrainData';
 
 const SentenceTrain = ({ onBack }) => {
     const [gameState, setGameState] = useState('start'); // start, playing, win
@@ -207,7 +199,8 @@ const SentenceTrain = ({ onBack }) => {
                     {isWin && (
                         <div className="st-win-message">
                             <h2 className="st-win-title">Choo Choo! Great Job!</h2>
-                            <button className="st-button" onClick={startNewRound} style={{ marginRight: '20px' }}>Next Sentence</button>
+                            <button className="game-btn-start" onClick={startNewRound} style={{ marginRight: '20px' }}>Play Again</button>
+                            <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
                         </div>
                     )}
                 </>

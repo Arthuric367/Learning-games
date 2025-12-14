@@ -46,26 +46,31 @@ function PronounAdventure({ onBackToMenu }) {
             playSound('correct');
             speakWithFemaleVoice(currentQuestion.audioText); // Read the full sentence with female voice
 
-            const newScore = score + 1;
-            setScore(newScore);
-
             setTimeout(() => {
-                // Check for milestones (5, 10)
-                if (newScore === 5 || newScore === 10) {
-                    setGameState('milestone');
-                    speakEncouraging("Wow! The giraffe is growing!");
-                } else if (currentQuestionIndex < questions.length - 1) {
-                    setCurrentQuestionIndex(prev => prev + 1);
-                } else {
-                    setGameState('win');
-                    speakEncouraging("You did it! The giraffe can eat the leaves!");
-                }
-            }, 2000); // Wait for audio/animation
+                setGameState('next_question');
+            }, 1000); // Short delay to show correct feedback before overlay
         } else {
             // Incorrect
             playSound('incorrect');
             setShake(true);
             setTimeout(() => setShake(false), 500); // Reset shake
+        }
+    };
+
+    const handleNextQuestion = () => {
+        const newScore = score + 1;
+        setScore(newScore);
+
+        // Check for milestones (5, 10)
+        if (newScore === 5 || newScore === 10) {
+            setGameState('milestone');
+            speakEncouraging("Wow! The giraffe is growing!");
+        } else if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+            setGameState('playing');
+        } else {
+            setGameState('win');
+            speakEncouraging("You did it! The giraffe can eat the leaves!");
         }
     };
 
@@ -104,15 +109,19 @@ function PronounAdventure({ onBackToMenu }) {
                 </div>
             )}
 
+            {gameState === 'next_question' && (
+                <div className="milestone-screen">
+                    <h2>Correct!</h2>
+                    <button className="game-btn-start" onClick={handleNextQuestion}>Next Question</button>
+                </div>
+            )}
+
             {gameState === 'win' && (
                 <div className="win-screen">
-                    <h1>🎉 Great Job! 🎉</h1>
-                    <GiraffeProgress score={15} isMilestone={true} />
-                    <div className="dino-dance">🦖🦒🚗</div>
-                    <button className="restart-btn" onClick={handleStart}>Play Again</button>
-                    <div style={{ marginTop: '20px' }}>
-                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
-                    </div>
+                    <GiraffeProgress score={score} />
+                    <h2 style={{ color: '#2ecc71' }}>🎉 You Won! 🎉</h2>
+                    <button className="game-btn-start" onClick={handleStart} style={{ marginBottom: '20px' }}>Play Again</button>
+                    <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
                 </div>
             )}
         </div>

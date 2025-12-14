@@ -58,8 +58,12 @@ function PuzzleMatcher({ onBackToMenu }) {
         } else {
             playSound('incorrect');
             setFeedback('Try again! ❌');
-            // Note: speakEncouraging is already called within playSound('incorrect')
         }
+    };
+
+    const handleNextQuestion = () => {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+        setGameState('playing');
     };
 
     const handleStart = () => {
@@ -96,7 +100,7 @@ function PuzzleMatcher({ onBackToMenu }) {
                 </div>
             )}
 
-            {gameState !== 'start' && (
+            {(gameState === 'playing' || gameState === 'next_question') && (
                 <>
                     <div className="puzzle-header">
                         <h1>🧩 Preposition Puzzle 🧩</h1>
@@ -104,73 +108,68 @@ function PuzzleMatcher({ onBackToMenu }) {
                     </div>
 
                     <div className="game-content">
-                        {/* Left Side: The Puzzle Grid */}
-                        <div className="puzzle-board">
-                            <div className="puzzle-image-container">
-                                <img src={currentPuzzleImage} alt="Puzzle Reward" className="reward-image" />
-                                {/* Overlay Grid */}
-                                <div className="puzzle-grid">
-                                    {shuffledQuestions.map((level) => (
-                                        <div
-                                            key={level.id}
-                                            className={`puzzle-piece ${unlockedPieces.includes(level.id) ? 'unlocked' : 'locked'}`}
-                                        >
-                                            {unlockedPieces.includes(level.id) ? '' : '?'}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Right Side: Question Area */}
-                        <div className="question-area">
-                            {gameState === 'playing' ? (
-                                <div className="question-card">
-                                    <div className="clue-icon">{currentQuestion.clue}</div>
-                                    <h2>{currentQuestion.sentence}</h2>
-                                    <div className="options-list">
-                                        {currentQuestion.options.map(opt => (
-                                            <button
-                                                key={opt}
-                                                className="option-btn"
-                                                onClick={() => handleAnswer(opt)}
+                        <div className="game-layout" style={{ display: 'flex', gap: '20px', width: '100%', height: '100%' }}>
+                            {/* Left Side: The Puzzle Grid */}
+                            <div className="puzzle-board">
+                                <div className="puzzle-image-container">
+                                    <img src={currentPuzzleImage} alt="Puzzle Reward" className="reward-image" />
+                                    {/* Overlay Grid */}
+                                    <div className="puzzle-grid">
+                                        {shuffledQuestions.map((level) => (
+                                            <div
+                                                key={level.id}
+                                                className={`puzzle-piece ${unlockedPieces.includes(level.id) ? 'unlocked' : 'locked'}`}
                                             >
-                                                {opt}
-                                            </button>
+                                                {unlockedPieces.includes(level.id) ? '' : '?'}
+                                            </div>
                                         ))}
                                     </div>
-                                    <div className="feedback-text">{feedback}</div>
                                 </div>
-                            ) : (
-                                <div className="win-message">
-                                    <h2>🎉 Puzzle Complete! 🎉</h2>
-                                    <p>You found the hidden picture!</p>
-                                    <button className="restart-btn" onClick={() => {
-                                        // Pick a random image
-                                        const randomImage = puzzleImages[Math.floor(Math.random() * puzzleImages.length)];
-                                        setCurrentPuzzleImage(randomImage);
+                            </div>
 
-                                        // Shuffle and pick 9 random questions, then shuffle options for each question
-                                        const questionsWithShuffledOptions = shuffleArray([...puzzleLevels])
-                                            .slice(0, 9) // Pick only 9 questions
-                                            .map(q => ({
-                                                ...q,
-                                                options: shuffleArray([...q.options])
-                                            }));
-                                        setShuffledQuestions(questionsWithShuffledOptions);
-
-                                        setUnlockedPieces([]);
-                                        setCurrentQuestionIndex(0);
-                                        setGameState('playing');
-                                    }}>Play Again</button>
-                                    <div style={{ marginTop: '20px' }}>
-                                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                            {/* Right Side: Question Area */}
+                            <div className="question-area" style={{ flex: 1 }}>
+                                {gameState === 'playing' && (
+                                    <div className="question-card">
+                                        <div className="clue-icon">{currentQuestion.clue}</div>
+                                        <h2>{currentQuestion.sentence}</h2>
+                                        <div className="options-list">
+                                            {currentQuestion.options.map(opt => (
+                                                <button
+                                                    key={opt}
+                                                    className="option-btn"
+                                                    onClick={() => handleAnswer(opt)}
+                                                >
+                                                    {opt}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="feedback-text">{feedback}</div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+
+                                {gameState === 'next_question' && (
+                                    <div className="question-card">
+                                        <h2>Correct!</h2>
+                                        <button className="game-btn-start" onClick={handleNextQuestion}>Next Question</button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </>
+            )}
+
+            {gameState === 'win' && (
+                <div className="win-screen">
+                    <h2 style={{ color: '#2ecc71' }}>🎉 Puzzle Complete! 🎉</h2>
+                    <p>You found the hidden picture!</p>
+                    <div className="puzzle-board completed" style={{ margin: '20px auto' }}>
+                        <img src={currentPuzzleImage} alt="Revealed" className="reward-image" style={{ width: '300px', height: '300px', objectFit: 'contain' }} />
+                    </div>
+                    <button className="game-btn-start" onClick={handleStart} style={{ marginBottom: '20px' }}>Play Again</button>
+                    <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                </div>
             )}
         </div>
     );

@@ -22,6 +22,21 @@ All games should use the following standard button styles and texts to ensure co
 - **CSS Class**: `game-btn-back`
 - **Usage**: Secondary action on Start Screen, Win Screen, or Game Over Screen to return to the app's main menu.
 
+## Game Container Rules
+All games must adhere to the following CSS rules to ensure proper display and interaction on iPad devices.
+
+### Container Style
+- **CSS Class**: Game specific container (e.g., `.sentence-train-container`)
+- **Required Properties**:
+  ```css
+  width: 100%;
+  height: 90vh; /* Viewport height for iPad */
+  overflow: hidden; /* Prevent scrolling */
+  touch-action: none; /* Prevent browser gestures like scroll/zoom */
+  position: relative;
+  ```
+- **Note**: Ensure internal content uses `box-sizing: border-box` and appropriate flexbox layouts to fit within this fixed 90vh container.
+
 ## Start Screens
 
 All games should use the standard Start Screen layout to ensure consistency and prevent scrolling issues.
