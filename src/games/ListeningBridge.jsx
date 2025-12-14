@@ -1,27 +1,20 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import './ListeningBridge.css';
 import adventurerImg from '../assets/listening_bridge/adventurer.png';
 import plankImg from '../assets/listening_bridge/plank.png';
+import { sentences } from '../data/listeningBridgeData';
 // background is set in CSS
 
-const SENTENCES = [
-    { text: "I like the dog", words: ["I", "like", "the", "dog"] },
-    { text: "The cat is sleeping", words: ["The", "cat", "is", "sleeping"] },
-    { text: "We play in the park", words: ["We", "play", "in", "the", "park"] },
-    { text: "She has a red hat", words: ["She", "has", "a", "red", "hat"] },
-    { text: "He runs very fast", words: ["He", "runs", "very", "fast"] },
-    { text: "It is a sunny day", words: ["It", "is", "a", "sunny", "day"] }
-];
-
 const ListeningBridge = ({ onBack }) => {
-    const [gameState, setGameState] = useState('start'); // start, playing, win
+    const [gameState, setGameState] = useState('start'); // start, playing, level-complete
     const [currentSentence, setCurrentSentence] = useState(null);
     const [shuffledWords, setShuffledWords] = useState([]);
     const [placedWords, setPlacedWords] = useState([]);
     const [isWin, setIsWin] = useState(false);
     const [draggedWord, setDraggedWord] = useState(null);
     const [adventurerPosition, setAdventurerPosition] = useState('start'); // start, crossed
+    const [progress, setProgress] = useState(0);
+    const TARGET_WINS = 5;
 
     useEffect(() => {
         // Initial setup if needed
@@ -29,6 +22,7 @@ const ListeningBridge = ({ onBack }) => {
 
     const speakSentence = (text) => {
         if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Cancel previous speech
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.8; // Slightly slower for kids
             utterance.pitch = 1.1; // Slightly higher pitch
@@ -41,15 +35,22 @@ const ListeningBridge = ({ onBack }) => {
 
     const handleStart = () => {
         setGameState('playing');
-        startNewRound();
+        setProgress(0);
+        startNewRound(true);
     };
 
-    const startNewRound = () => {
+    const startNewRound = (isFirst = false) => {
+        if (!isFirst && progress >= TARGET_WINS) {
+            setGameState('level-complete');
+            speakSentence("Incredible! You are a master bridge builder!");
+            return;
+        }
+
         setIsWin(false);
         setAdventurerPosition('start');
 
-        const randomIndex = Math.floor(Math.random() * SENTENCES.length);
-        const sentence = SENTENCES[randomIndex];
+        const randomIndex = Math.floor(Math.random() * sentences.length);
+        const sentence = sentences[randomIndex];
         setCurrentSentence(sentence);
 
         // Prepare words
@@ -81,8 +82,6 @@ const ListeningBridge = ({ onBack }) => {
     const handleDrop = (e, index) => {
         e.preventDefault();
         if (draggedWord) {
-            // Check if slot is empty or replace? 
-            // Let's replace for simplicity
             placeWord(draggedWord, index);
         }
         setDraggedWord(null);
@@ -106,10 +105,8 @@ const ListeningBridge = ({ onBack }) => {
         if (currentPlacedWords.every(w => w !== null)) {
             const currentText = currentPlacedWords.map(w => w.text).join(' ');
             if (currentText === currentSentence.text) {
-                // Correct!
                 handleWin();
             } else {
-                // Incorrect - maybe shake effect?
                 console.log("Incorrect sequence");
                 speakSentence("Try again!");
             }
@@ -119,7 +116,14 @@ const ListeningBridge = ({ onBack }) => {
     const handleWin = () => {
         setIsWin(true);
         setAdventurerPosition('crossed');
-        speakSentence("Great job! You built the bridge!");
+        const newProgress = progress + 1;
+        setProgress(newProgress);
+
+        if (newProgress >= TARGET_WINS) {
+            speakSentence("You finished the challenge!");
+        } else {
+            speakSentence("Great job! You built the bridge!");
+        }
     };
 
     const handleWordClick = (word) => {
@@ -155,6 +159,18 @@ const ListeningBridge = ({ onBack }) => {
                 </div>
             )}
 
+            {gameState === 'level-complete' && (
+                <div className="game-start-screen">
+                    <h1 className="game-start-title">Congratulations!</h1>
+                    <div style={{ fontSize: '4em', margin: '20px' }}>🏆</div>
+                    <p className="game-start-description">You completed {TARGET_WINS} bridges!</p>
+                    <button className="game-btn-start" onClick={handleStart}>Play Again</button>
+                    <div style={{ marginTop: '20px' }}>
+                        <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
+                    </div>
+                </div>
+            )}
+
             {gameState === 'playing' && (
                 <>
                     <div className="lb-controls">
@@ -163,8 +179,9 @@ const ListeningBridge = ({ onBack }) => {
 
                     <div className="lb-header">
                         <h2 className="lb-title">Listening Bridge</h2>
+                        <p style={{ margin: '5px 0', fontSize: '1.2em', color: '#666' }}>Progress: {progress} / {TARGET_WINS}</p>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <p className="lb-instruction">Click to listen again:</p>
+                            <p className="lb-instruction">Click for audio:</p>
                             <button className="lb-replay-btn" onClick={() => speakSentence(currentSentence.text)}>🔊</button>
                         </div>
                     </div>
@@ -180,6 +197,7 @@ const ListeningBridge = ({ onBack }) => {
                                 className={`lb-adventurer ${adventurerPosition === 'crossed' ? 'lb-cross' : ''}`}
                             />
 
+                            {/* Make river flow vertically, bridge goes horizontal */}
                             <div className="lb-bridge-slots">
                                 {currentSentence?.words.map((_, index) => (
                                     <div
@@ -218,8 +236,10 @@ const ListeningBridge = ({ onBack }) => {
 
                     {isWin && (
                         <div className="lb-win-message">
-                            <h2 className="lb-win-title">Safe Crossing!</h2>
-                            <button className="lb-next-btn" onClick={startNewRound}>Next Adventure &gt;</button>
+                            <h2 className="lb-win-title">{progress >= TARGET_WINS ? "All Done!" : "Safe Crossing!"}</h2>
+                            <button className="lb-next-btn" onClick={() => startNewRound(false)}>
+                                {progress >= TARGET_WINS ? "Finish" : "Next Adventure >"}
+                            </button>
                         </div>
                     )}
                 </>

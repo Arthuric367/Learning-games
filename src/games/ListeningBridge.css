@@ -1,7 +1,7 @@
 .listening-bridge-container {
     width: 100%;
     height: 100vh;
-    background-image: url('../assets/listening_bridge/background.png');
+    background-image: url('../assets/listening_bridge/background_v2.png');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -11,37 +11,41 @@
 
 .lb-header {
     background-color: rgba(255, 255, 255, 0.85);
-    padding: 15px 30px;
+    padding: 10px 20px;
+    /* Reduced padding */
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     position: absolute;
-    top: 20px;
+    top: 15px;
+    /* Slightly higher */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
+    /* Reduced gap */
     z-index: 100;
 }
 
 .lb-title {
     margin: 0;
     color: #4A235A;
-    font-size: 2em;
+    font-size: 1.8em;
+    /* Slightly smaller */
     text-shadow: 1px 1px 2px white;
 }
 
 .lb-instruction {
-    font-size: 1.2em;
+    font-size: 1.1em;
     color: #333;
     margin: 0;
 }
 
 .lb-controls {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 15px;
+    right: 15px;
     z-index: 100;
 }
 
@@ -49,9 +53,10 @@
     background-color: #E74C3C;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 8px 16px;
+    /* Compact */
     border-radius: 10px;
-    font-size: 1.2em;
+    font-size: 1.1em;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.1s;
@@ -67,21 +72,17 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* display: flex;
-    justify-content: center;
-    align-items: center; */
 }
-
-/* River banks are naturally in the background image at top and bottom */
 
 .lb-bridge-container {
     position: absolute;
-    top: 50%;
+    top: 45%;
+    /* Moved up slightly */
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80%;
-    height: 150px;
-    /* Height of the bridge area */
+    width: 85%;
+    /* Wider for more slots */
+    height: 140px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -91,14 +92,16 @@
 .lb-bridge-slots {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
     position: relative;
 }
 
 .lb-slot {
-    width: 120px;
-    height: 60px;
+    width: 110px;
+    /* Slightly narrower */
+    height: 55px;
+    /* Slightly shorter */
     border: 3px dashed rgba(255, 255, 255, 0.6);
     border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.1);
@@ -114,8 +117,8 @@
 }
 
 .lb-plank {
-    width: 120px;
-    height: 200px;
+    width: 110px;
+    height: 150px;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     display: flex;
@@ -136,38 +139,38 @@
 
 .lb-adventurer {
     position: absolute;
-    left: 5%;
-    /* Start position */
+    left: 20%;
+    /* Adjusted start */
     top: 50%;
-    /* Center vertically in bridge area */
     transform: translateY(-90%);
-    /* Sit on top of the bridge */
-    width: 200px;
+    width: 150px;
     height: auto;
     transition: left 2s ease-in-out;
-    /* Smooth crossing animation */
     z-index: 20;
 }
 
 .lb-adventurer.lb-cross {
-    left: 85%;
-    /* End position */
+    left: 90%;
+    /* Adjusted end */
 }
 
 /* Word Bank at the bottom */
 .lb-word-bank {
     position: absolute;
-    bottom: 30px;
+    bottom: 20px;
+    /* Moved up */
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.85);
+    /* More opaque */
+    padding: 15px;
     border-radius: 20px;
     display: flex;
-    gap: 15px;
+    gap: 10px;
     flex-wrap: wrap;
     justify-content: center;
-    max-width: 90%;
+    max-width: 95%;
+    /* Wider */
     box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
     z-index: 30;
 }
@@ -176,9 +179,9 @@
     background-color: #2ECC71;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 8px 12px;
     border-radius: 50%;
-    font-size: 1.5em;
+    font-size: 1.3em;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     margin-left: 10px;
@@ -190,7 +193,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: rgba(255, 255, 255, 0.95);
-    padding: 40px;
+    padding: 30px;
     border-radius: 20px;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -201,15 +204,16 @@
 .lb-win-title {
     color: #27AE60;
     margin-bottom: 20px;
+    font-size: 1.8em;
 }
 
 .lb-next-btn {
     background-color: #F1C40F;
     color: #333;
     border: none;
-    padding: 15px 30px;
+    padding: 12px 24px;
     border-radius: 30px;
-    font-size: 1.3em;
+    font-size: 1.2em;
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
@@ -232,7 +236,6 @@
     }
 }
 
-/* Shake animation for incorrect answer */
 .shake {
     animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
 }
