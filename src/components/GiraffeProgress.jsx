@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './GiraffeProgress.module.css';
-import giraffeBaby from '../assets/giraffe_baby_1763827967345.png';
-import giraffeGrowing from '../assets/giraffe_growing_1763827993032.png';
-import giraffeEating from '../assets/giraffe_eating_1763828019559.png';
+import giraffeBaby from '../assets/pronoun_adventure/giraffe_baby_1763827967345.png';
+import giraffeGrowing from '../assets/pronoun_adventure/giraffe_growing_1763827993032.png';
+import giraffeEating from '../assets/pronoun_adventure/giraffe_eating_1763828019559.png';
 
 const GiraffeProgress = ({ score, isMilestone }) => {
   let currentImage = giraffeBaby;

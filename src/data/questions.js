@@ -1,18 +1,18 @@
-import trexImg from '../assets/trex_standing_1763828050004.png';
-import carImg from '../assets/dino_driving_1763828073298.png';
-import ballImg from '../assets/dino_playing_ball_1763828204529.png';
-import friendsImg from '../assets/dino_friends.png';
-import houseImg from '../assets/dino_house.png';
-import pizzaImg from '../assets/dino_pizza.png';
-import toyImg from '../assets/dino_toy.png';
-import helpImg from '../assets/dino_help.png';
-import happyImg from '../assets/dino_happy.png';
-import comeImg from '../assets/dino_come.png';
-import nameTagImg from '../assets/dino_name_tag.png';
-import lookMeImg from '../assets/dino_look_me.png';
-import treeImg from '../assets/big_tree.png';
-import birdImg from '../assets/bird_wing.png';
-import iceCreamImg from '../assets/dino_icecream.png';
+import trexImg from '../assets/pronoun_adventure/trex_standing_1763828050004.png';
+import carImg from '../assets/pronoun_adventure/dino_driving_1763828073298.png';
+import ballImg from '../assets/pronoun_adventure/dino_playing_ball_1763828204529.png';
+import friendsImg from '../assets/pronoun_adventure/dino_friends.png';
+import houseImg from '../assets/pronoun_adventure/dino_house.png';
+import pizzaImg from '../assets/pronoun_adventure/dino_pizza.png';
+import toyImg from '../assets/pronoun_adventure/dino_toy.png';
+import helpImg from '../assets/pronoun_adventure/dino_help.png';
+import happyImg from '../assets/pronoun_adventure/dino_happy.png';
+import comeImg from '../assets/pronoun_adventure/dino_come.png';
+import nameTagImg from '../assets/pronoun_adventure/dino_name_tag.png';
+import lookMeImg from '../assets/pronoun_adventure/dino_look_me.png';
+import treeImg from '../assets/pronoun_adventure/big_tree.png';
+import birdImg from '../assets/pronoun_adventure/bird_wing.png';
+import iceCreamImg from '../assets/pronoun_adventure/dino_icecream.png';
 
 export const questions = [
   {

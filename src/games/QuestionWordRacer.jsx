@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { questionWords } from '../data/questionWords';
 import { speak, speakWithFemaleVoice, speakEncouraging, playSound } from '../utils/audio';
 import './QuestionWordRacer.css';
-import raceCarImg from '../assets/race_car.svg';
+import raceCarImg from '../assets/question_word_racer/race_car.svg';
 import shieldIcon from '../assets/shield_icon.png';
-import dinoAttackImg from '../assets/race_dino_attack.png';
-import dinoBlockedImg from '../assets/race_dino_blocked.png';
-import startScreenImg from '../assets/racer_start.png';
+import dinoAttackImg from '../assets/question_word_racer/race_dino_attack.png';
+import dinoBlockedImg from '../assets/question_word_racer/race_dino_blocked.png';
+import startScreenImg from '../assets/question_word_racer/racer_start.png';
 
 // Fisher-Yates Shuffle
 const shuffleArray = (array) => {

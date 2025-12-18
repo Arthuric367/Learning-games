@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './SentenceTrain.css';
 import trainEngineImg from '../assets/sentence_train/train_engine.png';
 import trainCarImg from '../assets/sentence_train/train_car.png';
+import celebrationCakeImg from '../assets/celebration_cake.png';
 import SENTENCES from '../data/sentenceTrainData';
 
 const SentenceTrain = ({ onBack }) => {
@@ -197,10 +198,15 @@ const SentenceTrain = ({ onBack }) => {
                     </div>
 
                     {isWin && (
-                        <div className="st-win-message">
-                            <h2 className="st-win-title">Choo Choo! Great Job!</h2>
-                            <button className="game-btn-start" onClick={startNewRound} style={{ marginRight: '20px' }}>Play Again</button>
-                            <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
+                        <div className="st-overlay-container">
+                            <div className="st-next-question-overlay">
+                                <h1 className="st-celebration-title">✨ You are correct! ✨</h1>
+                                <div className="st-celebration-content">
+                                    <img src={celebrationCakeImg} alt="Celebration" className="st-celebration-image" />
+                                    <p className="st-celebration-text">Choo Choo! Great job building the train! 🎂</p>
+                                </div>
+                                <button className="game-btn-start" onClick={startNewRound}>Next Question</button>
+                            </div>
                         </div>
                     )}
                 </>

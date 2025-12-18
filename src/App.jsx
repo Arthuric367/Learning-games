@@ -6,6 +6,7 @@ import PuzzleMatcher from './games/PuzzleMatcher';
 import WonderWorldBlaster from './games/WonderWorldBlaster';
 import SentenceTrain from './games/SentenceTrain';
 import ListeningBridge from './games/ListeningBridge';
+import AdjectiveArtist from './games/AdjectiveArtist';
 import './App.css';
 
 function App() {
@@ -47,6 +48,10 @@ function App() {
 
       {currentView === 'listening-bridge' && (
         <ListeningBridge onBack={handleBackToMenu} />
+      )}
+
+      {currentView === 'adjective-artist' && (
+        <AdjectiveArtist onBack={handleBackToMenu} />
       )}
     </div>
   );

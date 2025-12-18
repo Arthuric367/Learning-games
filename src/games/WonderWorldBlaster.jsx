@@ -3,25 +3,26 @@ import { categories } from '../data/categories';
 import { speak, speakWithFemaleVoice, speakEncouraging, playSound } from '../utils/audio';
 import './WonderWorldBlaster.css';
 // Import all monsters from cutemonsters directory
-import abyssalBeastImg from '../assets/cutemonsters/abyssal beast.png';
-import automatonFighterImg from '../assets/cutemonsters/automaton fighter.png';
-import boglingImg from '../assets/cutemonsters/bogling.png';
-import dryadImg from '../assets/cutemonsters/dryad.png';
-import fishImg from '../assets/cutemonsters/fish.png';
-import glisteningFishImg from '../assets/cutemonsters/glistening fish.png';
-import livingBoulderImg from '../assets/cutemonsters/living boulder.png';
-import merfolkImg from '../assets/cutemonsters/merfolk.png';
-import minotaurImg from '../assets/cutemonsters/minotaur.png';
-import plantBehemothImg from '../assets/cutemonsters/plant behemoth.png';
-import plantSpriteImg from '../assets/cutemonsters/plant sprite.png';
-import sharkImg from '../assets/cutemonsters/shark.png';
-import snowWormImg from '../assets/cutemonsters/snow worm.png';
-import tentacleMonsterImg from '../assets/cutemonsters/tentacle monster.png';
-import tigerImg from '../assets/cutemonsters/tiger.png';
-import turtleImg from '../assets/cutemonsters/turtle.png';
-import airFighterImg from '../assets/air_fighter.png';
-import airFighterShootImg from '../assets/air_fighter_shoot.png';
-import startScreenImg from '../assets/sky_background.png';
+// Import all monsters from cutemonsters directory
+import abyssalBeastImg from '../assets/wonder_world_blaster/cutemonsters/abyssal beast.png';
+import automatonFighterImg from '../assets/wonder_world_blaster/cutemonsters/automaton fighter.png';
+import boglingImg from '../assets/wonder_world_blaster/cutemonsters/bogling.png';
+import dryadImg from '../assets/wonder_world_blaster/cutemonsters/dryad.png';
+import fishImg from '../assets/wonder_world_blaster/cutemonsters/fish.png';
+import glisteningFishImg from '../assets/wonder_world_blaster/cutemonsters/glistening fish.png';
+import livingBoulderImg from '../assets/wonder_world_blaster/cutemonsters/living boulder.png';
+import merfolkImg from '../assets/wonder_world_blaster/cutemonsters/merfolk.png';
+import minotaurImg from '../assets/wonder_world_blaster/cutemonsters/minotaur.png';
+import plantBehemothImg from '../assets/wonder_world_blaster/cutemonsters/plant behemoth.png';
+import plantSpriteImg from '../assets/wonder_world_blaster/cutemonsters/plant sprite.png';
+import sharkImg from '../assets/wonder_world_blaster/cutemonsters/shark.png';
+import snowWormImg from '../assets/wonder_world_blaster/cutemonsters/snow worm.png';
+import tentacleMonsterImg from '../assets/wonder_world_blaster/cutemonsters/tentacle monster.png';
+import tigerImg from '../assets/wonder_world_blaster/cutemonsters/tiger.png';
+import turtleImg from '../assets/wonder_world_blaster/cutemonsters/turtle.png';
+import airFighterImg from '../assets/wonder_world_blaster/air_fighter.png';
+import airFighterShootImg from '../assets/wonder_world_blaster/air_fighter_shoot.png';
+import startScreenImg from '../assets/wonder_world_blaster/sky_background.png';
 
 // Array of all monster images
 const monsterImages = [

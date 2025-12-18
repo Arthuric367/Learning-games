@@ -3,7 +3,7 @@ import GameScene from '../components/GameScene';
 import GiraffeProgress from '../components/GiraffeProgress';
 import { questions as originalQuestions } from '../data/questions';
 import { speak, speakWithFemaleVoice, speakEncouraging, playSound } from '../utils/audio';
-import startScreenImg from '../assets/pronoun_start.png';
+import startScreenImg from '../assets/pronoun_adventure/pronoun_start.png';
 import './PronounAdventure.css';
 
 // Fisher-Yates Shuffle Algorithm
@@ -47,8 +47,17 @@ function PronounAdventure({ onBackToMenu }) {
             speakWithFemaleVoice(currentQuestion.audioText); // Read the full sentence with female voice
 
             setTimeout(() => {
-                setGameState('next_question');
-            }, 1000); // Short delay to show correct feedback before overlay
+                // Check for milestones (5, 10)
+                if (newScore === 5 || newScore === 10) {
+                    setGameState('milestone');
+                    speakEncouraging("Wow! The giraffe is growing!");
+                } else if (currentQuestionIndex < questions.length - 1) {
+                    setCurrentQuestionIndex(prev => prev + 1);
+                } else {
+                    setGameState('win');
+                    speakEncouraging("You did it! The giraffe can eat the leaves!");
+                }
+            }, 2000); // Wait for audio/animation
         } else {
             // Incorrect
             playSound('incorrect');
@@ -109,19 +118,15 @@ function PronounAdventure({ onBackToMenu }) {
                 </div>
             )}
 
-            {gameState === 'next_question' && (
-                <div className="milestone-screen">
-                    <h2>Correct!</h2>
-                    <button className="game-btn-start" onClick={handleNextQuestion}>Next Question</button>
-                </div>
-            )}
-
             {gameState === 'win' && (
                 <div className="win-screen">
-                    <GiraffeProgress score={score} />
-                    <h2 style={{ color: '#2ecc71' }}>🎉 You Won! 🎉</h2>
-                    <button className="game-btn-start" onClick={handleStart} style={{ marginBottom: '20px' }}>Play Again</button>
-                    <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    <h1>🎉 Great Job! 🎉</h1>
+                    <GiraffeProgress score={15} isMilestone={true} />
+                    <div className="dino-dance">🦖🦒🚗</div>
+                    <button className="restart-btn" onClick={handleStart}>Play Again</button>
+                    <div style={{ marginTop: '20px' }}>
+                        <button className="game-btn-back" onClick={onBackToMenu}>Back to Main Menu</button>
+                    </div>
                 </div>
             )}
         </div>

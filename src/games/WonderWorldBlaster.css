@@ -182,7 +182,7 @@
 .game-area {
     flex: 1;
     position: relative;
-    background-image: url('../assets/sky_background.png');
+    background-image: url('../assets/wonder_world_blaster/sky_background.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

@@ -3,8 +3,9 @@ import './ListeningBridge.css';
 import adventurerImg from '../assets/listening_bridge/adventurer.png';
 import plankImg from '../assets/listening_bridge/plank.png';
 import startScreenImg from '../assets/listening_bridge/bridge_start.png';
+import celebrationCakeImg from '../assets/celebration_cake.png';
 import SENTENCES from '../data/listeningBridgeData';
-import { playSound } from '../utils/audio';
+import { playSound, speakWithFemaleVoice } from '../utils/audio';
 // background is set in CSS
 
 const ListeningBridge = ({ onBack }) => {
@@ -46,14 +47,7 @@ const ListeningBridge = ({ onBack }) => {
     };
 
     const speakSentence = (text) => {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 0.8;
-            utterance.pitch = 1.1;
-            utterance.lang = 'en-US';
-            window.speechSynthesis.speak(utterance);
-        }
+        speakWithFemaleVoice(text, { rate: 0.8, pitch: 1.1 });
     };
 
     // Derived available words: Those in shuffledWords NOT currently in any slot
@@ -246,8 +240,15 @@ const ListeningBridge = ({ onBack }) => {
                         )}
 
                         {gameState === 'next_question' && (
-                            <div className="lb-word-bank" style={{ justifyContent: 'center' }}>
-                                <button className="game-btn-start" onClick={handleNextQuestion}>Next Question</button>
+                            <div className="lb-overlay-container">
+                                <div className="lb-next-question-overlay">
+                                    <h2 className="lb-celebration-title">✨ You are correct! ✨</h2>
+                                    <div className="lb-celebration-content">
+                                        <img src={celebrationCakeImg} alt="Celebration" className="lb-celebration-image" />
+                                        <p className="lb-celebration-text">Great job! Let's build more bridge! 🎂</p>
+                                    </div>
+                                    <button className="game-btn-start" onClick={handleNextQuestion}>Next Question</button>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -257,7 +258,7 @@ const ListeningBridge = ({ onBack }) => {
             {gameState === 'win' && (
                 <div className="lb-win-message">
                     <h2 className="lb-win-title">🎉 Bridge Completed! 🎉</h2>
-                    <p>You helped the dino cross!</p>
+                    <p>You helped the child cross the bridge!</p>
                     <button className="game-btn-start" onClick={startNewRound} style={{ marginRight: '20px' }}>Play Again</button>
                     <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
                 </div>

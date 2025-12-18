@@ -50,6 +50,14 @@ function MainMenu({ onSelectGame }) {
             emoji: '🌉👂',
             description: 'Build a bridge to cross the river!',
             color: '#8E44AD'
+        },
+        {
+            id: 'adjective-artist',
+            title: 'Adjective Artist',
+            subtitle: 'Colors & Shapes',
+            emoji: '🎨🖌️',
+            description: 'Paint and dress following instructions!',
+            color: '#FF4081'
         }
     ];
 
