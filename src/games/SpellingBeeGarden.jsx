@@ -33,7 +33,6 @@ import sharkImg from '../assets/spelling_bee/shark.png';
 import treeImg from '../assets/spelling_bee/tree.png';
 import tigerImg from '../assets/spelling_bee/tiger.png';
 import turtleImg from '../assets/spelling_bee/turtle.png';
-import wingImg from '../assets/spelling_bee/wing.png';
 import cakeImg from '../assets/celebration_cake.png';
 
 const ITEM_IMAGES = {
@@ -62,7 +61,6 @@ const ITEM_IMAGES = {
     tree: treeImg,
     tiger: tigerImg,
     turtle: turtleImg,
-    wing: wingImg
 };
 
 const SpellingBeeGarden = ({ onBack }) => {

@@ -14,7 +14,6 @@ const SPELLING_BEE_DATA = {
         { id: 'hat', word: 'HAT', displayWord: '_AT', missingLetter: 'H', options: ['H', 'C', 'R', 'P', 'M'], audioQuery: 'Hat' },
         { id: 'icecream', word: 'ICECREAM', displayWord: '_CECREAM', missingLetter: 'I', options: ['I', 'E', 'A', 'O', 'Y'], audioQuery: 'Ice cream' },
         { id: 'jet', word: 'JET', displayWord: '_ET', missingLetter: 'J', options: ['J', 'P', 'W', 'V', 'G'], audioQuery: 'Jet' },
-        { id: 'mermaid', word: 'MERMAID', displayWord: '_ERMAID', missingLetter: 'M', options: ['M', 'N', 'W', 'S', 'H'], audioQuery: 'Mermaid' },
         { id: 'monster', word: 'MONSTER', displayWord: '_ONSTER', missingLetter: 'M', options: ['M', 'N', 'B', 'G', 'W'], audioQuery: 'Monster' },
         { id: 'pig', word: 'PIG', displayWord: '_IG', missingLetter: 'P', options: ['P', 'B', 'W', 'D', 'G'], audioQuery: 'Pig' },
         { id: 'pizza', word: 'PIZZA', displayWord: '_IZZA', missingLetter: 'P', options: ['P', 'B', 'D', 'H', 'C'], audioQuery: 'Pizza' },
@@ -26,7 +25,6 @@ const SPELLING_BEE_DATA = {
         { id: 'tree', word: 'TREE', displayWord: '_REE', missingLetter: 'T', options: ['T', 'B', 'D', 'F', 'G'], audioQuery: 'Tree' },
         { id: 'tiger', word: 'TIGER', displayWord: '_IGER', missingLetter: 'T', options: ['T', 'L', 'B', 'P', 'S'], audioQuery: 'Tiger' },
         { id: 'turtle', word: 'TURTLE', displayWord: '_URTLE', missingLetter: 'T', options: ['T', 'D', 'S', 'B', 'G'], audioQuery: 'Turtle' },
-        { id: 'wing', word: 'WING', displayWord: '_ING', missingLetter: 'W', options: ['W', 'B', 'P', 'S', 'G'], audioQuery: 'Wing' }
     ]
 };
 
