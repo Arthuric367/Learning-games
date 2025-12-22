@@ -49,13 +49,13 @@
 
 .sb-word-display {
     background: rgba(255, 255, 255, 0.9);
-    padding: 20px 40px;
+    padding: 15px 30px;
     border-radius: 30px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 5px;
 }
 
 .sb-missing-word {
@@ -67,9 +67,9 @@
 }
 
 .sb-word-image {
-    max-height: 150px;
+    max-height: 120px;
     object-fit: contain;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .sb-garden-stage {
@@ -79,9 +79,9 @@
     position: relative;
     display: flex;
     justify-content: center;
-    align-items: flex-end;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    align-items: flex-start;
+    padding-top: 40px;
+    margin-top: 30px;
 }
 
 .sb-flower {
@@ -163,9 +163,9 @@
 
 .sb-honey-pot {
     position: absolute;
-    bottom: 20px;
-    right: 40px;
-    width: 100px;
+    bottom: 70px;
+    right: 60px;
+    width: 120px;
     text-align: center;
 }
 

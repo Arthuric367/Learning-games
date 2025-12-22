@@ -44,7 +44,7 @@ const SpellingBeeGarden = ({ onBack }) => {
 
         setCurrentWord(wordWithShuffledOptions);
         setGameState('playing');
-        setBeePos({ left: '50%', bottom: '20px' });
+        setBeePos({ left: '50%', top: '120px' });
         setIsBeeMoving(false);
 
         const instruction = `Find the first letter for ${word.audioQuery}`;
@@ -65,9 +65,9 @@ const SpellingBeeGarden = ({ onBack }) => {
         const stageRect = flowerRefs.current[index].parentElement.getBoundingClientRect();
 
         const targetLeft = ((flowerRect.left + flowerRect.width / 2 - stageRect.left) / stageRect.width) * 100;
-        const targetBottom = 150; // Fixed height above flowers
+        const targetTop = 20; // Position near top of flowers
 
-        setBeePos({ left: `${targetLeft}%`, bottom: `${targetBottom}px` });
+        setBeePos({ left: `${targetLeft}%`, top: `${targetTop}px` });
         setIsBeeMoving(true);
 
         setTimeout(() => {
@@ -88,7 +88,7 @@ const SpellingBeeGarden = ({ onBack }) => {
                 playSound('incorrect');
                 speakWithFemaleVoice("Try another flower!");
                 setTimeout(() => {
-                    setBeePos({ left: '50%', bottom: '20px' });
+                    setBeePos({ left: '50%', top: '120px' });
                     setIsBeeMoving(false);
                 }, 1000);
             }
@@ -145,7 +145,7 @@ const SpellingBeeGarden = ({ onBack }) => {
                                 className="sb-bee"
                                 style={{
                                     left: beePos.left,
-                                    bottom: beePos.bottom,
+                                    top: beePos.top,
                                     transform: `translateX(-50%) ${isBeeMoving ? '' : 'scaleX(1)'}`
                                 }}
                             >
