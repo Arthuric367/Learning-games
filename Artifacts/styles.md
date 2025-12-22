@@ -136,9 +136,19 @@ To keep the project manageable and clean, all assets must be organized into spec
     - `listening_bridge/`
     - `sentence_train/`
     - `adjective_artist/`
+    - `spelling_bee/`
 
 ### Rules
 1.  **Isolation**: Game-specific sprites, backgrounds, and icons should live only in their respective folder.
 2.  **Naming**: Use descriptive, lowercase filenames with underscores (e.g., `race_car.png`).
 3.  **Imports**: Always point imports to the full path: `import myImg from '../assets/game_name/my_img.png'`.
 4.  **CSS**: Use relative paths in CSS: `background-image: url('../assets/game_name/bg.png')`.
+
+## Game Design Best Practices
+
+### Randomization
+To ensure educational games remain engaging and prevent children from memorizing patterns:
+1.  **Randomize Answer Positions**: Always shuffle the order of options/choices so the correct answer appears in different positions each round.
+2.  **Implementation**: Use array shuffling (e.g., `.sort(() => Math.random() - 0.5)`) before rendering options.
+3.  **Example**: In a multiple-choice game, if "B" is the correct answer, it should not always appear as the first option.
+

@@ -37,7 +37,12 @@ const SpellingBeeGarden = ({ onBack }) => {
     const initRound = useCallback((roundIndex) => {
         const wordPool = SPELLING_BEE_DATA.vocabulary;
         const word = wordPool[roundIndex % wordPool.length];
-        setCurrentWord(word);
+
+        // Shuffle the options to randomize letter positions
+        const shuffledOptions = [...word.options].sort(() => Math.random() - 0.5);
+        const wordWithShuffledOptions = { ...word, options: shuffledOptions };
+
+        setCurrentWord(wordWithShuffledOptions);
         setGameState('playing');
         setBeePos({ left: '50%', bottom: '20px' });
         setIsBeeMoving(false);

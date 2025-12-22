@@ -24,7 +24,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 40px;
+    padding: 10px 40px 20px 40px;
+    margin-top: 10px;
     z-index: 10;
 }
 
@@ -74,12 +75,13 @@
 .sb-garden-stage {
     width: 100%;
     max-width: 1000px;
-    height: 300px;
+    height: 280px;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    padding-bottom: 50px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .sb-flower {
