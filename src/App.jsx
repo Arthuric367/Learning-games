@@ -7,6 +7,7 @@ import WonderWorldBlaster from './games/WonderWorldBlaster';
 import SentenceTrain from './games/SentenceTrain';
 import ListeningBridge from './games/ListeningBridge';
 import AdjectiveArtist from './games/AdjectiveArtist';
+import SpellingBeeGarden from './games/SpellingBeeGarden';
 import './App.css';
 
 function App() {
@@ -52,6 +53,10 @@ function App() {
 
       {currentView === 'adjective-artist' && (
         <AdjectiveArtist onBack={handleBackToMenu} />
+      )}
+
+      {currentView === 'spelling-bee' && (
+        <SpellingBeeGarden onBack={handleBackToMenu} />
       )}
     </div>
   );

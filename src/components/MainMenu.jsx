@@ -58,6 +58,14 @@ function MainMenu({ onSelectGame }) {
             emoji: '🎨🖌️',
             description: 'Paint and dress following instructions!',
             color: '#FF4081'
+        },
+        {
+            id: 'spelling-bee',
+            title: 'Spelling Bee Garden',
+            subtitle: 'Phonics & Words',
+            emoji: '🐝🌸',
+            description: 'Help the bee collect letters to spell words!',
+            color: '#FFEB3B'
         }
     ];
 
