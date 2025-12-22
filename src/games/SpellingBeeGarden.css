@@ -122,7 +122,7 @@
     height: 100px;
     z-index: 15;
     pointer-events: none;
-    transition: left 1s ease-in-out, bottom 1s ease-in-out;
+    transition: left 1s ease-in-out, top 1s ease-in-out;
 }
 
 .sb-bee-img {

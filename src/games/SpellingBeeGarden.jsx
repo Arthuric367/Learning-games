@@ -14,6 +14,26 @@ import dogImg from '../assets/spelling_bee/dog.png';
 import sunImg from '../assets/spelling_bee/sun.png';
 import boxImg from '../assets/spelling_bee/box.png';
 import pigImg from '../assets/spelling_bee/pig.png';
+import appleImg from '../assets/spelling_bee/apple.png';
+import dressImg from '../assets/spelling_bee/dress.png';
+import eggImg from '../assets/spelling_bee/egg.png';
+import fanImg from '../assets/spelling_bee/fan.png';
+import fishImg from '../assets/spelling_bee/fish.png';
+import gumImg from '../assets/spelling_bee/gum.png';
+import hatImg from '../assets/spelling_bee/hat.png';
+import icecreamImg from '../assets/spelling_bee/icecream.png';
+import jetImg from '../assets/spelling_bee/jet.png';
+import mermaidImg from '../assets/spelling_bee/mermaid.png';
+import monsterImg from '../assets/spelling_bee/monster.png';
+import pizzaImg from '../assets/spelling_bee/pizza.png';
+import rockImg from '../assets/spelling_bee/rock.png';
+import robotImg from '../assets/spelling_bee/robot.png';
+import socksImg from '../assets/spelling_bee/socks.png';
+import sharkImg from '../assets/spelling_bee/shark.png';
+import treeImg from '../assets/spelling_bee/tree.png';
+import tigerImg from '../assets/spelling_bee/tiger.png';
+import turtleImg from '../assets/spelling_bee/turtle.png';
+import wingImg from '../assets/spelling_bee/wing.png';
 import cakeImg from '../assets/celebration_cake.png';
 
 const ITEM_IMAGES = {
@@ -22,7 +42,27 @@ const ITEM_IMAGES = {
     dog: dogImg,
     sun: sunImg,
     box: boxImg,
-    pig: pigImg
+    pig: pigImg,
+    apple: appleImg,
+    dress: dressImg,
+    egg: eggImg,
+    fan: fanImg,
+    fish: fishImg,
+    gum: gumImg,
+    hat: hatImg,
+    icecream: icecreamImg,
+    jet: jetImg,
+    mermaid: mermaidImg,
+    monster: monsterImg,
+    pizza: pizzaImg,
+    rock: rockImg,
+    robot: robotImg,
+    socks: socksImg,
+    shark: sharkImg,
+    tree: treeImg,
+    tiger: tigerImg,
+    turtle: turtleImg,
+    wing: wingImg
 };
 
 const SpellingBeeGarden = ({ onBack }) => {
