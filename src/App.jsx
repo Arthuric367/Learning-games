@@ -9,9 +9,32 @@ import ListeningBridge from './games/ListeningBridge';
 import AdjectiveArtist from './games/AdjectiveArtist';
 import SpellingBeeGarden from './games/SpellingBeeGarden';
 import './App.css';
+import { useEffect } from 'react';
 
 function App() {
   const [currentView, setCurrentView] = useState('menu'); // 'menu' or game id
+
+  useEffect(() => {
+    // Prevent multi-touch zooming (pinch zoom)
+    const handleTouchStart = (e) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    // Prevent gesture-based zooming (iOS specific)
+    const handleGestureStart = (e) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('gesturestart', handleGestureStart, { passive: false });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('gesturestart', handleGestureStart);
+    };
+  }, []);
 
   const handleSelectGame = (gameId) => {
     setCurrentView(gameId);

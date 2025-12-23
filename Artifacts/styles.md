@@ -149,6 +149,7 @@ To keep the project manageable and clean, all assets must be organized into spec
 ### Randomization
 To ensure educational games remain engaging and prevent children from memorizing patterns:
 1.  **Randomize Answer Positions**: Always shuffle the order of options/choices so the correct answer appears in different positions each round.
-2.  **Implementation**: Use array shuffling (e.g., `.sort(() => Math.random() - 0.5)`) before rendering options.
-3.  **Example**: In a multiple-choice game, if "B" is the correct answer, it should not always appear as the first option.
+2.  **Session Randomization**: Randomly select a fixed number of questions (standard is 5) from the database at the start of each session or when "Try Again" is clicked.
+3.  **Round-by-Round Variety**: In interactive or theme-based games, ensure targets, colors, or themes are randomized for each round within the 5-round session.
+4.  **Implementation**: Use array shuffling (e.g., `.sort(() => Math.random() - 0.5)`) for both answer positions and session pools.
 

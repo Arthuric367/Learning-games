@@ -65,6 +65,21 @@ Pronoun Picnic is a collection of educational mini-games designed for children t
 - **Validation**: Bridge completes if the word order matches the audio.
 - **Feedback**: Adventurer crosses the bridge on win.
 
+### 7. Adjective Artist
+**Concept**: Adjectives (Colors, Sizes, Emotions)
+**Goal**: Paint objects according to specific instructions.
+**Mechanics**:
+- **Instructions**: Spoken and written (e.g., "Paint the big balloon red").
+- **Interaction**: Select a color and click the target object.
+- **Randomization**: Themes (Balloons, Clothing, Emotions) and targets are randomized for each of the 8 rounds.
+
+### 8. Spelling Bee Garden
+**Concept**: Spelling & Vocabulary
+**Goal**: Help a bee find the missing letters of words by clicking on flowers.
+**Mechanics**:
+- **Interaction**: Click flowers labeled with letters.
+- **Randomization**: 8 random words are selected from the database for each session.
+
 ## Common UI Elements
 - **Start Screen**: Standardized card layout with Title, Image, Game Start, and Back to Main Menu buttons.
 - **Exit Button**: Orange "Exit" button in the top corner during gameplay.
@@ -76,6 +91,7 @@ Pronoun Picnic is a collection of educational mini-games designed for children t
 ### Data Management
 - **Rule**: All game data (questions, words, levels, assets paths) must be decoupled from the component logic.
 - **Location**: All data files must reside in `src/data`.
+- **Session Rule**: Games should standardise on **8 rounds per session**, with questions/themes randomized at the start of each session or on "Play Again".
 - **Implementation**: Games should import data from these files rather than having hardcoded arrays within the `.jsx` files.
 
 ### Asset Management

@@ -98,6 +98,7 @@ const AdjectiveArtist = ({ onBack }) => {
 
     const handleStart = () => {
         const randomTheme = ADJECTIVE_ARTIST_DATA.themes[Math.floor(Math.random() * ADJECTIVE_ARTIST_DATA.themes.length)];
+        console.log('AdjectiveArtist Start - Theme:', randomTheme.name);
         setCurrentTheme(randomTheme);
         setCurrentRound(1);
         setGameState('playing');
@@ -143,9 +144,12 @@ const AdjectiveArtist = ({ onBack }) => {
     };
 
     const handleNextRound = () => {
+        const randomTheme = ADJECTIVE_ARTIST_DATA.themes[Math.floor(Math.random() * ADJECTIVE_ARTIST_DATA.themes.length)];
+        console.log('AdjectiveArtist Next Round - Theme:', randomTheme.name);
+        setCurrentTheme(randomTheme);
         setCurrentRound(prev => prev + 1);
         setGameState('playing');
-        initRound(currentTheme);
+        initRound(randomTheme);
     };
 
     const renderTarget = (target) => {

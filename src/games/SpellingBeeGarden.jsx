@@ -67,14 +67,29 @@ const SpellingBeeGarden = ({ onBack }) => {
     const [gameState, setGameState] = useState('start'); // start, playing, next_question, win
     const [currentRound, setCurrentRound] = useState(0);
     const [currentWord, setCurrentWord] = useState(null);
+    const [sessionVocabulary, setSessionVocabulary] = useState([]);
     const [honeyCount, setHoneyCount] = useState(0);
     const [beePos, setBeePos] = useState({ left: '50%', bottom: '20px' });
     const [isBeeMoving, setIsBeeMoving] = useState(false);
     const flowerRefs = useRef([]);
 
-    const initRound = useCallback((roundIndex) => {
-        const wordPool = SPELLING_BEE_DATA.vocabulary;
-        const word = wordPool[roundIndex % wordPool.length];
+    const initRound = useCallback((roundIndex, vocab = null) => {
+        console.log('initRound called with index:', roundIndex, 'vocab provided:', !!vocab);
+        const currentVocab = vocab || sessionVocabulary;
+        console.log('currentVocab length:', currentVocab.length);
+
+        if (!currentVocab.length) {
+            console.error('No vocabulary available for round!');
+            return;
+        }
+
+        const word = currentVocab[roundIndex];
+        if (!word) {
+            console.error('No word found for index:', roundIndex);
+            return;
+        }
+
+        console.log('Setting word:', word.word);
 
         // Shuffle the options to randomize letter positions
         const shuffledOptions = [...word.options].sort(() => Math.random() - 0.5);
@@ -87,12 +102,15 @@ const SpellingBeeGarden = ({ onBack }) => {
 
         const instruction = `Find the first letter for ${word.audioQuery}`;
         setTimeout(() => speakWithFemaleVoice(instruction), 500);
-    }, []);
+    }, [sessionVocabulary]);
 
     const handleStart = () => {
+        const shuffled = [...SPELLING_BEE_DATA.vocabulary].sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, SPELLING_BEE_DATA.roundsPerSession);
+        setSessionVocabulary(selected);
         setCurrentRound(1);
         setHoneyCount(0);
-        initRound(0);
+        initRound(0, selected);
     };
 
     const handleFlowerClick = (letter, index) => {
@@ -135,6 +153,7 @@ const SpellingBeeGarden = ({ onBack }) => {
 
     const handleNextRound = () => {
         const nextRound = currentRound + 1;
+        console.log('Advancing to round:', nextRound);
         setCurrentRound(nextRound);
         initRound(nextRound - 1);
     };

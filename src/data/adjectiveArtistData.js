@@ -49,7 +49,7 @@ const ADJECTIVE_ARTIST_DATA = {
             }
         }
     ],
-    roundsPerSession: 5
+    roundsPerSession: 8
 };
 
 export default ADJECTIVE_ARTIST_DATA;
