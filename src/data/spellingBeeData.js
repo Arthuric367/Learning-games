@@ -1,5 +1,5 @@
 const SPELLING_BEE_DATA = {
-    roundsPerSession: 8,
+    roundsPerSession: 5,
     vocabulary: [
         { id: 'apple', word: 'APPLE', displayWord: '_PPLE', missingLetter: 'A', options: ['A', 'E', 'I', 'O', 'U'], audioQuery: 'Apple' },
         { id: 'bus', word: 'BUS', displayWord: '_US', missingLetter: 'B', options: ['B', 'U', 'S', 'X', 'M'], audioQuery: 'Bus' },

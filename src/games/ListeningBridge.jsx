@@ -235,7 +235,6 @@ const ListeningBridge = ({ onBack }) => {
                                         {word.text}
                                     </div>
                                 ))}
-                                <button className="lb-replay-btn" onClick={() => speakSentence(SENTENCES[currentSentenceIndex]?.text)}>↺</button>
                             </div>
                         )}
 
