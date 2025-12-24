@@ -153,3 +153,181 @@ To ensure educational games remain engaging and prevent children from memorizing
 3.  **Round-by-Round Variety**: In interactive or theme-based games, ensure targets, colors, or themes are randomized for each round within the 5-round session.
 4.  **Implementation**: Use array shuffling (e.g., `.sort(() => Math.random() - 0.5)`) for both answer positions and session pools.
 
+## Round-Based Game Control Pattern
+
+For games with a fixed number of questions/rounds (e.g., 5 questions to win), follow this proven pattern based on the Spelling Bee Garden implementation.
+
+### Game Type Comparison
+
+The application supports three main game control patterns:
+
+| Game Type | Win Condition | Lose Condition | Progress Indicator | Examples |
+|-----------|--------------|----------------|-------------------|----------|
+| **HP-based** | Complete objective before HP depletes | HP reaches 0 | Health bar/hearts | Pronoun Adventure |
+| **Time-based** | Complete objective before time expires | Timer reaches 0 | Countdown timer | Question Word Racer |
+| **Round-based** | Complete all N rounds (e.g., 5) | N/A (no fail state) | Round counter (e.g., "3/5") | Spelling Bee Garden |
+
+### Data Structure Pattern
+
+Separate game configuration from content in your data file (e.g., `spellingBeeData.js`):
+
+```javascript
+const GAME_DATA = {
+    roundsPerSession: 5,  // Configuration constant
+    vocabulary: [         // Content pool (larger than roundsPerSession)
+        { id: 'item1', /* question data */ },
+        { id: 'item2', /* question data */ },
+        // ... more items
+    ]
+};
+```
+
+**Key Principles**:
+- Define `roundsPerSession` as a constant at the data level
+- Keep the content pool larger than `roundsPerSession` for variety
+- Structure each item with a unique `id` and all necessary question data
+
+### State Management
+
+Implement these essential state variables:
+
+```javascript
+const [gameState, setGameState] = useState('start');  // start, playing, next_question, win
+const [currentRound, setCurrentRound] = useState(0);  // 1-indexed for display
+const [sessionVocabulary, setSessionVocabulary] = useState([]);  // Randomized subset
+const [currentWord, setCurrentWord] = useState(null);  // Current question data
+```
+
+**State Descriptions**:
+- `gameState`: Controls which UI screen is displayed
+- `currentRound`: Tracks progress (1-indexed: 1, 2, 3, 4, 5)
+- `sessionVocabulary`: The randomized subset of questions for this session
+- `currentWord`: The active question/item being displayed
+
+### Round Flow Control
+
+#### 1. Session Initialization (`handleStart`)
+
+```javascript
+const handleStart = () => {
+    // Shuffle the full pool and select N items
+    const shuffled = [...GAME_DATA.vocabulary].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, GAME_DATA.roundsPerSession);
+    
+    setSessionVocabulary(selected);
+    setCurrentRound(1);  // Start at round 1 (1-indexed)
+    initRound(0, selected);  // Load first question (0-indexed array)
+};
+```
+
+#### 2. Round Initialization (`initRound`)
+
+```javascript
+const initRound = useCallback((roundIndex, vocab = null) => {
+    const currentVocab = vocab || sessionVocabulary;
+    const word = currentVocab[roundIndex];  // 0-indexed array access
+    
+    // Shuffle options for this round (additional randomization)
+    const shuffledOptions = [...word.options].sort(() => Math.random() - 0.5);
+    const wordWithShuffledOptions = { ...word, options: shuffledOptions };
+    
+    setCurrentWord(wordWithShuffledOptions);
+    setGameState('playing');
+    
+    // Optional: Speak instructions
+    setTimeout(() => speakWithFemaleVoice(`Instruction for ${word.name}`), 500);
+}, [sessionVocabulary]);
+```
+
+#### 3. Answer Validation and Round Completion
+
+```javascript
+const handleAnswer = (userAnswer) => {
+    if (userAnswer === currentWord.correctAnswer) {
+        playSound('correct');
+        
+        setTimeout(() => {
+            // Check if more rounds remain
+            if (currentRound < GAME_DATA.roundsPerSession) {
+                setGameState('next_question');  // Show celebration overlay
+            } else {
+                playSound('win');
+                setGameState('win');  // All rounds complete!
+            }
+        }, 1000);
+    } else {
+        playSound('incorrect');
+        // Allow retry (stay in 'playing' state)
+    }
+};
+```
+
+#### 4. Advancing to Next Round
+
+```javascript
+const handleNextRound = () => {
+    const nextRound = currentRound + 1;
+    setCurrentRound(nextRound);
+    initRound(nextRound - 1);  // Convert to 0-indexed for array access
+};
+```
+
+### UI Implementation
+
+#### Round Progress Display
+
+```jsx
+<div className="sb-header">
+    <div className="sb-round-info">
+        Round {currentRound} / {GAME_DATA.roundsPerSession}
+    </div>
+    <button className="game-btn-exit" onClick={onBack}>Exit</button>
+</div>
+```
+
+#### Next Question Overlay
+
+```jsx
+{gameState === 'next_question' && (
+    <div className="sb-overlay">
+        <div className="sb-overlay-content">
+            <img src={celebrationImg} alt="Success" className="sb-success-img" />
+            <h2 className="sb-success-text">Great Job! 🎉</h2>
+            <button className="game-btn-start" onClick={handleNextRound}>
+                Next Level
+            </button>
+        </div>
+    </div>
+)}
+```
+
+### Key Implementation Details
+
+1. **Index Management**: Use 0-indexed arrays but 1-indexed display
+   - `currentRound`: 1, 2, 3, 4, 5 (for UI display)
+   - Array access: `sessionVocabulary[currentRound - 1]`
+
+2. **Randomization Layers**:
+   - **Session level**: Shuffle and select N items from full pool
+   - **Round level**: Shuffle answer options for each question
+
+3. **State Transitions**:
+   - `start` → `playing` (on Game Start)
+   - `playing` → `next_question` (on correct answer, if rounds remain)
+   - `next_question` → `playing` (on Next Level button)
+   - `playing` → `win` (on correct answer, if last round)
+   - `win` → `playing` (on Play Again, resets session)
+
+4. **No Fail State**: Round-based games typically don't have a "game over" state. Players can retry incorrect answers until they succeed.
+
+5. **Session Reset**: On "Play Again", re-shuffle and select a new subset to ensure variety.
+
+### Best Practices
+
+- **Clear Separation**: Keep `next_question` celebration distinct from round advancement logic
+- **Callback Dependencies**: Include `sessionVocabulary` in `initRound` dependencies
+- **Audio Timing**: Use `setTimeout` to delay speech after state changes
+- **Vocabulary Passing**: Pass `selected` vocabulary to `initRound` on first call to avoid race conditions
+- **Progress Feedback**: Always show current round and total rounds in the UI
+- **Celebration**: Use the `next_question` state to give positive reinforcement between rounds
+

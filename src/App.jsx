@@ -8,6 +8,7 @@ import SentenceTrain from './games/SentenceTrain';
 import ListeningBridge from './games/ListeningBridge';
 import AdjectiveArtist from './games/AdjectiveArtist';
 import SpellingBeeGarden from './games/SpellingBeeGarden';
+import WordTowerBuilder from './games/WordTowerBuilder';
 import './App.css';
 import { useEffect } from 'react';
 
@@ -80,6 +81,10 @@ function App() {
 
       {currentView === 'spelling-bee' && (
         <SpellingBeeGarden onBack={handleBackToMenu} />
+      )}
+
+      {currentView === 'word-tower' && (
+        <WordTowerBuilder onBack={handleBackToMenu} />
       )}
     </div>
   );

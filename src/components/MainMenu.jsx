@@ -66,6 +66,14 @@ function MainMenu({ onSelectGame }) {
             emoji: '🐝🌸',
             description: 'Help the bee collect letters to spell words!',
             color: '#FFEB3B'
+        },
+        {
+            id: 'word-tower',
+            title: 'Word Tower Builder',
+            subtitle: 'Tetris & Categories',
+            emoji: '🏗️📦',
+            description: 'Match words by category to build your tower!',
+            color: '#F39C12'
         }
     ];
 
