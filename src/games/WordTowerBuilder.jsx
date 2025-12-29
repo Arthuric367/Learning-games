@@ -230,83 +230,6 @@ const WordTowerBuilder = ({ onBack }) => {
     }, [grid]);
 
     /**
-     * Adds a new piece to the top of the grid, pushing existing blocks down
-     */
-    const addPieceToTop = useCallback(() => {
-        setGrid(prevGrid => {
-            const newPiece = generatePiece();
-            const { shape, position, word, category, color, id, centerCell } = newPiece;
-            
-            // Calculate how many rows the piece needs
-            const pieceHeight = shape.length;
-            
-            // Check if adding this piece would cause game over
-            const wouldCauseGameOver = prevGrid.slice(0, pieceHeight).some(row => row.some(cell => cell !== null));
-            
-            if (wouldCauseGameOver) {
-                setGameState('game_over');
-                playSound('incorrect');
-                return prevGrid;
-            }
-            
-            // Shift all existing rows down by pieceHeight
-            const newGrid = createEmptyGrid();
-            
-            // Copy existing grid shifted down
-            for (let r = 0; r < WORD_TOWER_DATA.gridRows - pieceHeight; r++) {
-                for (let c = 0; c < WORD_TOWER_DATA.gridCols; c++) {
-                    if (prevGrid[r]) {
-                        newGrid[r + pieceHeight][c] = prevGrid[r][c];
-                    }
-                }
-            }
-            
-            // Add the new piece at the top, centered horizontally
-            const startCol = Math.floor((WORD_TOWER_DATA.gridCols - shape[0].length) / 2);
-            
-            for (let r = 0; r < shape.length; r++) {
-                for (let c = 0; c < shape[r].length; c++) {
-                    if (shape[r][c] === 1) {
-                        const gridCol = startCol + c;
-                        const isCenterCell = (r === centerCell.row && c === centerCell.col);
-                        
-                        if (gridCol >= 0 && gridCol < WORD_TOWER_DATA.gridCols) {
-                            newGrid[r][gridCol] = {
-                                word: isCenterCell ? word : '',  // Only center cell shows word
-                                category,
-                                color,
-                                pieceId: id,
-                                hasWord: isCenterCell
-                            };
-                        }
-                    }
-                }
-            }
-            
-            // Check for complete rows
-            const { clearedGrid, rowsCleared } = checkAndClearRows(newGrid);
-            if (rowsCleared > 0) {
-                const rowPoints = rowsCleared * WORD_TOWER_DATA.pointsPerRow;
-                setScore(prev => prev + rowPoints);
-            }
-            
-            // Check for warning
-            const highestBlock = clearedGrid.findIndex(row => row.some(cell => cell !== null));
-            if (highestBlock >= 0 && highestBlock <= WORD_TOWER_DATA.warningHeight - WORD_TOWER_DATA.gridRows) {
-                setShowWarning(true);
-                setWorkerState('crying');
-            }
-            
-            return rowsCleared > 0 ? clearedGrid : newGrid;
-        });
-    }, [generatePiece, createEmptyGrid, checkAndClearRows]);
-
-    // Store the latest addPieceToTop in a ref to avoid circular dependencies
-    useEffect(() => {
-        addPieceToTopRef.current = addPieceToTop;
-    }, [addPieceToTop]);
-
-    /**
      * Locks the current piece into the grid
      * Called when piece can't move down anymore
      */
@@ -501,6 +424,83 @@ const WordTowerBuilder = ({ onBack }) => {
 
         return { clearedGrid: newGrid, rowsCleared };
     }, [applyGravity]);
+
+    /**
+     * Adds a new piece to the top of the grid, pushing existing blocks down
+     */
+    const addPieceToTop = useCallback(() => {
+        setGrid(prevGrid => {
+            const newPiece = generatePiece();
+            const { shape, position, word, category, color, id, centerCell } = newPiece;
+            
+            // Calculate how many rows the piece needs
+            const pieceHeight = shape.length;
+            
+            // Check if adding this piece would cause game over
+            const wouldCauseGameOver = prevGrid.slice(0, pieceHeight).some(row => row.some(cell => cell !== null));
+            
+            if (wouldCauseGameOver) {
+                setGameState('game_over');
+                playSound('incorrect');
+                return prevGrid;
+            }
+            
+            // Shift all existing rows down by pieceHeight
+            const newGrid = createEmptyGrid();
+            
+            // Copy existing grid shifted down
+            for (let r = 0; r < WORD_TOWER_DATA.gridRows - pieceHeight; r++) {
+                for (let c = 0; c < WORD_TOWER_DATA.gridCols; c++) {
+                    if (prevGrid[r]) {
+                        newGrid[r + pieceHeight][c] = prevGrid[r][c];
+                    }
+                }
+            }
+            
+            // Add the new piece at the top, centered horizontally
+            const startCol = Math.floor((WORD_TOWER_DATA.gridCols - shape[0].length) / 2);
+            
+            for (let r = 0; r < shape.length; r++) {
+                for (let c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c] === 1) {
+                        const gridCol = startCol + c;
+                        const isCenterCell = (r === centerCell.row && c === centerCell.col);
+                        
+                        if (gridCol >= 0 && gridCol < WORD_TOWER_DATA.gridCols) {
+                            newGrid[r][gridCol] = {
+                                word: isCenterCell ? word : '',  // Only center cell shows word
+                                category,
+                                color,
+                                pieceId: id,
+                                hasWord: isCenterCell
+                            };
+                        }
+                    }
+                }
+            }
+            
+            // Check for complete rows
+            const { clearedGrid, rowsCleared } = checkAndClearRows(newGrid);
+            if (rowsCleared > 0) {
+                const rowPoints = rowsCleared * WORD_TOWER_DATA.pointsPerRow;
+                setScore(prev => prev + rowPoints);
+            }
+            
+            // Check for warning
+            const highestBlock = clearedGrid.findIndex(row => row.some(cell => cell !== null));
+            if (highestBlock >= 0 && highestBlock <= WORD_TOWER_DATA.warningHeight - WORD_TOWER_DATA.gridRows) {
+                setShowWarning(true);
+                setWorkerState('crying');
+            }
+            
+            return rowsCleared > 0 ? clearedGrid : newGrid;
+        });
+    }, [generatePiece, createEmptyGrid, checkAndClearRows]);
+
+    // Store the latest addPieceToTop in a ref to avoid circular dependencies
+    useEffect(() => {
+        addPieceToTopRef.current = addPieceToTop;
+    }, [addPieceToTop]);
 
     /**
      * Handles clicking on a block in the grid
