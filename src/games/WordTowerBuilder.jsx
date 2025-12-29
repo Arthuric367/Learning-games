@@ -200,9 +200,13 @@ const WordTowerBuilder = ({ onBack }) => {
      * @param {Array} shape - 2D array representing piece shape
      * @param {number} row - Row position
      * @param {number} col - Column position
+     * @param {Array} gridToCheck - Grid to check against (optional, uses current grid if not provided)
      * @returns {boolean} True if position is valid
      */
-    const canPlacePiece = useCallback((shape, row, col) => {
+    const canPlacePiece = useCallback((shape, row, col, gridToCheck = null) => {
+        // If no grid provided, we'll need to get it from state in the calling function
+        const checkGrid = gridToCheck || grid;
+        
         for (let r = 0; r < shape.length; r++) {
             for (let c = 0; c < shape[r].length; c++) {
                 if (shape[r][c] === 1) {
@@ -216,7 +220,7 @@ const WordTowerBuilder = ({ onBack }) => {
                     }
 
                     // Check if cell is occupied
-                    if (grid[gridRow] && grid[gridRow][gridCol] !== null) {
+                    if (checkGrid[gridRow] && checkGrid[gridRow][gridCol] !== null) {
                         return false;
                     }
                 }
@@ -229,72 +233,73 @@ const WordTowerBuilder = ({ onBack }) => {
      * Adds a new piece to the top of the grid, pushing existing blocks down
      */
     const addPieceToTop = useCallback(() => {
-        const newPiece = generatePiece();
-        const { shape, position, word, category, color, id, centerCell } = newPiece;
-        
-        // Calculate how many rows the piece needs
-        const pieceHeight = shape.length;
-        
-        // Check if adding this piece would cause game over
-        const wouldCauseGameOver = grid.slice(0, pieceHeight).some(row => row.some(cell => cell !== null));
-        
-        if (wouldCauseGameOver) {
-            setGameState('game_over');
-            playSound('incorrect');
-            return;
-        }
-        
-        // Shift all existing rows down by pieceHeight
-        const newGrid = createEmptyGrid();
-        
-        // Copy existing grid shifted down
-        for (let r = 0; r < WORD_TOWER_DATA.gridRows - pieceHeight; r++) {
-            for (let c = 0; c < WORD_TOWER_DATA.gridCols; c++) {
-                if (grid[r]) {
-                    newGrid[r + pieceHeight][c] = grid[r][c];
-                }
+        setGrid(prevGrid => {
+            const newPiece = generatePiece();
+            const { shape, position, word, category, color, id, centerCell } = newPiece;
+            
+            // Calculate how many rows the piece needs
+            const pieceHeight = shape.length;
+            
+            // Check if adding this piece would cause game over
+            const wouldCauseGameOver = prevGrid.slice(0, pieceHeight).some(row => row.some(cell => cell !== null));
+            
+            if (wouldCauseGameOver) {
+                setGameState('game_over');
+                playSound('incorrect');
+                return prevGrid;
             }
-        }
-        
-        // Add the new piece at the top, centered horizontally
-        const startCol = Math.floor((WORD_TOWER_DATA.gridCols - shape[0].length) / 2);
-        
-        for (let r = 0; r < shape.length; r++) {
-            for (let c = 0; c < shape[r].length; c++) {
-                if (shape[r][c] === 1) {
-                    const gridCol = startCol + c;
-                    const isCenterCell = (r === centerCell.row && c === centerCell.col);
-                    
-                    if (gridCol >= 0 && gridCol < WORD_TOWER_DATA.gridCols) {
-                        newGrid[r][gridCol] = {
-                            word: isCenterCell ? word : '',  // Only center cell shows word
-                            category,
-                            color,
-                            pieceId: id,
-                            hasWord: isCenterCell
-                        };
+            
+            // Shift all existing rows down by pieceHeight
+            const newGrid = createEmptyGrid();
+            
+            // Copy existing grid shifted down
+            for (let r = 0; r < WORD_TOWER_DATA.gridRows - pieceHeight; r++) {
+                for (let c = 0; c < WORD_TOWER_DATA.gridCols; c++) {
+                    if (prevGrid[r]) {
+                        newGrid[r + pieceHeight][c] = prevGrid[r][c];
                     }
                 }
             }
-        }
-        
-        setGrid(newGrid);
-        
-        // Check for complete rows
-        const { clearedGrid, rowsCleared } = checkAndClearRows(newGrid);
-        if (rowsCleared > 0) {
-            setGrid(clearedGrid);
-            const rowPoints = rowsCleared * WORD_TOWER_DATA.pointsPerRow;
-            setScore(prev => prev + rowPoints);
-        }
-        
-        // Check for warning
-        const highestBlock = newGrid.findIndex(row => row.some(cell => cell !== null));
-        if (highestBlock >= 0 && highestBlock <= WORD_TOWER_DATA.warningHeight - WORD_TOWER_DATA.gridRows) {
-            setShowWarning(true);
-            setWorkerState('crying');
-        }
-    }, [grid, generatePiece, createEmptyGrid, checkAndClearRows, setGameState]);
+            
+            // Add the new piece at the top, centered horizontally
+            const startCol = Math.floor((WORD_TOWER_DATA.gridCols - shape[0].length) / 2);
+            
+            for (let r = 0; r < shape.length; r++) {
+                for (let c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c] === 1) {
+                        const gridCol = startCol + c;
+                        const isCenterCell = (r === centerCell.row && c === centerCell.col);
+                        
+                        if (gridCol >= 0 && gridCol < WORD_TOWER_DATA.gridCols) {
+                            newGrid[r][gridCol] = {
+                                word: isCenterCell ? word : '',  // Only center cell shows word
+                                category,
+                                color,
+                                pieceId: id,
+                                hasWord: isCenterCell
+                            };
+                        }
+                    }
+                }
+            }
+            
+            // Check for complete rows
+            const { clearedGrid, rowsCleared } = checkAndClearRows(newGrid);
+            if (rowsCleared > 0) {
+                const rowPoints = rowsCleared * WORD_TOWER_DATA.pointsPerRow;
+                setScore(prev => prev + rowPoints);
+            }
+            
+            // Check for warning
+            const highestBlock = clearedGrid.findIndex(row => row.some(cell => cell !== null));
+            if (highestBlock >= 0 && highestBlock <= WORD_TOWER_DATA.warningHeight - WORD_TOWER_DATA.gridRows) {
+                setShowWarning(true);
+                setWorkerState('crying');
+            }
+            
+            return rowsCleared > 0 ? clearedGrid : newGrid;
+        });
+    }, [generatePiece, createEmptyGrid, checkAndClearRows]);
 
     // Store the latest addPieceToTop in a ref to avoid circular dependencies
     useEffect(() => {
@@ -308,50 +313,53 @@ const WordTowerBuilder = ({ onBack }) => {
     const lockPiece = useCallback(() => {
         if (!currentPiece) return;
 
-        const newGrid = grid.map(row => [...row]);
-        const { shape, position, word, category, color, id, centerCell } = currentPiece;
+        setGrid(prevGrid => {
+            const newGrid = prevGrid.map(row => [...row]);
+            const { shape, position, word, category, color, id, centerCell } = currentPiece;
 
-        // Place each cell of the piece into the grid
-        for (let r = 0; r < shape.length; r++) {
-            for (let c = 0; c < shape[r].length; c++) {
-                if (shape[r][c] === 1) {
-                    const gridRow = position.row + r;
-                    const gridCol = position.col + c;
-                    const isCenterCell = (r === centerCell.row && c === centerCell.col);
+            // Place each cell of the piece into the grid
+            for (let r = 0; r < shape.length; r++) {
+                for (let c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c] === 1) {
+                        const gridRow = position.row + r;
+                        const gridCol = position.col + c;
+                        const isCenterCell = (r === centerCell.row && c === centerCell.col);
 
-                    if (gridRow >= 0 && gridRow < WORD_TOWER_DATA.gridRows) {
-                        newGrid[gridRow][gridCol] = {
-                            word: isCenterCell ? word : '',  // Only center cell shows word
-                            category,
-                            color,
-                            pieceId: id,
-                            hasWord: isCenterCell
-                        };
+                        if (gridRow >= 0 && gridRow < WORD_TOWER_DATA.gridRows) {
+                            newGrid[gridRow][gridCol] = {
+                                word: isCenterCell ? word : '',  // Only center cell shows word
+                                category,
+                                color,
+                                pieceId: id,
+                                hasWord: isCenterCell
+                            };
+                        }
                     }
                 }
             }
-        }
 
-        setGrid(newGrid);
-        setCurrentPiece(null);
-
-        // Check for game over (blocks reached top)
-        if (position.row <= 1) {
-            // Check if any blocks in top 2 rows
-            const topBlocked = newGrid.slice(0, 2).some(row => row.some(cell => cell !== null));
-            if (topBlocked) {
-                setGameState('game_over');
-                playSound('incorrect');
-                return;
+            // Check for game over (blocks reached top)
+            if (position.row <= 1) {
+                // Check if any blocks in top 2 rows
+                const topBlocked = newGrid.slice(0, 2).some(row => row.some(cell => cell !== null));
+                if (topBlocked) {
+                    setGameState('game_over');
+                    playSound('incorrect');
+                    return newGrid;
+                }
             }
-        }
 
-        // Check for warning (blocks at row 10 or higher)
-        const highestBlock = newGrid.findIndex(row => row.some(cell => cell !== null));
-        if (highestBlock >= 0 && highestBlock <= WORD_TOWER_DATA.warningHeight - WORD_TOWER_DATA.gridRows) {
-            setShowWarning(true);
-            setWorkerState('crying');
-        }
+            // Check for warning (blocks at row 10 or higher)
+            const highestBlock = newGrid.findIndex(row => row.some(cell => cell !== null));
+            if (highestBlock >= 0 && highestBlock <= WORD_TOWER_DATA.warningHeight - WORD_TOWER_DATA.gridRows) {
+                setShowWarning(true);
+                setWorkerState('crying');
+            }
+
+            return newGrid;
+        });
+        
+        setCurrentPiece(null);
 
         // Generate next piece after a short delay
         setTimeout(() => {
@@ -359,7 +367,7 @@ const WordTowerBuilder = ({ onBack }) => {
             setCurrentPiece(newPiece);
         }, 500);
 
-    }, [currentPiece, grid, generatePiece]);
+    }, [currentPiece, generatePiece]);
 
     /**
      * Moves the current piece down by one row
@@ -425,12 +433,15 @@ const WordTowerBuilder = ({ onBack }) => {
      * @param {string} pieceId - ID of the piece to remove
      */
     const removePieceById = useCallback((pieceId) => {
-        const newGrid = grid.map(row =>
-            row.map(cell => cell && cell.pieceId === pieceId ? null : cell)
-        );
-        setGrid(newGrid);
-        return newGrid;
-    }, [grid]);
+        let resultGrid;
+        setGrid(prevGrid => {
+            resultGrid = prevGrid.map(row =>
+                row.map(cell => cell && cell.pieceId === pieceId ? null : cell)
+            );
+            return resultGrid;
+        });
+        return resultGrid;
+    }, []);
 
     /**
      * Applies gravity: makes blocks fall down to fill empty spaces
@@ -499,62 +510,69 @@ const WordTowerBuilder = ({ onBack }) => {
     const handleBlockClick = useCallback((row, col) => {
         if (gameState !== 'playing') return;
 
-        const clickedCell = grid[row][col];
-        if (!clickedCell) return;  // Empty cell
+        setGrid(prevGrid => {
+            const clickedCell = prevGrid[row][col];
+            if (!clickedCell) return prevGrid;  // Empty cell
 
-        // Check if clicked block matches current theme
-        if (clickedCell.category === currentTheme) {
-            // CORRECT MATCH!
-            playSound('correct');
-            speakWithFemaleVoice(clickedCell.word);
+            // Check if clicked block matches current theme
+            if (clickedCell.category === currentTheme) {
+                // CORRECT MATCH!
+                playSound('correct');
+                speakWithFemaleVoice(clickedCell.word);
 
-            // Remove the entire piece (all blocks with same pieceId)
-            let newGrid = removePieceById(clickedCell.pieceId);
+                // Remove the entire piece (all blocks with same pieceId)
+                let newGrid = prevGrid.map(r =>
+                    r.map(cell => cell && cell.pieceId === clickedCell.pieceId ? null : cell)
+                );
 
-            // Apply gravity
-            newGrid = applyGravity(newGrid);
+                // Apply gravity
+                newGrid = applyGravity(newGrid);
 
-            // Check for complete rows
-            const { clearedGrid, rowsCleared } = checkAndClearRows(newGrid);
-            setGrid(clearedGrid);
+                // Check for complete rows
+                const { clearedGrid, rowsCleared } = checkAndClearRows(newGrid);
 
-            // Update score
-            const blockPoints = WORD_TOWER_DATA.pointsPerBlock * combo;
-            const rowPoints = rowsCleared * WORD_TOWER_DATA.pointsPerRow * combo;
-            const totalPoints = blockPoints + rowPoints;
+                // Update score
+                const blockPoints = WORD_TOWER_DATA.pointsPerBlock * combo;
+                const rowPoints = rowsCleared * WORD_TOWER_DATA.pointsPerRow * combo;
+                const totalPoints = blockPoints + rowPoints;
 
-            setScore(prev => prev + totalPoints);
+                setScore(prev => prev + totalPoints);
 
-            // Increase combo (consecutive correct)
-            setCombo(WORD_TOWER_DATA.comboMultiplier);
+                // Increase combo (consecutive correct)
+                setCombo(WORD_TOWER_DATA.comboMultiplier);
 
-            // Reset worker to happy
-            setWorkerState('happy');
-            setShowWarning(false);
+                // Reset worker to happy
+                setWorkerState('happy');
+                setShowWarning(false);
 
-            // In Level 2+, change theme after each correct match
-            if (level >= 2) {
-                selectRandomTheme();
+                // In Level 2+, change theme after each correct match
+                if (level >= 2) {
+                    selectRandomTheme();
+                }
+                
+                return clearedGrid;
+
+            } else {
+                // WRONG MATCH!
+                playSound('incorrect');
+                speakWithFemaleVoice('Try another block!');
+
+                // Reset combo
+                setCombo(1);
+
+                // Apply penalty: reduce timer by 2 seconds
+                setNextDropTime(prev => prev - WORD_TOWER_DATA.wrongClickPenalty);
+
+                // Show worried worker
+                setWorkerState('worried');
+
+                // Flash timer red (handled in CSS)
+                setTimeout(() => setWorkerState('happy'), 1000);
+                
+                return prevGrid;
             }
-
-        } else {
-            // WRONG MATCH!
-            playSound('incorrect');
-            speakWithFemaleVoice('Try another block!');
-
-            // Reset combo
-            setCombo(1);
-
-            // Apply penalty: reduce timer by 2 seconds
-            setNextDropTime(prev => prev - WORD_TOWER_DATA.wrongClickPenalty);
-
-            // Show worried worker
-            setWorkerState('worried');
-
-            // Flash timer red (handled in CSS)
-            setTimeout(() => setWorkerState('happy'), 1000);
-        }
-    }, [gameState, grid, currentTheme, combo, level, removePieceById, applyGravity, checkAndClearRows, selectRandomTheme]);
+        });
+    }, [gameState, currentTheme, combo, level, applyGravity, checkAndClearRows, selectRandomTheme]);
 
     /**
      * Starts a new game
