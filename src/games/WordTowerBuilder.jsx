@@ -58,6 +58,7 @@ const WordTowerBuilder = ({ onBack }) => {
     const dropTimerRef = useRef(null);
     const countdownRef = useRef(null);
     const topSpawnTimerRef = useRef(null);
+    const addPieceToTopRef = useRef(null);
 
     // ===== UTILITY FUNCTIONS =====
 
@@ -123,7 +124,7 @@ const WordTowerBuilder = ({ onBack }) => {
             id: Date.now() + Math.random(),  // Unique ID for this piece
             centerCell: centerCell  // Which cell should display the word
         };
-    }, []);
+    }, [findCenterCell]);
 
     /**
      * Selects a random theme (category) for the current level
@@ -293,7 +294,12 @@ const WordTowerBuilder = ({ onBack }) => {
             setShowWarning(true);
             setWorkerState('crying');
         }
-    }, [grid, generatePiece, createEmptyGrid, checkAndClearRows]);
+    }, [grid, generatePiece, createEmptyGrid, checkAndClearRows, setGameState]);
+
+    // Store the latest addPieceToTop in a ref to avoid circular dependencies
+    useEffect(() => {
+        addPieceToTopRef.current = addPieceToTop;
+    }, [addPieceToTop]);
 
     /**
      * Locks the current piece into the grid
@@ -671,14 +677,16 @@ const WordTowerBuilder = ({ onBack }) => {
      * Top spawn timer - adds new piece to top every 10 seconds
      */
     useEffect(() => {
-        if (gameState !== 'playing') return;
+        if (gameState !== 'playing' || !nextTopSpawnTime) return;
 
         topSpawnTimerRef.current = setInterval(() => {
             const remaining = nextTopSpawnTime - Date.now();
             
             // Time to spawn at top
             if (remaining <= 0) {
-                addPieceToTop();
+                if (addPieceToTopRef.current) {
+                    addPieceToTopRef.current();
+                }
                 setNextTopSpawnTime(Date.now() + 10000);  // Next spawn in 10 seconds
             }
         }, 100);
@@ -688,7 +696,7 @@ const WordTowerBuilder = ({ onBack }) => {
                 clearInterval(topSpawnTimerRef.current);
             }
         };
-    }, [gameState, nextTopSpawnTime, addPieceToTop]);
+    }, [gameState, nextTopSpawnTime]);
 
     /**
      * Renders the grid with current piece overlay
