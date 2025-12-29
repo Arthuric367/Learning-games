@@ -45,6 +45,10 @@ const WordTowerBuilder = ({ onBack }) => {
     // Tracks when the next auto-drop should occur
     const [nextDropTime, setNextDropTime] = useState(null);
     const [timeRemaining, setTimeRemaining] = useState(dropInterval);
+    
+    // ===== TOP ROW SPAWN TIMER =====
+    // Tracks when to spawn a new piece at the top every 10 seconds
+    const [nextTopSpawnTime, setNextTopSpawnTime] = useState(null);
 
     // ===== UI STATE =====
     const [workerState, setWorkerState] = useState('happy');  // happy, worried, crying
@@ -53,6 +57,7 @@ const WordTowerBuilder = ({ onBack }) => {
     // ===== REFS =====
     const dropTimerRef = useRef(null);
     const countdownRef = useRef(null);
+    const topSpawnTimerRef = useRef(null);
 
     // ===== UTILITY FUNCTIONS =====
 
@@ -63,6 +68,25 @@ const WordTowerBuilder = ({ onBack }) => {
         return Array(WORD_TOWER_DATA.gridRows).fill(null).map(() =>
             Array(WORD_TOWER_DATA.gridCols).fill(null)
         );
+    }, []);
+
+    /**
+     * Finds the center cell of a Tetris shape for word display
+     * @param {Array} shape - 2D array representing piece shape
+     * @returns {Object} {row, col} of the center cell
+     */
+    const findCenterCell = useCallback((shape) => {
+        const filledCells = [];
+        for (let r = 0; r < shape.length; r++) {
+            for (let c = 0; c < shape[r].length; c++) {
+                if (shape[r][c] === 1) {
+                    filledCells.push({ row: r, col: c });
+                }
+            }
+        }
+        // Return the middle filled cell (or first if only one)
+        const middleIndex = Math.floor(filledCells.length / 2);
+        return filledCells[middleIndex] || { row: 0, col: 0 };
     }, []);
 
     /**
@@ -86,6 +110,9 @@ const WordTowerBuilder = ({ onBack }) => {
         // Calculate starting position (centered horizontally, at top)
         const startCol = Math.floor((WORD_TOWER_DATA.gridCols - shape.pattern[0].length) / 2);
 
+        // Find the center cell of the piece for word display
+        const centerCell = findCenterCell(shape.pattern);
+
         return {
             shape: shape.pattern,
             shapeName: shape.name,
@@ -93,7 +120,8 @@ const WordTowerBuilder = ({ onBack }) => {
             category: randomCategoryKey,
             color: category.color,
             position: { row: 0, col: startCol },
-            id: Date.now() + Math.random()  // Unique ID for this piece
+            id: Date.now() + Math.random(),  // Unique ID for this piece
+            centerCell: centerCell  // Which cell should display the word
         };
     }, []);
 
@@ -197,6 +225,77 @@ const WordTowerBuilder = ({ onBack }) => {
     }, [grid]);
 
     /**
+     * Adds a new piece to the top of the grid, pushing existing blocks down
+     */
+    const addPieceToTop = useCallback(() => {
+        const newPiece = generatePiece();
+        const { shape, position, word, category, color, id, centerCell } = newPiece;
+        
+        // Calculate how many rows the piece needs
+        const pieceHeight = shape.length;
+        
+        // Check if adding this piece would cause game over
+        const wouldCauseGameOver = grid.slice(0, pieceHeight).some(row => row.some(cell => cell !== null));
+        
+        if (wouldCauseGameOver) {
+            setGameState('game_over');
+            playSound('incorrect');
+            return;
+        }
+        
+        // Shift all existing rows down by pieceHeight
+        const newGrid = createEmptyGrid();
+        
+        // Copy existing grid shifted down
+        for (let r = 0; r < WORD_TOWER_DATA.gridRows - pieceHeight; r++) {
+            for (let c = 0; c < WORD_TOWER_DATA.gridCols; c++) {
+                if (grid[r]) {
+                    newGrid[r + pieceHeight][c] = grid[r][c];
+                }
+            }
+        }
+        
+        // Add the new piece at the top, centered horizontally
+        const startCol = Math.floor((WORD_TOWER_DATA.gridCols - shape[0].length) / 2);
+        
+        for (let r = 0; r < shape.length; r++) {
+            for (let c = 0; c < shape[r].length; c++) {
+                if (shape[r][c] === 1) {
+                    const gridCol = startCol + c;
+                    const isCenterCell = (r === centerCell.row && c === centerCell.col);
+                    
+                    if (gridCol >= 0 && gridCol < WORD_TOWER_DATA.gridCols) {
+                        newGrid[r][gridCol] = {
+                            word: isCenterCell ? word : '',  // Only center cell shows word
+                            category,
+                            color,
+                            pieceId: id,
+                            hasWord: isCenterCell
+                        };
+                    }
+                }
+            }
+        }
+        
+        setGrid(newGrid);
+        
+        // Check for complete rows
+        const { clearedGrid, rowsCleared } = checkAndClearRows(newGrid);
+        if (rowsCleared > 0) {
+            setGrid(clearedGrid);
+            const rowPoints = rowsCleared * WORD_TOWER_DATA.pointsPerRow;
+            setScore(prev => prev + rowPoints);
+        }
+        
+        // Check for warning
+        const highestBlock = newGrid.findIndex(row => row.some(cell => cell !== null));
+        if (highestBlock >= 0 && highestBlock <= WORD_TOWER_DATA.warningHeight - WORD_TOWER_DATA.gridRows) {
+            setShowWarning(true);
+            setWorkerState('crying');
+        }
+    }, [grid, generatePiece, createEmptyGrid, checkAndClearRows]);
+
+    /**
      * Locks the current piece into the grid
      * Called when piece can't move down anymore
      */
@@ -204,7 +303,7 @@ const WordTowerBuilder = ({ onBack }) => {
         if (!currentPiece) return;
 
         const newGrid = grid.map(row => [...row]);
-        const { shape, position, word, category, color, id } = currentPiece;
+        const { shape, position, word, category, color, id, centerCell } = currentPiece;
 
         // Place each cell of the piece into the grid
         for (let r = 0; r < shape.length; r++) {
@@ -212,13 +311,15 @@ const WordTowerBuilder = ({ onBack }) => {
                 if (shape[r][c] === 1) {
                     const gridRow = position.row + r;
                     const gridCol = position.col + c;
+                    const isCenterCell = (r === centerCell.row && c === centerCell.col);
 
                     if (gridRow >= 0 && gridRow < WORD_TOWER_DATA.gridRows) {
                         newGrid[gridRow][gridCol] = {
-                            word,
+                            word: isCenterCell ? word : '',  // Only center cell shows word
                             category,
                             color,
-                            pieceId: id
+                            pieceId: id,
+                            hasWord: isCenterCell
                         };
                     }
                 }
@@ -483,6 +584,7 @@ const WordTowerBuilder = ({ onBack }) => {
         // Start game
         setGameState('playing');
         setNextDropTime(Date.now() + WORD_TOWER_DATA.baseDropInterval);
+        setNextTopSpawnTime(Date.now() + 10000);  // First top spawn after 10 seconds
 
         // Announce theme
         const themeName = WORD_TOWER_DATA.categories[initialTheme].name;
@@ -566,6 +668,29 @@ const WordTowerBuilder = ({ onBack }) => {
     }, [gameState, currentPiece, nextDropTime, dropInterval, dropPiece]);
 
     /**
+     * Top spawn timer - adds new piece to top every 10 seconds
+     */
+    useEffect(() => {
+        if (gameState !== 'playing') return;
+
+        topSpawnTimerRef.current = setInterval(() => {
+            const remaining = nextTopSpawnTime - Date.now();
+            
+            // Time to spawn at top
+            if (remaining <= 0) {
+                addPieceToTop();
+                setNextTopSpawnTime(Date.now() + 10000);  // Next spawn in 10 seconds
+            }
+        }, 100);
+
+        return () => {
+            if (topSpawnTimerRef.current) {
+                clearInterval(topSpawnTimerRef.current);
+            }
+        };
+    }, [gameState, nextTopSpawnTime, addPieceToTop]);
+
+    /**
      * Renders the grid with current piece overlay
      */
     const renderGrid = () => {
@@ -573,19 +698,22 @@ const WordTowerBuilder = ({ onBack }) => {
 
         // Overlay current piece
         if (currentPiece) {
-            const { shape, position, word, category, color, id } = currentPiece;
+            const { shape, position, word, category, color, id, centerCell } = currentPiece;
             for (let r = 0; r < shape.length; r++) {
                 for (let c = 0; c < shape[r].length; c++) {
                     if (shape[r][c] === 1) {
                         const gridRow = position.row + r;
                         const gridCol = position.col + c;
+                        const isCenterCell = (r === centerCell.row && c === centerCell.col);
+                        
                         if (gridRow >= 0 && gridRow < WORD_TOWER_DATA.gridRows) {
                             gridWithPiece[gridRow][gridCol] = {
-                                word,
+                                word: isCenterCell ? word : '',  // Only center cell shows word
                                 category,
                                 color,
                                 pieceId: id,
-                                isCurrent: true
+                                isCurrent: true,
+                                hasWord: isCenterCell
                             };
                         }
                     }
@@ -602,7 +730,7 @@ const WordTowerBuilder = ({ onBack }) => {
                         style={{ backgroundColor: cell ? cell.color : 'transparent' }}
                         onClick={() => handleBlockClick(rowIndex, colIndex)}
                     >
-                        {cell && <span className="wtb-word">{cell.word}</span>}
+                        {cell && cell.word && <span className="wtb-word">{cell.word}</span>}
                     </div>
                 ))}
             </div>

@@ -7,7 +7,7 @@ const WORD_TOWER_DATA = {
     gridCols: 6,   // Horizontal grid size (narrower for mobile)
 
     // ===== TIMING CONFIGURATION =====
-    baseDropInterval: 10000,  // 10 seconds - initial drop speed
+    baseDropInterval: 2000,  // 2 seconds - initial drop speed
     minDropInterval: 2000,    // 2 seconds - minimum drop speed (safety limit)
     wrongClickPenalty: 2000,  // 2 seconds - time reduced on wrong click
 
@@ -19,8 +19,8 @@ const WORD_TOWER_DATA = {
 
     // ===== DIFFICULTY CONFIGURATION =====
     warningHeight: 10,        // Show warning when blocks reach this row (out of 12)
-    level1PreFill: 0,         // Number of pre-filled rows in Level 1
-    level2PreFill: 2,         // Number of pre-filled rows in Level 2
+    level1PreFill: 3,         // Number of pre-filled rows in Level 1
+    level2PreFill: 5,         // Number of pre-filled rows in Level 2
 
     // ===== TETRIS SHAPES =====
     // Each shape is a 2D array where 1 = filled cell, 0 = empty cell
