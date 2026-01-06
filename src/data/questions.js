@@ -13,6 +13,7 @@ import lookMeImg from '../assets/pronoun_adventure/dino_look_me.png';
 import treeImg from '../assets/pronoun_adventure/big_tree.png';
 import birdImg from '../assets/pronoun_adventure/bird_wing.png';
 import iceCreamImg from '../assets/pronoun_adventure/dino_icecream.png';
+import iceCreamVideo from '../assets/pronoun_adventure/Dinosaur_Ice_Cream.mp4';
 
 export const questions = [
   {
@@ -147,6 +148,8 @@ export const questions = [
     options: ["We", "Our", "Us"],
     answer: "We",
     image: iceCreamImg,
+    video: iceCreamVideo,
+    poster: iceCreamImg,
     audioText: "We love ice cream!",
     hint: "Subject"
   }

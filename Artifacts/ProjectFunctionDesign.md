@@ -17,15 +17,22 @@ Pronoun Picnic is a collection of educational mini-games designed for children t
 
 ### 2. Pronoun Adventure
 **Concept**: Pronoun Usage
-**Goal**: Help a growing giraffe by answering pronoun questions.
+**Goal**: Help a growing giraffe reach the leaves by answering pronoun questions correctly.
 **Mechanics**:
-- **Quiz**: Multiple-choice questions about pronouns (e.g., "_____ is my friend").
+- **Quiz**: Multiple-choice questions about pronouns (e.g., "___ am a T-Rex").
+- **Session**: 5 randomly selected questions per session from a pool of 15 questions.
 - **Progression**:
-    - Correct answers grow the giraffe.
-    - Milestones at scores 5 and 10.
+    - Correct answers advance to the next question.
+    - Milestone at score 3 shows the growing giraffe.
+    - Win at score 5 shows the eating giraffe.
+- **Video Integration**:
+    - Baby giraffe video plays on initial milestone screen.
+    - Ice cream question features video instead of static image.
 - **Feedback**:
-    - **Correct**: Giraffe eats leaves, positive audio.
-    - **Incorrect**: Screen shakes, "Try again" audio.
+    - **Correct**: Audio reads the complete sentence, celebration overlay appears.
+    - **Incorrect**: Screen shakes, "Try again" audio plays.
+    - **Score 3**: Giraffe milestone screen with "Growing taller!" message.
+    - **Score 5**: Win screen with eating giraffe and "Yum! Delicious leaves!" message.
 
 ### 3. Puzzle Matcher
 **Concept**: Prepositions & Vocabulary
@@ -91,7 +98,7 @@ Pronoun Picnic is a collection of educational mini-games designed for children t
 ### Data Management
 - **Rule**: All game data (questions, words, levels, assets paths) must be decoupled from the component logic.
 - **Location**: All data files must reside in `src/data`.
-- **Session Rule**: Games should standardise on **8 rounds per session**, with questions/themes randomized at the start of each session or on "Play Again".
+- **Session Rule**: Games should standardise on **8 rounds per session** (except Pronoun Adventure which uses 5 rounds), with questions/themes randomized at the start of each session or on "Play Again".
 - **Implementation**: Games should import data from these files rather than having hardcoded arrays within the `.jsx` files.
 
 ### Asset Management

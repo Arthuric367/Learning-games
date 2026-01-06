@@ -4,6 +4,7 @@ import GiraffeProgress from '../components/GiraffeProgress';
 import { questions as originalQuestions } from '../data/questions';
 import { speak, speakWithFemaleVoice, speakEncouraging, playSound } from '../utils/audio';
 import startScreenImg from '../assets/pronoun_adventure/pronoun_start.png';
+import celebrationImg from '../assets/celebration_cake.png';
 import './PronounAdventure.css';
 
 // Fisher-Yates Shuffle Algorithm
@@ -16,21 +17,25 @@ const shuffleArray = (array) => {
     return newArray;
 };
 
+const ROUNDS_PER_SESSION = 5;
+
 function PronounAdventure({ onBackToMenu }) {
-    const [gameState, setGameState] = useState('start'); // start, milestone, playing, win
-    const [questions, setQuestions] = useState(originalQuestions);
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [gameState, setGameState] = useState('start'); // start, milestone, playing, next_question, win
+    const [sessionQuestions, setSessionQuestions] = useState([]);
+    const [currentRound, setCurrentRound] = useState(0);
     const [score, setScore] = useState(0);
     const [shake, setShake] = useState(false);
 
-    const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = sessionQuestions[currentRound];
 
     const handleStart = () => {
-        // Randomize questions on start
-        setQuestions(shuffleArray(originalQuestions));
+        // Shuffle and select 5 questions for this session
+        const shuffled = [...originalQuestions].sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, ROUNDS_PER_SESSION);
 
+        setSessionQuestions(selected);
         setScore(0);
-        setCurrentQuestionIndex(0);
+        setCurrentRound(0);
         // Show baby giraffe first
         setGameState('milestone');
         speakEncouraging("Let's play! Look at the baby giraffe.");
@@ -46,16 +51,21 @@ function PronounAdventure({ onBackToMenu }) {
             playSound('correct');
             speakWithFemaleVoice(currentQuestion.audioText); // Read the full sentence with female voice
 
+            const newScore = score + 1;
+            setScore(newScore);
+
             setTimeout(() => {
-                // Check for milestones (5, 10)
-                if (newScore === 5 || newScore === 10) {
-                    setGameState('milestone');
-                    speakEncouraging("Wow! The giraffe is growing!");
-                } else if (currentQuestionIndex < questions.length - 1) {
-                    setCurrentQuestionIndex(prev => prev + 1);
-                } else {
+                // Check if this was the last question
+                if (currentRound >= ROUNDS_PER_SESSION - 1) {
                     setGameState('win');
                     speakEncouraging("You did it! The giraffe can eat the leaves!");
+                } else if (newScore === 3) {
+                    // Show giraffe growing milestone at score 3
+                    setGameState('milestone');
+                    speakEncouraging("Wow! The giraffe is growing!");
+                } else {
+                    // Show next question celebration
+                    setGameState('next_question');
                 }
             }, 2000); // Wait for audio/animation
         } else {
@@ -67,20 +77,9 @@ function PronounAdventure({ onBackToMenu }) {
     };
 
     const handleNextQuestion = () => {
-        const newScore = score + 1;
-        setScore(newScore);
-
-        // Check for milestones (5, 10)
-        if (newScore === 5 || newScore === 10) {
-            setGameState('milestone');
-            speakEncouraging("Wow! The giraffe is growing!");
-        } else if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            setGameState('playing');
-        } else {
-            setGameState('win');
-            speakEncouraging("You did it! The giraffe can eat the leaves!");
-        }
+        const nextRound = currentRound + 1;
+        setCurrentRound(nextRound);
+        setGameState('playing');
     };
 
     return (
@@ -98,15 +97,26 @@ function PronounAdventure({ onBackToMenu }) {
 
             {gameState === 'milestone' && (
                 <div className="milestone-screen" onClick={handleMilestoneContinue}>
-                    <GiraffeProgress score={score} isMilestone={true} />
+                    <GiraffeProgress score={score} isMilestone={true} maxScore={ROUNDS_PER_SESSION} />
                     <button className="continue-btn">Continue (繼續)</button>
+                </div>
+            )}
+
+            {gameState === 'next_question' && (
+                <div className="milestone-screen" onClick={handleNextQuestion}>
+                    <div style={{ textAlign: 'center' }}>
+                        <img src={celebrationImg} alt="Celebration" style={{ maxWidth: '200px', marginBottom: '20px' }} />
+                        <h2 style={{ fontSize: '2.5rem', color: '#4CAF50', marginBottom: '20px' }}>Great Job! 🎉</h2>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '30px' }}>You got it right!</div>
+                        <button className="continue-btn">Next Question</button>
+                    </div>
                 </div>
             )}
 
             {gameState === 'playing' && (
                 <div className="game-screen">
                     <div className="progress">
-                        Question {currentQuestionIndex + 1} / {questions.length}
+                        Round {currentRound + 1} / {ROUNDS_PER_SESSION}
                     </div>
                     <GameScene
                         question={currentQuestion}
@@ -121,7 +131,7 @@ function PronounAdventure({ onBackToMenu }) {
             {gameState === 'win' && (
                 <div className="win-screen">
                     <h1>🎉 Great Job! 🎉</h1>
-                    <GiraffeProgress score={15} isMilestone={true} />
+                    <GiraffeProgress score={ROUNDS_PER_SESSION} isMilestone={true} maxScore={ROUNDS_PER_SESSION} />
                     <div className="dino-dance">🦖🦒🚗</div>
                     <button className="restart-btn" onClick={handleStart}>Play Again</button>
                     <div style={{ marginTop: '20px' }}>

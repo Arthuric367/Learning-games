@@ -18,10 +18,13 @@
 }
 
 .milestone .imageContainer {
-  width: 200px;
-  height: 200px;
+  width: 80%;
+  max-width: 600px;
+  height: 300px;
   margin-right: 0;
   margin-bottom: 20px;
+  border-radius: 20px;
+  border: 5px solid #FF9800;
 }
 
 .milestone .message {
