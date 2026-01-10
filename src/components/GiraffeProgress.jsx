@@ -2,24 +2,29 @@ import React from 'react';
 import styles from './GiraffeProgress.module.css';
 import giraffeBabyImg from '../assets/pronoun_adventure/giraffe_baby_1763827967345.png';
 import giraffeBabyVideo from '../assets/pronoun_adventure/Giraffe_baby.mp4';
-import giraffeGrowing from '../assets/pronoun_adventure/giraffe_growing_1763827993032.png';
-import giraffeEating from '../assets/pronoun_adventure/giraffe_eating_1763828019559.png';
+import giraffeGrowingImg from '../assets/pronoun_adventure/giraffe_growing_1763827993032.png';
+import giraffeGrowingVideo from '../assets/pronoun_adventure/Giraffe_Growing.mp4';
+import giraffeEatingImg from '../assets/pronoun_adventure/giraffe_eating_1763828019559.png';
+import giraffeEatingVideo from '../assets/pronoun_adventure/Giraffe_Eating.mp4';
 
 const GiraffeProgress = ({ score, isMilestone, maxScore = 5 }) => {
-  let currentImage = giraffeBabyImg;
-  let useVideo = false;
+  let currentVideo = giraffeBabyVideo;
+  let currentPoster = giraffeBabyImg;
   let message = "Baby Giraffe is hungry...";
   let progress = (score / maxScore) * 100;
 
   if (score === 0) {
-    useVideo = true;
+    currentVideo = giraffeBabyVideo;
+    currentPoster = giraffeBabyImg;
     message = "Baby Giraffe is hungry...";
   } else if (score >= maxScore) {
-    currentImage = giraffeEating;
+    currentVideo = giraffeEatingVideo;
+    currentPoster = giraffeEatingImg;
     message = "Yum! Delicious leaves!";
     progress = 100;
   } else if (score >= 3) {
-    currentImage = giraffeGrowing;
+    currentVideo = giraffeGrowingVideo;
+    currentPoster = giraffeGrowingImg;
     message = "Growing taller!";
   }
 
@@ -29,22 +34,18 @@ const GiraffeProgress = ({ score, isMilestone, maxScore = 5 }) => {
   return (
     <div className={containerClass}>
       <div className={styles.imageContainer}>
-        {useVideo ? (
-          <video
-            src={giraffeBabyVideo}
-            poster={giraffeBabyImg}
-            autoPlay
-            loop
-            playsInline
-            muted
-            className={styles.giraffeImage}
-            style={{ objectFit: 'contain' }}
-          >
-            <img src={giraffeBabyImg} alt="Giraffe Progress" className={styles.giraffeImage} />
-          </video>
-        ) : (
-          <img src={currentImage} alt="Giraffe Progress" className={styles.giraffeImage} />
-        )}
+        <video
+          src={currentVideo}
+          poster={currentPoster}
+          autoPlay
+          loop
+          playsInline
+          muted
+          className={styles.giraffeImage}
+          style={{ objectFit: 'contain' }}
+        >
+          <img src={currentPoster} alt="Giraffe Progress" className={styles.giraffeImage} />
+        </video>
       </div>
       <div className={styles.info}>
         <p className={styles.message}>{message}</p>

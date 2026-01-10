@@ -4,6 +4,7 @@ import ballImg from '../assets/pronoun_adventure/dino_playing_ball_1763828204529
 import friendsImg from '../assets/pronoun_adventure/dino_friends.png';
 import houseImg from '../assets/pronoun_adventure/dino_house.png';
 import pizzaImg from '../assets/pronoun_adventure/dino_pizza.png';
+import pizzaVideo from '../assets/pronoun_adventure/Dino_Pizza.mp4';
 import toyImg from '../assets/pronoun_adventure/dino_toy.png';
 import helpImg from '../assets/pronoun_adventure/dino_help.png';
 import happyImg from '../assets/pronoun_adventure/dino_happy.png';
@@ -67,6 +68,8 @@ export const questions = [
     options: ["I", "My", "Me"],
     answer: "I",
     image: pizzaImg,
+    video: pizzaVideo,
+    poster: pizzaImg,
     audioText: "I like pizza.",
     hint: "Subject"
   },
