@@ -3,28 +3,53 @@ import './ListeningBridge.css';
 import adventurerImg from '../assets/listening_bridge/adventurer.png';
 import plankImg from '../assets/listening_bridge/plank.png';
 import startScreenImg from '../assets/listening_bridge/bridge_start.png';
-import celebrationCakeImg from '../assets/celebration_cake.png';
+import adventurerSuccessVideo from '../assets/listening_bridge/Adventurer_Success.mp4';
+import adventurerFallVideo from '../assets/listening_bridge/Adventurer_Fall.mp4';
 import SENTENCES from '../data/listeningBridgeData';
 import { playSound, speakWithFemaleVoice } from '../utils/audio';
 // background is set in CSS
 
+const ROUNDS_PER_SESSION = 5;
+
+console.log('[ListeningBridge] SENTENCES imported:', SENTENCES);
+console.log('[ListeningBridge] SENTENCES length:', SENTENCES?.length);
+
 const ListeningBridge = ({ onBack }) => {
-    const [gameState, setGameState] = useState('start'); // start, playing, next_question, win
+    const [gameState, setGameState] = useState('start'); // start, playing, next_question, wrong_answer, game_over, win
     const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+    const [sessionSentences, setSessionSentences] = useState([]); // Randomized 5 sentences for this session
     const [slots, setSlots] = useState([]);
     const [isCrossing, setIsCrossing] = useState(false);
     const [shuffledWords, setShuffledWords] = useState([]);
+    const [lives, setLives] = useState(3);
+    const [correctAnswers, setCorrectAnswers] = useState(0);
 
     useEffect(() => {
-        if (gameState === 'playing' || gameState === 'start') {
+        console.log('[ListeningBridge] useEffect triggered', {
+            gameState,
+            currentSentenceIndex,
+            sessionSentencesLength: sessionSentences.length,
+            sessionSentences
+        });
+
+        if ((gameState === 'playing' || gameState === 'start') && sessionSentences.length > 0) {
             initLevel();
         }
-    }, [currentSentenceIndex, gameState]);
+    }, [currentSentenceIndex, gameState, sessionSentences]);
 
     const initLevel = () => {
-        const sentence = SENTENCES[currentSentenceIndex];
-        if (!sentence) return;
+        console.log('[initLevel] Starting', {
+            currentSentenceIndex,
+            sessionSentencesLength: sessionSentences.length
+        });
 
+        const sentence = sessionSentences[currentSentenceIndex];
+        if (!sentence) {
+            console.warn('[initLevel] No sentence found at index', currentSentenceIndex);
+            return;
+        }
+
+        console.log('[initLevel] Sentence loaded:', sentence);
         setSlots(Array(sentence.words.length).fill(null));
 
         // Create word objects with unique IDs
@@ -39,6 +64,7 @@ const ListeningBridge = ({ onBack }) => {
             [words[i], words[j]] = [words[j], words[i]];
         }
         setShuffledWords(words);
+        console.log('[initLevel] Shuffled words:', words);
 
         // Speak
         if (gameState === 'playing') {
@@ -54,8 +80,17 @@ const ListeningBridge = ({ onBack }) => {
     const availableWords = shuffledWords.filter(sw => !slots.some(s => s && s.id === sw.id));
 
     const handleStart = () => {
-        setGameState('playing');
+        console.log('[handleStart] Starting game');
+        // Shuffle and select 5 random sentences
+        const shuffled = [...SENTENCES].sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, ROUNDS_PER_SESSION);
+
+        console.log('[handleStart] Selected sentences:', selected);
+        setSessionSentences(selected);
         setCurrentSentenceIndex(0); // Reset to first sentence
+        setLives(3); // Reset lives
+        setCorrectAnswers(0); // Reset score
+        setGameState('playing');
     };
 
     const handleDragStart = (e, word) => {
@@ -124,13 +159,14 @@ const ListeningBridge = ({ onBack }) => {
 
             if (isCorrect) {
                 playSound('correct');
+                setCorrectAnswers(prev => prev + 1); // Increment correct answers
                 setIsCrossing(true);
 
                 // Use a ref or local variable to ensure we don't depend on stale state if multiple clicks happened (unlikely here)
                 setTimeout(() => {
                     setIsCrossing(false);
                     // Check if there are more sentences
-                    if (currentSentenceIndex < SENTENCES.length - 1) {
+                    if (currentSentenceIndex < ROUNDS_PER_SESSION - 1) {
                         setGameState('next_question');
                     } else {
                         playSound('win');
@@ -139,13 +175,25 @@ const ListeningBridge = ({ onBack }) => {
                 }, 2000); // Reduced delay to 1s for better responsiveness
             } else {
                 playSound('incorrect');
+
+                // Wait 1 second, then deduct life and show appropriate screen
+                setTimeout(() => {
+                    const newLives = lives - 1;
+                    setLives(newLives);
+
+                    if (newLives > 0) {
+                        setGameState('wrong_answer');
+                    } else {
+                        setGameState('game_over');
+                    }
+                }, 1000);
             }
         }
     };
 
     const handleNextQuestion = () => {
         // Move to next sentence, useEffect will re-init level
-        if (currentSentenceIndex < SENTENCES.length - 1) {
+        if (currentSentenceIndex < ROUNDS_PER_SESSION - 1) {
             setCurrentSentenceIndex(prev => prev + 1);
             setGameState('playing');
         } else {
@@ -154,7 +202,14 @@ const ListeningBridge = ({ onBack }) => {
     };
 
     const startNewRound = () => {
+        // Shuffle and select 5 new random sentences
+        const shuffled = [...SENTENCES].sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, ROUNDS_PER_SESSION);
+
+        setSessionSentences(selected);
         setCurrentSentenceIndex(0);
+        setLives(3); // Reset lives
+        setCorrectAnswers(0); // Reset score
         setGameState('playing');
         // useEffect will handle initialization
     };
@@ -175,18 +230,21 @@ const ListeningBridge = ({ onBack }) => {
                     <h1 className="game-start-title">🌉 Listening Bridge 🌉</h1>
                     <img src={startScreenImg} alt="Bridge" className="game-start-image" />
                     <p className="game-start-description">Build the bridge with the correct words!</p>
-                    <button className="game-btn-start" onClick={() => setGameState('playing')}>Game Start</button>
+                    <button className="game-btn-start" onClick={handleStart}>Game Start</button>
                     <div style={{ marginTop: '20px' }}>
                         <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
                     </div>
                 </div>
             )}
 
-            {(gameState === 'playing' || gameState === 'next_question') && (
+            {(gameState === 'playing' || gameState === 'next_question' || gameState === 'wrong_answer') && (
                 <>
                     <div className="lb-header">
-                        <h2 className="lb-title">Sentence {currentSentenceIndex + 1} / {SENTENCES.length}</h2>
-                        <button className="game-btn-sound" onClick={() => speakSentence(SENTENCES[currentSentenceIndex]?.text)}>🔊 Listen</button>
+                        <h2 className="lb-title">
+                            Sentence {currentSentenceIndex + 1} / {ROUNDS_PER_SESSION} |
+                            {' '}{'❤️'.repeat(lives)}{'🖤'.repeat(3 - lives)}
+                        </h2>
+                        <button className="game-btn-sound" onClick={() => speakSentence(sessionSentences[currentSentenceIndex]?.text)}>🔊 Listen</button>
                     </div>
 
                     <div className="lb-controls">
@@ -221,7 +279,7 @@ const ListeningBridge = ({ onBack }) => {
                         </div>
 
                         {/* Word Bank */}
-                        {gameState === 'playing' && (
+                        {(gameState === 'playing') && (
                             <div className="lb-word-bank">
                                 {availableWords.map((word) => (
                                     <div
@@ -243,8 +301,31 @@ const ListeningBridge = ({ onBack }) => {
                                 <div className="lb-next-question-overlay">
                                     <h2 className="lb-celebration-title">✨ You are correct! ✨</h2>
                                     <div className="lb-celebration-content">
-                                        <img src={celebrationCakeImg} alt="Celebration" className="lb-celebration-image" />
-                                        <p className="lb-celebration-text">Great job! Let's build more bridge! 🎂</p>
+                                        <video
+                                            src={adventurerSuccessVideo}
+                                            autoPlay
+                                            className="lb-celebration-image"
+                                            style={{ maxHeight: '300px', objectFit: 'contain' }}
+                                        />
+                                        <p className="lb-celebration-text">Great job! Let's build more bridge! �</p>
+                                    </div>
+                                    <button className="game-btn-start" onClick={handleNextQuestion}>Next Question</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {gameState === 'wrong_answer' && (
+                            <div className="lb-overlay-container">
+                                <div className="lb-next-question-overlay">
+                                    <h2 className="lb-celebration-title">❌ It is incorrect ❌</h2>
+                                    <div className="lb-celebration-content">
+                                        <video
+                                            src={adventurerFallVideo}
+                                            autoPlay
+                                            className="lb-celebration-image"
+                                            style={{ maxHeight: '300px', objectFit: 'contain' }}
+                                        />
+                                        <p className="lb-celebration-text">Try again on the next question! 💪</p>
                                     </div>
                                     <button className="game-btn-start" onClick={handleNextQuestion}>Next Question</button>
                                 </div>
@@ -254,10 +335,21 @@ const ListeningBridge = ({ onBack }) => {
                 </>
             )}
 
+            {gameState === 'game_over' && (
+                <div className="lb-win-message">
+                    <h2 className="lb-win-title">🎮 Game Over 🎮</h2>
+                    <p>You answered <strong>{correctAnswers}</strong> out of <strong>{currentSentenceIndex + 1}</strong> questions correctly!</p>
+                    <p style={{ marginTop: '10px' }}>Don't give up! Try again! 💪</p>
+                    <button className="game-btn-start" onClick={startNewRound} style={{ marginRight: '20px' }}>Try Again</button>
+                    <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
+                </div>
+            )}
+
             {gameState === 'win' && (
                 <div className="lb-win-message">
                     <h2 className="lb-win-title">🎉 Bridge Completed! 🎉</h2>
                     <p>You helped the child cross the bridge!</p>
+                    <p>Perfect score: <strong>{correctAnswers}</strong> out of <strong>{ROUNDS_PER_SESSION}</strong>! 🌟</p>
                     <button className="game-btn-start" onClick={startNewRound} style={{ marginRight: '20px' }}>Play Again</button>
                     <button className="game-btn-back" onClick={onBack}>Back to Main Menu</button>
                 </div>

@@ -95,6 +95,17 @@ An overlay or distinct state that appears after a round/question is completed co
     - **Celebratory Image**: High-quality cartoon image (e.g., cake, star, trophy) to reward the child visually.
     - **Single Action Button**: "Next Question" button to proceed.
 
+### 3.5. Wrong Answer Screen (`wrong_answer`)
+An overlay that appears after a player answers incorrectly (in games with lives/HP systems).
+- **Purpose**: Provides feedback on incorrect answers and encourages the player to continue.
+- **Visual Requirements**:
+    - **Centered Overlay**: Similar layout to `next_question` with darkened background.
+    - **Feedback Text**: Clear indication of incorrect answer (e.g., "It is incorrect ❌").
+    - **Feedback Media**: Video or image showing failure animation (e.g., character falling, mistake animation).
+    - **Video Behavior**: If using video, should auto-play once (no loop).
+    - **Encouraging Message**: Supportive text to motivate continued play (e.g., "Try again on the next question! 💪").
+    - **Single Action Button**: "Next Question" button to proceed to the next challenge.
+
 ### 4. Win Screen (`win_screen`)
 Displayed when the game is successfully completed.
 - **Visible Buttons**:
@@ -103,9 +114,14 @@ Displayed when the game is successfully completed.
 
 ### 5. Game Over (`game_over`)
 Displayed when the player loses (if applicable).
+- **Purpose**: Shows the end of game due to failure condition (e.g., HP/lives depleted, time expired).
+- **Visual Requirements**:
+    - **Title**: Clear game over message (e.g., "🎮 Game Over 🎮").
+    - **Score Display** (for applicable games): Show player's performance (e.g., "You answered X out of Y questions correctly!").
+    - **Encouraging Message**: Supportive text to motivate retry (e.g., "Don't give up! Try again! 💪").
 - **Visible Buttons**:
-    1.  **Play Again** (Styled like Start Button)
-    2.  **Back to Main Menu**
+    1.  **Try Again** (Styled like Start Button) - Restarts the game from the beginning
+    2.  **Back to Main Menu** - Returns to main menu
 
 ## Audio and Feedback
 
@@ -163,7 +179,7 @@ The application supports three main game control patterns:
 
 | Game Type | Win Condition | Lose Condition | Progress Indicator | Examples |
 |-----------|--------------|----------------|-------------------|----------|
-| **HP-based** | Complete objective before HP depletes | HP reaches 0 | Health bar/hearts | Pronoun Adventure |
+| **HP-based** | Complete objective before HP depletes | HP reaches 0 | Health bar/hearts | Pronoun Adventure, Listening Bridge |
 | **Time-based** | Complete objective before time expires | Timer reaches 0 | Countdown timer | Question Word Racer |
 | **Round-based** | Complete all N rounds (e.g., 5) | N/A (no fail state) | Round counter (e.g., "3/5") | Spelling Bee Garden |
 
