@@ -1131,3 +1131,11 @@
         width: 100%;
     }
 }
+
+.grid-hunt-board.easy-mode .grid-hunt-symbol {
+    font-size: clamp(1.3rem, 3.8vw, 2rem);
+}
+
+.letter-grid-board.easy-mode .letter-grid-symbol {
+    font-size: clamp(1.2rem, 3.5vw, 1.9rem);
+}

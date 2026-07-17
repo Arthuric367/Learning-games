@@ -2151,7 +2151,10 @@ const BrainGamesLab = ({ onBack }) => {
                                 </button>
                             </div>
 
-                            <div className="grid-hunt-board" style={{ gridTemplateColumns: `repeat(${activeGridHuntConfig.size}, minmax(0, 1fr))` }}>
+                            <div
+                                className={`grid-hunt-board ${gridHuntAdvanced ? 'advanced-mode' : 'easy-mode'}`}
+                                style={{ gridTemplateColumns: `repeat(${activeGridHuntConfig.size}, minmax(0, 1fr))` }}
+                            >
                                 {gridHuntData.cells.map((cell) => {
                                     const isTapped = gridHuntTappedIds.includes(cell.id);
                                     return (
@@ -2213,7 +2216,10 @@ const BrainGamesLab = ({ onBack }) => {
                                 Built: <strong>{letterBuiltPart || '_'}</strong>
                             </div>
 
-                            <div className="letter-grid-board" style={{ gridTemplateColumns: `repeat(${activeLetterGameConfig.size}, minmax(0, 1fr))` }}>
+                            <div
+                                className={`letter-grid-board ${letterGameAdvanced ? 'advanced-mode' : 'easy-mode'}`}
+                                style={{ gridTemplateColumns: `repeat(${activeLetterGameConfig.size}, minmax(0, 1fr))` }}
+                            >
                                 {letterData.cells.map((cell) => {
                                     const isTapped = letterTappedIds.includes(cell.id);
                                     return (
