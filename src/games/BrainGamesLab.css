@@ -43,6 +43,24 @@
     gap: 12px;
 }
 
+.brain-progress-board {
+    margin-top: 12px;
+    border: 2px solid #d8eeff;
+    border-radius: 14px;
+    background: #f6fcff;
+    padding: 12px;
+}
+
+.brain-progress-board h3 {
+    margin: 0 0 8px;
+    color: #1f5f84;
+}
+
+.brain-progress-board p {
+    margin: 4px 0;
+    color: #355f79;
+}
+
 .brain-game-card {
     min-height: 168px;
     border-radius: 16px;
@@ -161,45 +179,8 @@
     text-transform: capitalize;
 }
 
-.shape {
-    width: 66px;
-    height: 66px;
-}
-
-.shape.circle {
-    border-radius: 50%;
-}
-
-.shape.square {
-    border-radius: 8px;
-}
-
-.shape.triangle {
-    width: 0;
-    height: 0;
-    border-left: 34px solid transparent;
-    border-right: 34px solid transparent;
-    border-bottom: 66px solid;
-}
-
-.shape.red {
-    background: #ef5959;
-    border-bottom-color: #ef5959;
-}
-
-.shape.blue {
-    background: #3a84ff;
-    border-bottom-color: #3a84ff;
-}
-
-.shape.green {
-    background: #37a95f;
-    border-bottom-color: #37a95f;
-}
-
-.shape.orange {
-    background: #ed9a2f;
-    border-bottom-color: #ed9a2f;
+.shape-glyph {
+    display: block;
 }
 
 .oops-message {
@@ -212,6 +193,39 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
+}
+
+.delay-timer {
+    margin: 8px 0;
+    font-size: 1.1rem;
+    color: #1e5f84;
+    font-weight: bold;
+}
+
+.ladder-timer-track {
+    width: 100%;
+    max-width: 560px;
+    height: 16px;
+    border-radius: 999px;
+    background: #e8f4ff;
+    border: 2px solid #b9e0ff;
+    overflow: hidden;
+}
+
+.ladder-timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff8a80, #ffd54f, #81d4fa);
+    transition: width 0.1s linear;
+}
+
+.delay-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.delay-actions .brain-action-btn {
+    max-width: 260px;
 }
 
 .oops-option {
@@ -259,14 +273,7 @@
         flex-direction: row;
     }
 
-    .shape {
-        width: 50px;
-        height: 50px;
-    }
-
-    .shape.triangle {
-        border-left-width: 25px;
-        border-right-width: 25px;
-        border-bottom-width: 50px;
+    .delay-actions .brain-action-btn {
+        max-width: none;
     }
 }

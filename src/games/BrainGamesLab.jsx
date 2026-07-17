@@ -4,6 +4,14 @@ import './BrainGamesLab.css';
 const CALM_TARGET_ATTEMPTS = 10;
 const SWITCH_TOTAL_ROUNDS = 12;
 const OOPS_TOTAL_ROUNDS = 8;
+const DELAY_TOTAL_ROUNDS = 6;
+const EMOTION_TOTAL_ROUNDS = 8;
+const LADDER_TOTAL_LEVELS = 6;
+const BREATH_TOTAL_ROUNDS = 10;
+const FOCUS_TOTAL_ROUNDS = 12;
+const TURN_TOTAL_ROUNDS = 8;
+const SEQUENCE_TOTAL_STEPS = 4;
+const BRAIN_PROGRESS_STORAGE_KEY = 'brain-games-progress-v1';
 
 const SHAPES = ['circle', 'square', 'triangle'];
 const COLORS = ['red', 'blue', 'green', 'orange'];
@@ -35,6 +43,82 @@ const OOPS_PATTERNS = [
         options: ['2', '3', '1']
     }
 ];
+
+const EMOTION_SCENARIOS = [
+    {
+        prompt: 'Your block tower falls down.',
+        answer: 'Take 2 slow breaths and rebuild.',
+        options: ['Yell loudly', 'Take 2 slow breaths and rebuild.', 'Throw blocks']
+    },
+    {
+        prompt: 'You lose one round in a game.',
+        answer: 'Say: I can try again.',
+        options: ['Quit and slam table', 'Say: I can try again.', 'Blame others']
+    },
+    {
+        prompt: 'A friend chooses a different game.',
+        answer: 'Use calm words and take turns.',
+        options: ['Use calm words and take turns.', 'Grab the toy', 'Cry and stop playing']
+    },
+    {
+        prompt: 'You feel very angry.',
+        answer: 'Pause body, breathe in and out.',
+        options: ['Run away shouting', 'Pause body, breathe in and out.', 'Hit pillow very hard']
+    },
+    {
+        prompt: 'Homework feels hard.',
+        answer: 'Ask for help calmly.',
+        options: ['Tear the paper', 'Ask for help calmly.', 'Say I am bad at this']
+    }
+];
+
+const TURN_SCENARIOS = [
+    {
+        prompt: 'Friend is using the puzzle pieces now.',
+        answer: 'Wait and ask for a turn.',
+        options: ['Grab pieces now', 'Wait and ask for a turn.', 'Shout loudly']
+    },
+    {
+        prompt: 'Teacher says: Your turn after Mina.',
+        answer: 'Say OK and wait calmly.',
+        options: ['Say OK and wait calmly.', 'Run to front line', 'Refuse to play']
+    },
+    {
+        prompt: 'You want the same toy as your sibling.',
+        answer: 'Use timer and take turns.',
+        options: ['Push sibling', 'Cry loudly', 'Use timer and take turns.']
+    },
+    {
+        prompt: 'Board game says skip one turn.',
+        answer: 'Take a breath and keep playing.',
+        options: ['Throw the dice', 'Take a breath and keep playing.', 'Quit the game']
+    }
+];
+
+const FOCUS_SIGNALS = [
+    { kind: 'go', label: 'Green Turtle' },
+    { kind: 'go', label: 'Blue Smile' },
+    { kind: 'stop', label: 'Red Stop Sign' },
+    { kind: 'stop', label: 'Sleeping Moon' }
+];
+
+const RESET_ROUTINE_STEPS = [
+    'Stop body',
+    'Take 2 breaths',
+    'Use calm words',
+    'Try again'
+];
+
+const DEFAULT_PROGRESS = {
+    calmHistory: [],
+    delayHistory: [],
+    emotionHistory: [],
+    ladderHistory: [],
+    breathHistory: [],
+    focusHistory: [],
+    turnHistory: [],
+    sequenceHistory: []
+};
 
 function randomFrom(list) {
     return list[Math.floor(Math.random() * list.length)];
@@ -80,13 +164,106 @@ function makeSwitchRound(roundIndex, previousRuleType) {
         }
     }
 
-    const choices = shuffle([correct, ...distractors]);
+    let choices = shuffle([correct, ...distractors]);
+
+    // Safety guard for rendering/data edge cases: always include one valid answer.
+    if (!choices.some((item) => item.id === correct.id)) {
+        choices = [correct, ...distractors];
+    }
 
     return {
         ruleType,
         ruleValue,
         choices,
         correctId: correct.id
+    };
+}
+
+function makeFocusSignal() {
+    return randomFrom(FOCUS_SIGNALS);
+}
+
+function makeBreathPrompt() {
+    return Math.random() < 0.5 ? 'Inhale' : 'Exhale';
+}
+
+function ladderConfig(level) {
+    return {
+        goal: 6 + level * 2,
+        seconds: Math.max(3.5, 7 - level * 0.7)
+    };
+}
+
+function makeSequenceOptions(stepIndex) {
+    const correct = RESET_ROUTINE_STEPS[stepIndex];
+    const distractors = shuffle(RESET_ROUTINE_STEPS.filter((item) => item !== correct)).slice(0, 2);
+    return shuffle([correct, ...distractors]);
+}
+
+function loadProgress() {
+    try {
+        const raw = window.localStorage.getItem(BRAIN_PROGRESS_STORAGE_KEY);
+        if (!raw) return DEFAULT_PROGRESS;
+        const parsed = JSON.parse(raw);
+        return {
+            ...DEFAULT_PROGRESS,
+            ...parsed,
+            calmHistory: Array.isArray(parsed?.calmHistory) ? parsed.calmHistory : [],
+            delayHistory: Array.isArray(parsed?.delayHistory) ? parsed.delayHistory : [],
+            emotionHistory: Array.isArray(parsed?.emotionHistory) ? parsed.emotionHistory : [],
+            ladderHistory: Array.isArray(parsed?.ladderHistory) ? parsed.ladderHistory : [],
+            breathHistory: Array.isArray(parsed?.breathHistory) ? parsed.breathHistory : [],
+            focusHistory: Array.isArray(parsed?.focusHistory) ? parsed.focusHistory : [],
+            turnHistory: Array.isArray(parsed?.turnHistory) ? parsed.turnHistory : [],
+            sequenceHistory: Array.isArray(parsed?.sequenceHistory) ? parsed.sequenceHistory : []
+        };
+    } catch (error) {
+        return DEFAULT_PROGRESS;
+    }
+}
+
+function saveProgress(nextProgress) {
+    try {
+        window.localStorage.setItem(BRAIN_PROGRESS_STORAGE_KEY, JSON.stringify(nextProgress));
+    } catch (error) {
+        // Ignore storage write failures to keep gameplay uninterrupted.
+    }
+}
+
+function shapeStyle(shape, color) {
+    const palette = {
+        red: '#ef5959',
+        blue: '#3a84ff',
+        green: '#37a95f',
+        orange: '#ed9a2f'
+    };
+
+    const fill = palette[color] || '#3a84ff';
+
+    if (shape === 'triangle') {
+        return {
+            width: 0,
+            height: 0,
+            borderLeft: '34px solid transparent',
+            borderRight: '34px solid transparent',
+            borderBottom: `66px solid ${fill}`
+        };
+    }
+
+    if (shape === 'square') {
+        return {
+            width: '66px',
+            height: '66px',
+            borderRadius: '8px',
+            background: fill
+        };
+    }
+
+    return {
+        width: '66px',
+        height: '66px',
+        borderRadius: '50%',
+        background: fill
     };
 }
 
@@ -98,6 +275,7 @@ const BrainGamesLab = ({ onBack }) => {
     const [calmDirection, setCalmDirection] = useState(1);
     const [calmAttempts, setCalmAttempts] = useState(0);
     const [calmHits, setCalmHits] = useState(0);
+    const [calmSaved, setCalmSaved] = useState(false);
 
     // Rule Switch Game
     const [switchRound, setSwitchRound] = useState(0);
@@ -113,11 +291,72 @@ const BrainGamesLab = ({ onBack }) => {
     const [oopsMessage, setOopsMessage] = useState('Find the best answer.');
     const [oopsPattern, setOopsPattern] = useState(() => randomFrom(OOPS_PATTERNS));
 
+    // Delay Treasure Game
+    const [delayRound, setDelayRound] = useState(0);
+    const [delayScore, setDelayScore] = useState(0);
+    const [delayTimer, setDelayTimer] = useState(4);
+    const [delayWaiting, setDelayWaiting] = useState(false);
+    const [delaySaved, setDelaySaved] = useState(false);
+
+    // Emotion Coach Game
+    const [emotionRound, setEmotionRound] = useState(0);
+    const [emotionScore, setEmotionScore] = useState(0);
+    const [emotionSaved, setEmotionSaved] = useState(false);
+    const [emotionScenario, setEmotionScenario] = useState(() => randomFrom(EMOTION_SCENARIOS));
+
+    // Frustration Ladder Game
+    const [ladderLevel, setLadderLevel] = useState(0);
+    const [ladderGoal, setLadderGoal] = useState(ladderConfig(0).goal);
+    const [ladderTaps, setLadderTaps] = useState(0);
+    const [ladderTimeLeft, setLadderTimeLeft] = useState(ladderConfig(0).seconds);
+    const [ladderStatus, setLadderStatus] = useState('ready'); // ready, playing, failed, levelComplete, finished
+    const [ladderResets, setLadderResets] = useState(0);
+    const [ladderSaved, setLadderSaved] = useState(false);
+
+    // Breath Bridge Game
+    const [breathRound, setBreathRound] = useState(0);
+    const [breathScore, setBreathScore] = useState(0);
+    const [breathPrompt, setBreathPrompt] = useState(() => makeBreathPrompt());
+    const [breathSaved, setBreathSaved] = useState(false);
+
+    // Focus Freeze Game
+    const [focusRound, setFocusRound] = useState(0);
+    const [focusScore, setFocusScore] = useState(0);
+    const [focusSignal, setFocusSignal] = useState(() => makeFocusSignal());
+    const [focusSaved, setFocusSaved] = useState(false);
+
+    // Turn Taking Builder Game
+    const [turnRound, setTurnRound] = useState(0);
+    const [turnScore, setTurnScore] = useState(0);
+    const [turnScenario, setTurnScenario] = useState(() => randomFrom(TURN_SCENARIOS));
+    const [turnSaved, setTurnSaved] = useState(false);
+
+    // Reset Routine Game
+    const [sequenceStep, setSequenceStep] = useState(0);
+    const [sequenceScore, setSequenceScore] = useState(0);
+    const [sequenceMessage, setSequenceMessage] = useState('Pick the first calm step.');
+    const [sequenceOptions, setSequenceOptions] = useState(() => makeSequenceOptions(0));
+    const [sequenceSaved, setSequenceSaved] = useState(false);
+
+    const [progress, setProgress] = useState(() => loadProgress());
+
+    const addProgressEntry = useCallback((bucket, entry) => {
+        setProgress((prev) => {
+            const next = {
+                ...prev,
+                [bucket]: [entry, ...(prev[bucket] || [])].slice(0, 20)
+            };
+            saveProgress(next);
+            return next;
+        });
+    }, []);
+
     const resetCalm = useCallback(() => {
         setCalmMeter(50);
         setCalmDirection(1);
         setCalmAttempts(0);
         setCalmHits(0);
+        setCalmSaved(false);
     }, []);
 
     const resetSwitch = useCallback(() => {
@@ -135,6 +374,69 @@ const BrainGamesLab = ({ onBack }) => {
         setOopsMessage('Find the best answer.');
         setOopsPattern(randomFrom(OOPS_PATTERNS));
     }, []);
+
+    const resetDelay = useCallback(() => {
+        setDelayRound(0);
+        setDelayScore(0);
+        setDelayTimer(4);
+        setDelayWaiting(false);
+        setDelaySaved(false);
+    }, []);
+
+    const resetEmotion = useCallback(() => {
+        setEmotionRound(0);
+        setEmotionScore(0);
+        setEmotionSaved(false);
+        setEmotionScenario(randomFrom(EMOTION_SCENARIOS));
+    }, []);
+
+    const resetLadder = useCallback(() => {
+        const base = ladderConfig(0);
+        setLadderLevel(0);
+        setLadderGoal(base.goal);
+        setLadderTaps(0);
+        setLadderTimeLeft(base.seconds);
+        setLadderStatus('ready');
+        setLadderResets(0);
+        setLadderSaved(false);
+    }, []);
+
+    const resetBreath = useCallback(() => {
+        setBreathRound(0);
+        setBreathScore(0);
+        setBreathPrompt(makeBreathPrompt());
+        setBreathSaved(false);
+    }, []);
+
+    const resetFocus = useCallback(() => {
+        setFocusRound(0);
+        setFocusScore(0);
+        setFocusSignal(makeFocusSignal());
+        setFocusSaved(false);
+    }, []);
+
+    const resetTurn = useCallback(() => {
+        setTurnRound(0);
+        setTurnScore(0);
+        setTurnScenario(randomFrom(TURN_SCENARIOS));
+        setTurnSaved(false);
+    }, []);
+
+    const resetSequence = useCallback(() => {
+        setSequenceStep(0);
+        setSequenceScore(0);
+        setSequenceMessage('Pick the first calm step.');
+        setSequenceOptions(makeSequenceOptions(0));
+        setSequenceSaved(false);
+    }, []);
+
+    const startLadderLevel = useCallback((extraSeconds = 0) => {
+        const cfg = ladderConfig(ladderLevel);
+        setLadderGoal(cfg.goal);
+        setLadderTaps(0);
+        setLadderTimeLeft(cfg.seconds + extraSeconds);
+        setLadderStatus('playing');
+    }, [ladderLevel]);
 
     useEffect(() => {
         if (view !== 'calm') {
@@ -159,6 +461,43 @@ const BrainGamesLab = ({ onBack }) => {
         return () => window.clearInterval(intervalId);
     }, [view, calmDirection]);
 
+    useEffect(() => {
+        if (view !== 'delay' || !delayWaiting) {
+            return undefined;
+        }
+
+        const id = window.setInterval(() => {
+            setDelayTimer((prev) => {
+                if (prev <= 1) {
+                    window.clearInterval(id);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => window.clearInterval(id);
+    }, [view, delayWaiting]);
+
+    useEffect(() => {
+        if (view !== 'ladder' || ladderStatus !== 'playing') {
+            return undefined;
+        }
+
+        const id = window.setInterval(() => {
+            setLadderTimeLeft((prev) => {
+                if (prev <= 0.1) {
+                    setLadderStatus('failed');
+                    window.clearInterval(id);
+                    return 0;
+                }
+                return prev - 0.1;
+            });
+        }, 100);
+
+        return () => window.clearInterval(id);
+    }, [view, ladderStatus]);
+
     const calmZoneClass = useMemo(() => {
         if (calmMeter >= 35 && calmMeter <= 65) {
             return 'in-zone';
@@ -179,8 +518,52 @@ const BrainGamesLab = ({ onBack }) => {
             return;
         }
 
-        resetOops();
-        setView('oops');
+        if (gameId === 'delay') {
+            resetDelay();
+            setView('delay');
+            return;
+        }
+
+        if (gameId === 'emotion') {
+            resetEmotion();
+            setView('emotion');
+            return;
+        }
+
+        if (gameId === 'ladder') {
+            resetLadder();
+            setView('ladder');
+            return;
+        }
+
+        if (gameId === 'breath') {
+            resetBreath();
+            setView('breath');
+            return;
+        }
+
+        if (gameId === 'focus') {
+            resetFocus();
+            setView('focus');
+            return;
+        }
+
+        if (gameId === 'turn') {
+            resetTurn();
+            setView('turn');
+            return;
+        }
+
+        if (gameId === 'sequence') {
+            resetSequence();
+            setView('sequence');
+            return;
+        }
+
+        if (gameId === 'oops') {
+            resetOops();
+            setView('oops');
+        }
     };
 
     const handleCalmTap = () => {
@@ -244,9 +627,284 @@ const BrainGamesLab = ({ onBack }) => {
         }
     };
 
+    const handleDelayWait = () => {
+        if (delayWaiting || delayRound >= DELAY_TOTAL_ROUNDS) {
+            return;
+        }
+        setDelayTimer(4);
+        setDelayWaiting(true);
+    };
+
+    const handleDelayClaim = () => {
+        if (delayRound >= DELAY_TOTAL_ROUNDS) {
+            return;
+        }
+
+        const waitedLongEnough = delayWaiting && delayTimer === 0;
+        const gained = waitedLongEnough ? 3 : 1;
+        const nextRound = delayRound + 1;
+
+        setDelayScore((prev) => prev + gained);
+        setDelayRound(nextRound);
+        setDelayWaiting(false);
+        setDelayTimer(4);
+    };
+
+    const handleEmotionChoice = (choice) => {
+        if (emotionRound >= EMOTION_TOTAL_ROUNDS) {
+            return;
+        }
+
+        const isCorrect = choice === emotionScenario.answer;
+        const nextRound = emotionRound + 1;
+
+        if (isCorrect) {
+            setEmotionScore((prev) => prev + 1);
+        }
+
+        setEmotionRound(nextRound);
+
+        if (nextRound < EMOTION_TOTAL_ROUNDS) {
+            setEmotionScenario(randomFrom(EMOTION_SCENARIOS));
+        }
+    };
+
+    const handleLadderTap = () => {
+        if (ladderStatus !== 'playing') {
+            return;
+        }
+
+        setLadderTaps((prev) => {
+            const next = prev + 1;
+            if (next >= ladderGoal) {
+                setLadderStatus('levelComplete');
+            }
+            return next;
+        });
+    };
+
+    const handleLadderCalmReset = () => {
+        if (ladderStatus !== 'failed') {
+            return;
+        }
+        setLadderResets((prev) => prev + 1);
+        startLadderLevel(1);
+    };
+
+    const handleLadderNext = () => {
+        if (ladderStatus !== 'levelComplete') {
+            return;
+        }
+
+        const nextLevel = ladderLevel + 1;
+        if (nextLevel >= LADDER_TOTAL_LEVELS) {
+            setLadderLevel(nextLevel);
+            setLadderStatus('finished');
+            return;
+        }
+
+        const cfg = ladderConfig(nextLevel);
+        setLadderLevel(nextLevel);
+        setLadderGoal(cfg.goal);
+        setLadderTaps(0);
+        setLadderTimeLeft(cfg.seconds);
+        setLadderStatus('ready');
+    };
+
+    const handleBreathChoice = (choice) => {
+        if (breathRound >= BREATH_TOTAL_ROUNDS) {
+            return;
+        }
+
+        if (choice === breathPrompt) {
+            setBreathScore((prev) => prev + 1);
+        }
+
+        const nextRound = breathRound + 1;
+        setBreathRound(nextRound);
+
+        if (nextRound < BREATH_TOTAL_ROUNDS) {
+            setBreathPrompt(makeBreathPrompt());
+        }
+    };
+
+    const handleFocusChoice = (choice) => {
+        if (focusRound >= FOCUS_TOTAL_ROUNDS) {
+            return;
+        }
+
+        const shouldTap = focusSignal.kind === 'go';
+        const isCorrect = (choice === 'tap' && shouldTap) || (choice === 'wait' && !shouldTap);
+        if (isCorrect) {
+            setFocusScore((prev) => prev + 1);
+        }
+
+        const nextRound = focusRound + 1;
+        setFocusRound(nextRound);
+
+        if (nextRound < FOCUS_TOTAL_ROUNDS) {
+            setFocusSignal(makeFocusSignal());
+        }
+    };
+
+    const handleTurnChoice = (choice) => {
+        if (turnRound >= TURN_TOTAL_ROUNDS) {
+            return;
+        }
+
+        if (choice === turnScenario.answer) {
+            setTurnScore((prev) => prev + 1);
+        }
+
+        const nextRound = turnRound + 1;
+        setTurnRound(nextRound);
+
+        if (nextRound < TURN_TOTAL_ROUNDS) {
+            setTurnScenario(randomFrom(TURN_SCENARIOS));
+        }
+    };
+
+    const handleSequenceChoice = (choice) => {
+        if (sequenceStep >= SEQUENCE_TOTAL_STEPS) {
+            return;
+        }
+
+        const expected = RESET_ROUTINE_STEPS[sequenceStep];
+        if (choice === expected) {
+            const nextStep = sequenceStep + 1;
+            setSequenceScore((prev) => prev + 1);
+            setSequenceStep(nextStep);
+
+            if (nextStep >= SEQUENCE_TOTAL_STEPS) {
+                setSequenceMessage('Routine complete. Great self-control!');
+                return;
+            }
+
+            setSequenceOptions(makeSequenceOptions(nextStep));
+            setSequenceMessage(`Great. Now pick step ${nextStep + 1}.`);
+            return;
+        }
+
+        setSequenceOptions(makeSequenceOptions(sequenceStep));
+        setSequenceMessage('Close. Pause and choose the calm step.');
+    };
+
     const calmFinished = calmAttempts >= CALM_TARGET_ATTEMPTS;
     const switchFinished = switchRound >= SWITCH_TOTAL_ROUNDS;
     const oopsFinished = oopsRound >= OOPS_TOTAL_ROUNDS;
+    const delayFinished = delayRound >= DELAY_TOTAL_ROUNDS;
+    const emotionFinished = emotionRound >= EMOTION_TOTAL_ROUNDS;
+    const ladderFinished = ladderStatus === 'finished';
+    const breathFinished = breathRound >= BREATH_TOTAL_ROUNDS;
+    const focusFinished = focusRound >= FOCUS_TOTAL_ROUNDS;
+    const turnFinished = turnRound >= TURN_TOTAL_ROUNDS;
+    const sequenceFinished = sequenceStep >= SEQUENCE_TOTAL_STEPS;
+
+    useEffect(() => {
+        if (!calmFinished || calmSaved) {
+            return;
+        }
+
+        const score = Math.round((calmHits / CALM_TARGET_ATTEMPTS) * 100);
+        addProgressEntry('calmHistory', {
+            score,
+            hits: calmHits,
+            attempts: CALM_TARGET_ATTEMPTS,
+            timestamp: new Date().toISOString()
+        });
+        setCalmSaved(true);
+    }, [addProgressEntry, calmFinished, calmSaved, calmHits]);
+
+    useEffect(() => {
+        if (!delayFinished || delaySaved) {
+            return;
+        }
+
+        addProgressEntry('delayHistory', {
+            score: delayScore,
+            rounds: DELAY_TOTAL_ROUNDS,
+            timestamp: new Date().toISOString()
+        });
+        setDelaySaved(true);
+    }, [addProgressEntry, delayFinished, delaySaved, delayScore]);
+
+    useEffect(() => {
+        if (!emotionFinished || emotionSaved) {
+            return;
+        }
+
+        addProgressEntry('emotionHistory', {
+            score: emotionScore,
+            rounds: EMOTION_TOTAL_ROUNDS,
+            timestamp: new Date().toISOString()
+        });
+        setEmotionSaved(true);
+    }, [addProgressEntry, emotionFinished, emotionSaved, emotionScore]);
+
+    useEffect(() => {
+        if (!ladderFinished || ladderSaved) {
+            return;
+        }
+
+        addProgressEntry('ladderHistory', {
+            levels: LADDER_TOTAL_LEVELS,
+            resets: ladderResets,
+            timestamp: new Date().toISOString()
+        });
+        setLadderSaved(true);
+    }, [addProgressEntry, ladderFinished, ladderResets, ladderSaved]);
+
+    useEffect(() => {
+        if (!breathFinished || breathSaved) {
+            return;
+        }
+
+        addProgressEntry('breathHistory', {
+            score: breathScore,
+            rounds: BREATH_TOTAL_ROUNDS,
+            timestamp: new Date().toISOString()
+        });
+        setBreathSaved(true);
+    }, [addProgressEntry, breathFinished, breathSaved, breathScore]);
+
+    useEffect(() => {
+        if (!focusFinished || focusSaved) {
+            return;
+        }
+
+        addProgressEntry('focusHistory', {
+            score: focusScore,
+            rounds: FOCUS_TOTAL_ROUNDS,
+            timestamp: new Date().toISOString()
+        });
+        setFocusSaved(true);
+    }, [addProgressEntry, focusFinished, focusSaved, focusScore]);
+
+    useEffect(() => {
+        if (!turnFinished || turnSaved) {
+            return;
+        }
+
+        addProgressEntry('turnHistory', {
+            score: turnScore,
+            rounds: TURN_TOTAL_ROUNDS,
+            timestamp: new Date().toISOString()
+        });
+        setTurnSaved(true);
+    }, [addProgressEntry, turnFinished, turnSaved, turnScore]);
+
+    useEffect(() => {
+        if (!sequenceFinished || sequenceSaved) {
+            return;
+        }
+
+        addProgressEntry('sequenceHistory', {
+            score: sequenceScore,
+            steps: SEQUENCE_TOTAL_STEPS,
+            timestamp: new Date().toISOString()
+        });
+        setSequenceSaved(true);
+    }, [addProgressEntry, sequenceFinished, sequenceSaved, sequenceScore]);
 
     return (
         <div className="brain-lab-container">
@@ -282,6 +940,57 @@ const BrainGamesLab = ({ onBack }) => {
                             <h3>3. Oops to Fix</h3>
                             <p>Practice calm retries after mistakes.</p>
                         </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('delay')}>
+                            <h3>4. Delay Treasure</h3>
+                            <p>Wait calmly for bigger rewards.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('emotion')}>
+                            <h3>5. Emotion Coach</h3>
+                            <p>Pick calm actions in tricky moments.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('ladder')}>
+                            <h3>6. Frustration Ladder</h3>
+                            <p>Finish harder levels and reset calmly after misses.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('breath')}>
+                            <h3>7. Breath Bridge</h3>
+                            <p>Match inhale and exhale prompts with steady rhythm.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('focus')}>
+                            <h3>8. Focus Freeze</h3>
+                            <p>Tap on Go signals and wait on Stop signals.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('turn')}>
+                            <h3>9. Turn Taking Builder</h3>
+                            <p>Practice social patience and calm turn-taking.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('sequence')}>
+                            <h3>10. Reset Routine</h3>
+                            <p>Build the 4-step calm-down sequence in order.</p>
+                        </button>
+                    </div>
+
+                    <div className="brain-progress-board">
+                        <h3>Progress Memory</h3>
+                        <p>
+                            Calm history: {progress.calmHistory.slice(0, 5).map((item) => `${item.score}%`).join(' | ') || 'No sessions yet'}
+                        </p>
+                        <p>
+                            Delay history: {progress.delayHistory.slice(0, 5).map((item) => `${item.score}⭐`).join(' | ') || 'No sessions yet'}
+                        </p>
+                        <p>
+                            Emotion history: {progress.emotionHistory.slice(0, 5).map((item) => `${item.score}/${EMOTION_TOTAL_ROUNDS}`).join(' | ') || 'No sessions yet'}
+                        </p>
+                        <p>
+                            Games 6-10 latest: {progress.ladderHistory[0] ? `L6 resets ${progress.ladderHistory[0].resets}` : 'L6 none'} | {progress.breathHistory[0] ? `L7 ${progress.breathHistory[0].score}/${BREATH_TOTAL_ROUNDS}` : 'L7 none'} | {progress.focusHistory[0] ? `L8 ${progress.focusHistory[0].score}/${FOCUS_TOTAL_ROUNDS}` : 'L8 none'} | {progress.turnHistory[0] ? `L9 ${progress.turnHistory[0].score}/${TURN_TOTAL_ROUNDS}` : 'L9 none'} | {progress.sequenceHistory[0] ? `L10 ${progress.sequenceHistory[0].score}/${SEQUENCE_TOTAL_STEPS}` : 'L10 none'}
+                        </p>
                     </div>
                 </div>
             )}
@@ -347,7 +1056,7 @@ const BrainGamesLab = ({ onBack }) => {
                                         className="switch-card"
                                         onClick={() => handleSwitchChoice(choice.id)}
                                     >
-                                        <div className={`shape ${choice.shape} ${choice.color}`} />
+                                        <div className="shape-glyph" style={shapeStyle(choice.shape, choice.color)} />
                                         <span>{choice.color} {choice.shape}</span>
                                     </button>
                                 ))}
@@ -410,6 +1119,305 @@ const BrainGamesLab = ({ onBack }) => {
                             <p>Correct: {oopsScore} | Calm recoveries: {oopsRecoveries}</p>
                             <div className="brain-result-actions">
                                 <button className="game-btn-start" onClick={resetOops}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'delay' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Delay Treasure</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!delayFinished && (
+                        <>
+                            <p className="brain-instruction">
+                                Wait calmly for 4 seconds to get 3 stars. Quick claim gives 1 star.
+                            </p>
+
+                            <div className="delay-timer">{delayWaiting ? `Wait: ${delayTimer}s` : 'Press Wait to start timer'}</div>
+
+                            <div className="delay-actions">
+                                <button className="brain-action-btn" onClick={handleDelayWait}>Wait Calmly</button>
+                                <button className="brain-action-btn" onClick={handleDelayClaim}>Claim Stars</button>
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {delayRound + 1}/{DELAY_TOTAL_ROUNDS}</span>
+                                <span>Stars: {delayScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {delayFinished && (
+                        <div className="brain-result">
+                            <h3>Patience power</h3>
+                            <p>Total stars: {delayScore}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetDelay}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'emotion' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Emotion Coach</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!emotionFinished && (
+                        <>
+                            <p className="brain-instruction">Situation: {emotionScenario.prompt}</p>
+
+                            <div className="oops-options">
+                                {emotionScenario.options.map((option) => (
+                                    <button
+                                        key={option}
+                                        className="brain-action-btn oops-option"
+                                        onClick={() => handleEmotionChoice(option)}
+                                    >
+                                        {option}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {emotionRound + 1}/{EMOTION_TOTAL_ROUNDS}</span>
+                                <span>Score: {emotionScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {emotionFinished && (
+                        <div className="brain-result">
+                            <h3>Calm choices unlocked</h3>
+                            <p>Correct calm responses: {emotionScore}/{EMOTION_TOTAL_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetEmotion}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'ladder' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Frustration Ladder</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!ladderFinished && (
+                        <>
+                            <p className="brain-instruction">
+                                Level {ladderLevel + 1}: reach {ladderGoal} taps before timer ends.
+                            </p>
+
+                            <div className="ladder-timer-track">
+                                <div className="ladder-timer-fill" style={{ width: `${Math.max(0, (ladderTimeLeft / (ladderConfig(ladderLevel).seconds + (ladderStatus === 'playing' ? 0 : 1))) * 100)}%` }} />
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Taps: {ladderTaps}/{ladderGoal}</span>
+                                <span>Time: {ladderTimeLeft.toFixed(1)}s</span>
+                                <span>Calm resets: {ladderResets}</span>
+                            </div>
+
+                            <div className="delay-actions">
+                                {ladderStatus === 'ready' && (
+                                    <button className="brain-action-btn" onClick={() => startLadderLevel()}>Start Level</button>
+                                )}
+
+                                {ladderStatus === 'playing' && (
+                                    <button className="brain-action-btn" onClick={handleLadderTap}>Build Block</button>
+                                )}
+
+                                {ladderStatus === 'failed' && (
+                                    <button className="brain-action-btn" onClick={handleLadderCalmReset}>Calm Reset (+1s)</button>
+                                )}
+
+                                {ladderStatus === 'levelComplete' && (
+                                    <button className="brain-action-btn" onClick={handleLadderNext}>Next Level</button>
+                                )}
+                            </div>
+
+                            {ladderStatus === 'failed' && (
+                                <p className="oops-message">Missed this level. Breathe and try a calm reset.</p>
+                            )}
+                        </>
+                    )}
+
+                    {ladderFinished && (
+                        <div className="brain-result">
+                            <h3>Ladder complete</h3>
+                            <p>You cleared all 6 levels with {ladderResets} calm resets.</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetLadder}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'breath' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Breath Bridge</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!breathFinished && (
+                        <>
+                            <p className="brain-instruction">Prompt: {breathPrompt}</p>
+                            <div className="delay-actions">
+                                <button className="brain-action-btn" onClick={() => handleBreathChoice('Inhale')}>Inhale</button>
+                                <button className="brain-action-btn" onClick={() => handleBreathChoice('Exhale')}>Exhale</button>
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {breathRound + 1}/{BREATH_TOTAL_ROUNDS}</span>
+                                <span>Score: {breathScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {breathFinished && (
+                        <div className="brain-result">
+                            <h3>Breathing rhythm built</h3>
+                            <p>Correct breaths: {breathScore}/{BREATH_TOTAL_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetBreath}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'focus' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Focus Freeze</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!focusFinished && (
+                        <>
+                            <p className="brain-instruction">Signal: {focusSignal.label}</p>
+                            <p className="oops-message">Tap on Go signals, wait on Stop signals.</p>
+                            <div className="delay-actions">
+                                <button className="brain-action-btn" onClick={() => handleFocusChoice('tap')}>Tap</button>
+                                <button className="brain-action-btn" onClick={() => handleFocusChoice('wait')}>Wait</button>
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {focusRound + 1}/{FOCUS_TOTAL_ROUNDS}</span>
+                                <span>Score: {focusScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {focusFinished && (
+                        <div className="brain-result">
+                            <h3>Great inhibition control</h3>
+                            <p>Correct actions: {focusScore}/{FOCUS_TOTAL_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetFocus}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'turn' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Turn Taking Builder</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!turnFinished && (
+                        <>
+                            <p className="brain-instruction">Situation: {turnScenario.prompt}</p>
+                            <div className="oops-options">
+                                {turnScenario.options.map((option) => (
+                                    <button
+                                        key={option}
+                                        className="brain-action-btn oops-option"
+                                        onClick={() => handleTurnChoice(option)}
+                                    >
+                                        {option}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {turnRound + 1}/{TURN_TOTAL_ROUNDS}</span>
+                                <span>Score: {turnScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {turnFinished && (
+                        <div className="brain-result">
+                            <h3>Social calm unlocked</h3>
+                            <p>Turn-taking choices: {turnScore}/{TURN_TOTAL_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetTurn}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'sequence' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Reset Routine</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!sequenceFinished && (
+                        <>
+                            <p className="brain-instruction">Step {sequenceStep + 1}: choose the right calm routine step.</p>
+                            <p className="oops-message">{sequenceMessage}</p>
+
+                            <div className="oops-options">
+                                {sequenceOptions.map((option) => (
+                                    <button
+                                        key={option}
+                                        className="brain-action-btn oops-option"
+                                        onClick={() => handleSequenceChoice(option)}
+                                    >
+                                        {option}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Correct steps: {sequenceScore}/{SEQUENCE_TOTAL_STEPS}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {sequenceFinished && (
+                        <div className="brain-result">
+                            <h3>Routine mastered</h3>
+                            <p>Calm sequence score: {sequenceScore}/{SEQUENCE_TOTAL_STEPS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetSequence}>Play Again</button>
                                 <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
                             </div>
                         </div>
