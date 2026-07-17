@@ -11,10 +11,59 @@ const BREATH_TOTAL_ROUNDS = 10;
 const FOCUS_TOTAL_ROUNDS = 12;
 const TURN_TOTAL_ROUNDS = 8;
 const SEQUENCE_TOTAL_STEPS = 4;
+const COLOR_TWINS_TOTAL_ROUNDS = 8;
+const FLASH_TOTAL_ROUNDS = 8;
+const FLASH_REVEAL_SECONDS = 3;
+const COLOR_TRAIL_LENGTH = 5;
+const GRID_HUNT_EASY_SIZE = 8;
+const GRID_HUNT_ADV_SIZE = 10;
+const GRID_HUNT_TOTAL_ROUNDS = 8;
+const GRID_HUNT_EASY_SEQUENCE_LENGTH = 4;
+const GRID_HUNT_ADV_SEQUENCE_LENGTH = 6;
+const LETTER_GAME_TOTAL_ROUNDS = 8;
+const LETTER_GAME_EASY_SIZE = 8;
+const LETTER_GAME_ADV_SIZE = 10;
 const BRAIN_PROGRESS_STORAGE_KEY = 'brain-games-progress-v1';
 
 const SHAPES = ['circle', 'square', 'triangle'];
 const COLORS = ['red', 'blue', 'green', 'orange'];
+const TOUCH_COLORS = ['red', 'blue', 'green', 'orange', 'pink', 'purple'];
+const TOUCH_COLOR_HEX = {
+    red: '#ef5959',
+    blue: '#3a84ff',
+    green: '#37a95f',
+    orange: '#ed9a2f',
+    pink: '#f36bb4',
+    purple: '#8e61e8'
+};
+
+const GRID_HUNT_SYMBOLS = [
+    '😀', '😢', '😎', '😍', '🤔', '😴', '😡', '🤗',
+    '🌸', '🌼', '🌻', '🍀', '⭐', '🌙', '☀️', '⚡',
+    '⬆️', '⬇️', '⬅️', '➡️', '↗️', '↘️', '↙️', '↖️',
+    '🔴', '🔵', '🟢', '🟡', '🟣', '🟠', '⚪', '⚫',
+    '❤️', '💙', '💚', '💛', '💜', '🧡', '🩷', '🩵',
+    '🔺', '🔻', '🔷', '🔶', '🔸', '🔹', '🟪', '🟫',
+    '🚗', '🚀', '✈️', '🚲', '🛶', '🏀', '⚽', '🎈',
+    '🍎', '🍌', '🍇', '🍉', '🥕', '🌽', '🍓', '🥝'
+];
+const GRID_HUNT_EXTRA_SYMBOLS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'];
+const GRID_HUNT_SYMBOL_POOL = [...GRID_HUNT_SYMBOLS, ...GRID_HUNT_EXTRA_SYMBOLS];
+const LETTERS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+const LETTER_QUESTION_WORDS = [
+    'write', 'pencil', 'animal', 'school', 'friend', 'family', 'teacher', 'book', 'paper', 'eraser',
+    'ruler', 'backpack', 'lunch', 'water', 'bottle', 'window', 'table', 'chair', 'clock', 'homework',
+    'lesson', 'number', 'letter', 'story', 'poem', 'music', 'dance', 'art', 'color', 'paint',
+    'crayon', 'marker', 'glue', 'scissors', 'folder', 'notebook', 'library', 'garden', 'flower', 'tree',
+    'grass', 'cloud', 'rain', 'sunny', 'wind', 'storm', 'snow', 'river', 'ocean', 'beach',
+    'mountain', 'forest', 'bird', 'rabbit', 'turtle', 'puppy', 'kitten', 'horse', 'zebra', 'monkey',
+    'elephant', 'giraffe', 'lion', 'tiger', 'bear', 'shark', 'whale', 'dolphin', 'apple', 'banana',
+    'orange', 'grape', 'melon', 'carrot', 'tomato', 'potato', 'cookie', 'bread', 'butter', 'cheese',
+    'yogurt', 'cereal', 'soup', 'pizza', 'pasta', 'breakfast', 'dinner', 'happy', 'calm', 'brave',
+    'kind', 'share', 'smile', 'thank', 'sorry', 'please', 'listen', 'focus', 'breathe', 'pause',
+    'jump', 'run', 'walk', 'stand', 'sit', 'clap', 'sing', 'play', 'learn', 'think',
+    'dream', 'build', 'draw', 'count', 'shape', 'circle', 'square', 'triangle', 'star', 'arrow'
+];
 
 const OOPS_PATTERNS = [
     {
@@ -200,6 +249,106 @@ function makeSequenceOptions(stepIndex) {
     return shuffle([correct, ...distractors]);
 }
 
+function colorHex(colorName) {
+    return TOUCH_COLOR_HEX[colorName] || '#3a84ff';
+}
+
+function makeColorOptions(targetColor, optionCount = 3) {
+    return shuffle([targetColor, ...shuffle(TOUCH_COLORS.filter((item) => item !== targetColor)).slice(0, optionCount - 1)]);
+}
+
+function makeColorTwinsRound(roundIndex) {
+    const targetColor = randomFrom(TOUCH_COLORS);
+    return {
+        roundIndex,
+        targetColor,
+        leftOptions: makeColorOptions(targetColor),
+        rightOptions: makeColorOptions(targetColor)
+    };
+}
+
+function makeFlashRound(roundIndex) {
+    const pool = SHAPES.flatMap((shape) => COLORS.map((color) => ({
+        key: `${color}-${shape}`,
+        shape,
+        color
+    })));
+    const target = randomFrom(pool);
+    const options = shuffle([target, ...shuffle(pool.filter((item) => item.key !== target.key)).slice(0, 5)]);
+    return {
+        roundIndex,
+        target,
+        options
+    };
+}
+
+function makeColorTrailSequence(length) {
+    return Array.from({ length }, () => randomFrom(TOUCH_COLORS));
+}
+
+function gridHuntConfig(advancedMode) {
+    if (advancedMode) {
+        return {
+            size: GRID_HUNT_ADV_SIZE,
+            sequenceLength: GRID_HUNT_ADV_SEQUENCE_LENGTH
+        };
+    }
+
+    return {
+        size: GRID_HUNT_EASY_SIZE,
+        sequenceLength: GRID_HUNT_EASY_SEQUENCE_LENGTH
+    };
+}
+
+function makeGridHuntRound(roundIndex, size, sequenceLength) {
+    const totalCells = size * size;
+    const symbols = shuffle(GRID_HUNT_SYMBOL_POOL);
+    const cells = Array.from({ length: totalCells }, (_, index) => ({
+        id: `g${roundIndex}-${index}`,
+        symbol: symbols[index] || String(index + 1)
+    }));
+    const promptCells = shuffle(cells).slice(0, sequenceLength);
+
+    return {
+        roundIndex,
+        cells,
+        promptIds: promptCells.map((item) => item.id)
+    };
+}
+
+function letterGameConfig(advancedMode) {
+    return {
+        size: advancedMode ? LETTER_GAME_ADV_SIZE : LETTER_GAME_EASY_SIZE
+    };
+}
+
+function sampleLetterWords(count) {
+    return shuffle(LETTER_QUESTION_WORDS).slice(0, count);
+}
+
+function makeLetterRound(word, roundIndex, size) {
+    const totalCells = size * size;
+    const toRandomCase = (value) => (Math.random() < 0.5 ? value.toUpperCase() : value.toLowerCase());
+    const grid = Array.from({ length: totalCells }, () => toRandomCase(randomFrom(LETTERS)));
+    const indexes = shuffle(Array.from({ length: totalCells }, (_, index) => index));
+
+    word.toUpperCase().split('').forEach((char) => {
+        const slot = indexes.pop();
+        if (typeof slot === 'number') {
+            grid[slot] = toRandomCase(char);
+        }
+    });
+
+    return {
+        roundIndex,
+        word,
+        cells: grid.map((letter, index) => ({
+            id: `w${roundIndex}-${index}`,
+            letter
+        }))
+    };
+}
+
 function loadProgress() {
     try {
         const raw = window.localStorage.getItem(BRAIN_PROGRESS_STORAGE_KEY);
@@ -338,6 +487,52 @@ const BrainGamesLab = ({ onBack }) => {
     const [sequenceOptions, setSequenceOptions] = useState(() => makeSequenceOptions(0));
     const [sequenceSaved, setSequenceSaved] = useState(false);
 
+    // Color Twins Tap Game
+    const [twinsRound, setTwinsRound] = useState(0);
+    const [twinsScore, setTwinsScore] = useState(0);
+    const [twinsLeftPick, setTwinsLeftPick] = useState(null);
+    const [twinsRightPick, setTwinsRightPick] = useState(null);
+    const [twinsMessage, setTwinsMessage] = useState('Pick the target color on both sides.');
+    const [twinsData, setTwinsData] = useState(() => makeColorTwinsRound(0));
+
+    // Flash Memory Match Game
+    const [flashRound, setFlashRound] = useState(0);
+    const [flashScore, setFlashScore] = useState(0);
+    const [flashReveal, setFlashReveal] = useState(true);
+    const [flashRevealSeconds, setFlashRevealSeconds] = useState(FLASH_REVEAL_SECONDS);
+    const [flashData, setFlashData] = useState(() => makeFlashRound(0));
+
+    // Color Trail Echo Game
+    const [trailSequence, setTrailSequence] = useState(() => makeColorTrailSequence(COLOR_TRAIL_LENGTH));
+    const [trailShowIndex, setTrailShowIndex] = useState(0);
+    const [trailShowing, setTrailShowing] = useState(true);
+    const [trailStep, setTrailStep] = useState(0);
+    const [trailMessage, setTrailMessage] = useState('Watch the color trail, then repeat it.');
+
+    // Grid Sequence Hunt Game
+    const [gridHuntAdvanced, setGridHuntAdvanced] = useState(false);
+    const [gridHuntRound, setGridHuntRound] = useState(0);
+    const [gridHuntScore, setGridHuntScore] = useState(0);
+    const [gridHuntStep, setGridHuntStep] = useState(0);
+    const [gridHuntMessage, setGridHuntMessage] = useState('Tap the symbols in the exact order shown below.');
+    const [gridHuntTappedIds, setGridHuntTappedIds] = useState([]);
+    const [gridHuntData, setGridHuntData] = useState(() => makeGridHuntRound(0, GRID_HUNT_EASY_SIZE, GRID_HUNT_EASY_SEQUENCE_LENGTH));
+
+    const activeGridHuntConfig = useMemo(() => gridHuntConfig(gridHuntAdvanced), [gridHuntAdvanced]);
+
+    // Letter Path Builder Game
+    const initialLetterWords = useMemo(() => sampleLetterWords(LETTER_GAME_TOTAL_ROUNDS), []);
+    const [letterGameAdvanced, setLetterGameAdvanced] = useState(false);
+    const [letterWords, setLetterWords] = useState(initialLetterWords);
+    const [letterRound, setLetterRound] = useState(0);
+    const [letterScore, setLetterScore] = useState(0);
+    const [letterStep, setLetterStep] = useState(0);
+    const [letterTappedIds, setLetterTappedIds] = useState([]);
+    const [letterMessage, setLetterMessage] = useState('Tap the letters in order to build the word.');
+    const [letterData, setLetterData] = useState(() => makeLetterRound(initialLetterWords[0] || 'write', 0, LETTER_GAME_EASY_SIZE));
+
+    const activeLetterGameConfig = useMemo(() => letterGameConfig(letterGameAdvanced), [letterGameAdvanced]);
+
     const [progress, setProgress] = useState(() => loadProgress());
 
     const addProgressEntry = useCallback((bucket, entry) => {
@@ -430,6 +625,54 @@ const BrainGamesLab = ({ onBack }) => {
         setSequenceSaved(false);
     }, []);
 
+    const resetTwins = useCallback(() => {
+        setTwinsRound(0);
+        setTwinsScore(0);
+        setTwinsLeftPick(null);
+        setTwinsRightPick(null);
+        setTwinsMessage('Pick the target color on both sides.');
+        setTwinsData(makeColorTwinsRound(0));
+    }, []);
+
+    const resetFlash = useCallback(() => {
+        setFlashRound(0);
+        setFlashScore(0);
+        setFlashReveal(true);
+        setFlashRevealSeconds(FLASH_REVEAL_SECONDS);
+        setFlashData(makeFlashRound(0));
+    }, []);
+
+    const resetTrail = useCallback(() => {
+        setTrailSequence(makeColorTrailSequence(COLOR_TRAIL_LENGTH));
+        setTrailShowIndex(0);
+        setTrailShowing(true);
+        setTrailStep(0);
+        setTrailMessage('Watch the color trail, then repeat it.');
+    }, []);
+
+    const resetGridHunt = useCallback((advancedMode = gridHuntAdvanced) => {
+        const cfg = gridHuntConfig(advancedMode);
+        setGridHuntRound(0);
+        setGridHuntScore(0);
+        setGridHuntStep(0);
+        setGridHuntMessage('Tap the symbols in the exact order shown below.');
+        setGridHuntTappedIds([]);
+        setGridHuntData(makeGridHuntRound(0, cfg.size, cfg.sequenceLength));
+    }, [gridHuntAdvanced]);
+
+    const resetLetterGame = useCallback((advancedMode = letterGameAdvanced) => {
+        const cfg = letterGameConfig(advancedMode);
+        const nextWords = sampleLetterWords(LETTER_GAME_TOTAL_ROUNDS);
+
+        setLetterWords(nextWords);
+        setLetterRound(0);
+        setLetterScore(0);
+        setLetterStep(0);
+        setLetterTappedIds([]);
+        setLetterMessage('Tap the letters in order to build the word.');
+        setLetterData(makeLetterRound(nextWords[0] || 'write', 0, cfg.size));
+    }, [letterGameAdvanced]);
+
     const startLadderLevel = useCallback((extraSeconds = 0) => {
         const cfg = ladderConfig(ladderLevel);
         setLadderGoal(cfg.goal);
@@ -498,6 +741,43 @@ const BrainGamesLab = ({ onBack }) => {
         return () => window.clearInterval(id);
     }, [view, ladderStatus]);
 
+    useEffect(() => {
+        if (view !== 'flash' || !flashReveal || flashRound >= FLASH_TOTAL_ROUNDS) {
+            return undefined;
+        }
+
+        const id = window.setInterval(() => {
+            setFlashRevealSeconds((prev) => {
+                if (prev <= 1) {
+                    setFlashReveal(false);
+                    window.clearInterval(id);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => window.clearInterval(id);
+    }, [view, flashReveal, flashRound]);
+
+    useEffect(() => {
+        if (view !== 'trail' || !trailShowing) {
+            return undefined;
+        }
+
+        if (trailShowIndex >= trailSequence.length) {
+            setTrailShowing(false);
+            setTrailMessage('Now repeat the same color order.');
+            return undefined;
+        }
+
+        const id = window.setTimeout(() => {
+            setTrailShowIndex((prev) => prev + 1);
+        }, 700);
+
+        return () => window.clearTimeout(id);
+    }, [view, trailShowing, trailShowIndex, trailSequence]);
+
     const calmZoneClass = useMemo(() => {
         if (calmMeter >= 35 && calmMeter <= 65) {
             return 'in-zone';
@@ -557,6 +837,36 @@ const BrainGamesLab = ({ onBack }) => {
         if (gameId === 'sequence') {
             resetSequence();
             setView('sequence');
+            return;
+        }
+
+        if (gameId === 'twins') {
+            resetTwins();
+            setView('twins');
+            return;
+        }
+
+        if (gameId === 'flash') {
+            resetFlash();
+            setView('flash');
+            return;
+        }
+
+        if (gameId === 'trail') {
+            resetTrail();
+            setView('trail');
+            return;
+        }
+
+        if (gameId === 'grid-hunt') {
+            resetGridHunt();
+            setView('grid-hunt');
+            return;
+        }
+
+        if (gameId === 'letter-path') {
+            resetLetterGame();
+            setView('letter-path');
             return;
         }
 
@@ -789,6 +1099,176 @@ const BrainGamesLab = ({ onBack }) => {
         setSequenceMessage('Close. Pause and choose the calm step.');
     };
 
+    const handleTwinsPick = (side, colorName) => {
+        if (twinsRound >= COLOR_TWINS_TOTAL_ROUNDS) {
+            return;
+        }
+
+        const nextLeft = side === 'left' ? colorName : twinsLeftPick;
+        const nextRight = side === 'right' ? colorName : twinsRightPick;
+
+        if (side === 'left') {
+            setTwinsLeftPick(colorName);
+        } else {
+            setTwinsRightPick(colorName);
+        }
+
+        if (!nextLeft || !nextRight) {
+            return;
+        }
+
+        const isCorrect = nextLeft === twinsData.targetColor && nextRight === twinsData.targetColor;
+        const nextRound = twinsRound + 1;
+
+        if (isCorrect) {
+            setTwinsScore((prev) => prev + 1);
+            setTwinsMessage('Great match. Calm hands, calm brain.');
+        } else {
+            setTwinsMessage('Nice try. Slow breath and match again.');
+        }
+
+        setTwinsRound(nextRound);
+        setTwinsLeftPick(null);
+        setTwinsRightPick(null);
+
+        if (nextRound < COLOR_TWINS_TOTAL_ROUNDS) {
+            setTwinsData(makeColorTwinsRound(nextRound));
+        }
+    };
+
+    const handleFlashChoice = (choiceKey) => {
+        if (flashRound >= FLASH_TOTAL_ROUNDS || flashReveal) {
+            return;
+        }
+
+        const isCorrect = choiceKey === flashData.target.key;
+        const nextRound = flashRound + 1;
+
+        if (isCorrect) {
+            setFlashScore((prev) => prev + 1);
+        }
+
+        setFlashRound(nextRound);
+
+        if (nextRound < FLASH_TOTAL_ROUNDS) {
+            setFlashData(makeFlashRound(nextRound));
+            setFlashReveal(true);
+            setFlashRevealSeconds(FLASH_REVEAL_SECONDS);
+        }
+    };
+
+    const handleTrailTap = (colorName) => {
+        if (trailShowing || trailStep >= COLOR_TRAIL_LENGTH) {
+            return;
+        }
+
+        const expected = trailSequence[trailStep];
+        if (colorName === expected) {
+            const nextStep = trailStep + 1;
+            setTrailStep(nextStep);
+
+            if (nextStep >= COLOR_TRAIL_LENGTH) {
+                setTrailMessage('Memory trail complete. Excellent focus.');
+                return;
+            }
+
+            setTrailMessage(`Nice. Keep going (${nextStep}/${COLOR_TRAIL_LENGTH}).`);
+            return;
+        }
+
+        setTrailStep(0);
+        setTrailShowIndex(0);
+        setTrailShowing(true);
+        setTrailMessage('Oops. Breathe and replay the trail.');
+    };
+
+    const handleGridHuntTap = (cellId) => {
+        if (gridHuntRound >= GRID_HUNT_TOTAL_ROUNDS) {
+            return;
+        }
+
+        const expectedId = gridHuntData.promptIds[gridHuntStep];
+        if (cellId === expectedId) {
+            const nextStep = gridHuntStep + 1;
+            const nextTapped = [...gridHuntTappedIds, cellId];
+            setGridHuntStep(nextStep);
+            setGridHuntTappedIds(nextTapped);
+
+            if (nextStep >= activeGridHuntConfig.sequenceLength) {
+                const nextRound = gridHuntRound + 1;
+                setGridHuntScore((prev) => prev + 1);
+                setGridHuntMessage('Great sequence. Calm focus and continue.');
+                setGridHuntRound(nextRound);
+                setGridHuntStep(0);
+                setGridHuntTappedIds([]);
+
+                if (nextRound < GRID_HUNT_TOTAL_ROUNDS) {
+                    setGridHuntData(makeGridHuntRound(nextRound, activeGridHuntConfig.size, activeGridHuntConfig.sequenceLength));
+                }
+                return;
+            }
+
+            setGridHuntMessage(`Good. Step ${nextStep + 1} next.`);
+            return;
+        }
+
+        // Calm mode: mistakes restart the current sequence without penalty.
+        setGridHuntStep(0);
+        setGridHuntTappedIds([]);
+        setGridHuntMessage('Oops. Slow breath and retry from step 1.');
+    };
+
+    const handleGridHuntModeToggle = () => {
+        const nextAdvanced = !gridHuntAdvanced;
+        setGridHuntAdvanced(nextAdvanced);
+        resetGridHunt(nextAdvanced);
+    };
+
+    const handleLetterTap = (cellId, letter) => {
+        if (letterRound >= LETTER_GAME_TOTAL_ROUNDS) {
+            return;
+        }
+
+        const currentWord = (letterWords[letterRound] || '').toUpperCase();
+        const expected = currentWord[letterStep];
+
+        if (letter.toUpperCase() === expected) {
+            const nextStep = letterStep + 1;
+            setLetterStep(nextStep);
+            setLetterTappedIds((prev) => [...prev, cellId]);
+
+            if (nextStep >= currentWord.length) {
+                const nextRound = letterRound + 1;
+                setLetterScore((prev) => prev + 1);
+                setLetterMessage('Great spelling. Calm mind, next word.');
+                setLetterRound(nextRound);
+                setLetterStep(0);
+                setLetterTappedIds([]);
+
+                if (nextRound < LETTER_GAME_TOTAL_ROUNDS) {
+                    const nextWord = letterWords[nextRound] || 'write';
+                    setLetterData(makeLetterRound(nextWord, nextRound, activeLetterGameConfig.size));
+                }
+
+                return;
+            }
+
+            setLetterMessage(`Good. Next letter: step ${nextStep + 1}.`);
+            return;
+        }
+
+        // Calm mode retry: restart only the current word attempt.
+        setLetterStep(0);
+        setLetterTappedIds([]);
+        setLetterMessage('Oops. Take one breath and start this word again.');
+    };
+
+    const handleLetterModeToggle = () => {
+        const nextAdvanced = !letterGameAdvanced;
+        setLetterGameAdvanced(nextAdvanced);
+        resetLetterGame(nextAdvanced);
+    };
+
     const calmFinished = calmAttempts >= CALM_TARGET_ATTEMPTS;
     const switchFinished = switchRound >= SWITCH_TOTAL_ROUNDS;
     const oopsFinished = oopsRound >= OOPS_TOTAL_ROUNDS;
@@ -799,6 +1279,17 @@ const BrainGamesLab = ({ onBack }) => {
     const focusFinished = focusRound >= FOCUS_TOTAL_ROUNDS;
     const turnFinished = turnRound >= TURN_TOTAL_ROUNDS;
     const sequenceFinished = sequenceStep >= SEQUENCE_TOTAL_STEPS;
+    const twinsFinished = twinsRound >= COLOR_TWINS_TOTAL_ROUNDS;
+    const flashFinished = flashRound >= FLASH_TOTAL_ROUNDS;
+    const trailFinished = trailStep >= COLOR_TRAIL_LENGTH;
+    const gridHuntFinished = gridHuntRound >= GRID_HUNT_TOTAL_ROUNDS;
+    const gridHuntPromptSymbols = gridHuntData.promptIds.map((id) => {
+        const found = gridHuntData.cells.find((cell) => cell.id === id);
+        return found ? found.symbol : '?';
+    });
+    const letterFinished = letterRound >= LETTER_GAME_TOTAL_ROUNDS;
+    const letterCurrentWord = (letterWords[letterRound] || '').toUpperCase();
+    const letterBuiltPart = letterCurrentWord.slice(0, letterStep);
 
     useEffect(() => {
         if (!calmFinished || calmSaved) {
@@ -974,6 +1465,31 @@ const BrainGamesLab = ({ onBack }) => {
                         <button className="brain-game-card" onClick={() => handleStartGame('sequence')}>
                             <h3>10. Reset Routine</h3>
                             <p>Build the 4-step calm-down sequence in order.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('twins')}>
+                            <h3>11. Color Twins Tap</h3>
+                            <p>Find the same target color on both sides.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('flash')}>
+                            <h3>12. Flash Memory Match</h3>
+                            <p>Memorize shape and color, then choose the exact match.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('trail')}>
+                            <h3>13. Color Trail Echo</h3>
+                            <p>Watch the color sequence and tap it back in order.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('grid-hunt')}>
+                            <h3>14. Grid Sequence Hunt</h3>
+                            <p>Find symbols in order on an 8x8 grid.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('letter-path')}>
+                            <h3>15. Letter Path Builder</h3>
+                            <p>Spell daily words by tapping letters in order.</p>
                         </button>
                     </div>
 
@@ -1418,6 +1934,314 @@ const BrainGamesLab = ({ onBack }) => {
                             <p>Calm sequence score: {sequenceScore}/{SEQUENCE_TOTAL_STEPS}</p>
                             <div className="brain-result-actions">
                                 <button className="game-btn-start" onClick={resetSequence}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'twins' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Color Twins Tap</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!twinsFinished && (
+                        <>
+                            <p className="brain-instruction">
+                                Target color: <strong style={{ color: colorHex(twinsData.targetColor), textTransform: 'capitalize' }}>{twinsData.targetColor}</strong>
+                            </p>
+                            <p className="oops-message">{twinsMessage}</p>
+
+                            <div className="twins-board">
+                                <div>
+                                    <h4>Left Hand</h4>
+                                    <div className="twins-options">
+                                        {twinsData.leftOptions.map((colorName) => (
+                                            <button
+                                                key={`left-${twinsRound}-${colorName}`}
+                                                className={`twins-color-btn ${twinsLeftPick === colorName ? 'selected' : ''}`}
+                                                onClick={() => handleTwinsPick('left', colorName)}
+                                                aria-label={`Left ${colorName}`}
+                                            >
+                                                <span className="twins-color-dot" style={{ background: colorHex(colorName) }} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4>Right Hand</h4>
+                                    <div className="twins-options">
+                                        {twinsData.rightOptions.map((colorName) => (
+                                            <button
+                                                key={`right-${twinsRound}-${colorName}`}
+                                                className={`twins-color-btn ${twinsRightPick === colorName ? 'selected' : ''}`}
+                                                onClick={() => handleTwinsPick('right', colorName)}
+                                                aria-label={`Right ${colorName}`}
+                                            >
+                                                <span className="twins-color-dot" style={{ background: colorHex(colorName) }} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {twinsRound + 1}/{COLOR_TWINS_TOTAL_ROUNDS}</span>
+                                <span>Matches: {twinsScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {twinsFinished && (
+                        <div className="brain-result">
+                            <h3>Bilateral focus unlocked</h3>
+                            <p>Target matches: {twinsScore}/{COLOR_TWINS_TOTAL_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetTwins}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'flash' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Flash Memory Match</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!flashFinished && (
+                        <>
+                            <p className="brain-instruction">
+                                Memorize the model on the right. Then pick the exact same shape and color.
+                            </p>
+
+                            <div className="flash-board">
+                                <div>
+                                    <h4>Choices</h4>
+                                    <div className="flash-options-grid">
+                                        {flashData.options.map((item) => (
+                                            <button
+                                                key={`${flashRound}-${item.key}`}
+                                                className="flash-option-btn"
+                                                disabled={flashReveal}
+                                                onClick={() => handleFlashChoice(item.key)}
+                                            >
+                                                <div className="shape-glyph" style={shapeStyle(item.shape, item.color)} />
+                                                <span>{item.color} {item.shape}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4>Model Card</h4>
+                                    <div className={`flash-model-card ${flashReveal ? 'showing' : 'hidden'}`}>
+                                        {flashReveal ? (
+                                            <>
+                                                <div className="shape-glyph" style={shapeStyle(flashData.target.shape, flashData.target.color)} />
+                                                <span>{flashData.target.color} {flashData.target.shape}</span>
+                                                <small>Memorize: {flashRevealSeconds}s</small>
+                                            </>
+                                        ) : (
+                                            <span className="flash-hidden-mark">?</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {flashRound + 1}/{FLASH_TOTAL_ROUNDS}</span>
+                                <span>Correct: {flashScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {flashFinished && (
+                        <div className="brain-result">
+                            <h3>Memory power built</h3>
+                            <p>Exact matches: {flashScore}/{FLASH_TOTAL_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetFlash}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'trail' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Color Trail Echo</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!trailFinished && (
+                        <>
+                            <p className="brain-instruction">Watch and copy the {COLOR_TRAIL_LENGTH}-color sequence.</p>
+                            <p className="oops-message">{trailMessage}</p>
+
+                            <div className="trail-preview">
+                                {trailShowing && trailShowIndex < trailSequence.length ? (
+                                    <span className="trail-preview-dot" style={{ background: colorHex(trailSequence[trailShowIndex]) }} />
+                                ) : (
+                                    <span className="trail-preview-dot trail-idle-dot" />
+                                )}
+                            </div>
+
+                            <div className="trail-options-row">
+                                {TOUCH_COLORS.map((colorName) => (
+                                    <button
+                                        key={`trail-${colorName}`}
+                                        className="trail-color-btn"
+                                        onClick={() => handleTrailTap(colorName)}
+                                        disabled={trailShowing}
+                                        aria-label={`Tap ${colorName}`}
+                                    >
+                                        <span className="trail-color-dot" style={{ background: colorHex(colorName) }} />
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Progress: {trailStep}/{COLOR_TRAIL_LENGTH}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {trailFinished && (
+                        <div className="brain-result">
+                            <h3>Excellent sequence memory</h3>
+                            <p>You repeated all {COLOR_TRAIL_LENGTH} colors in the right order.</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetTrail}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'grid-hunt' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Grid Sequence Hunt</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!gridHuntFinished && (
+                        <>
+                            <p className="brain-instruction">
+                                Tap this order: <strong>{gridHuntPromptSymbols.join(' | ')}</strong>
+                            </p>
+                            <p className="oops-message">{gridHuntMessage}</p>
+
+                            <div className="grid-hunt-toggle-row">
+                                <span>Mode: <strong>{gridHuntAdvanced ? 'Advanced' : 'Easy'}</strong></span>
+                                <button className="grid-hunt-mode-toggle" onClick={handleGridHuntModeToggle}>
+                                    {gridHuntAdvanced ? 'Switch to Easy (8x8, 4 steps)' : 'Switch to Advanced (10x10, 6 steps)'}
+                                </button>
+                            </div>
+
+                            <div className="grid-hunt-board" style={{ gridTemplateColumns: `repeat(${activeGridHuntConfig.size}, minmax(0, 1fr))` }}>
+                                {gridHuntData.cells.map((cell) => {
+                                    const isTapped = gridHuntTappedIds.includes(cell.id);
+                                    return (
+                                        <button
+                                            key={cell.id}
+                                            className={`grid-hunt-cell ${isTapped ? 'done' : ''}`}
+                                            onClick={() => handleGridHuntTap(cell.id)}
+                                            aria-label={`Symbol ${cell.symbol}`}
+                                        >
+                                            <span>{cell.symbol}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {gridHuntRound + 1}/{GRID_HUNT_TOTAL_ROUNDS}</span>
+                                <span>Step: {gridHuntStep}/{activeGridHuntConfig.sequenceLength}</span>
+                                <span>Score: {gridHuntScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {gridHuntFinished && (
+                        <div className="brain-result">
+                            <h3>Sequence hunter complete</h3>
+                            <p>Correct rounds: {gridHuntScore}/{GRID_HUNT_TOTAL_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetGridHunt}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'letter-path' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Letter Path Builder</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!letterFinished && (
+                        <>
+                            <p className="brain-instruction">
+                                Word to build: <strong>{letterCurrentWord}</strong>
+                            </p>
+                            <p className="oops-message">{letterMessage}</p>
+
+                            <div className="grid-hunt-toggle-row">
+                                <span>Mode: <strong>{letterGameAdvanced ? 'Advanced' : 'Easy'}</strong></span>
+                                <button className="grid-hunt-mode-toggle" onClick={handleLetterModeToggle}>
+                                    {letterGameAdvanced ? 'Switch to Easy (8x8)' : 'Switch to Advanced (10x10)'}
+                                </button>
+                            </div>
+
+                            <div className="letter-game-built">
+                                Built: <strong>{letterBuiltPart || '_'}</strong>
+                            </div>
+
+                            <div className="letter-grid-board" style={{ gridTemplateColumns: `repeat(${activeLetterGameConfig.size}, minmax(0, 1fr))` }}>
+                                {letterData.cells.map((cell) => {
+                                    const isTapped = letterTappedIds.includes(cell.id);
+                                    return (
+                                        <button
+                                            key={cell.id}
+                                            className={`letter-grid-cell ${isTapped ? 'done' : ''}`}
+                                            onClick={() => handleLetterTap(cell.id, cell.letter)}
+                                            aria-label={`Letter ${cell.letter}`}
+                                        >
+                                            <span>{cell.letter}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {letterRound + 1}/{LETTER_GAME_TOTAL_ROUNDS}</span>
+                                <span>Letters: {letterStep}/{letterCurrentWord.length || 0}</span>
+                                <span>Score: {letterScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {letterFinished && (
+                        <div className="brain-result">
+                            <h3>Word builder complete</h3>
+                            <p>Correct words: {letterScore}/{LETTER_GAME_TOTAL_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetLetterGame}>Play Again</button>
                                 <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
                             </div>
                         </div>
