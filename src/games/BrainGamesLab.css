@@ -23,6 +23,17 @@
     box-shadow: 0 10px 30px rgba(17, 52, 83, 0.15);
 }
 
+.brain-lab-hub-panel {
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.brain-lab-compact-panel {
+    padding: 12px;
+}
+
 .brain-lab-header {
     display: flex;
     align-items: center;
@@ -410,7 +421,7 @@
     margin-top: 10px;
     width: 100%;
     display: grid;
-    gap: 6px;
+    gap: 4px;
 }
 
 .grid-hunt-toggle-row {
@@ -450,6 +461,11 @@
     padding: 0;
 }
 
+.grid-hunt-symbol {
+    font-size: clamp(1.08rem, 3vw, 1.6rem);
+    line-height: 1;
+}
+
 .grid-hunt-cell.done {
     border-color: #56b9ff;
     background: #eaf7ff;
@@ -466,7 +482,7 @@
     margin-top: 10px;
     width: 100%;
     display: grid;
-    gap: 6px;
+    gap: 4px;
 }
 
 .letter-grid-cell {
@@ -482,6 +498,11 @@
     justify-content: center;
     padding: 0;
     cursor: pointer;
+}
+
+.letter-grid-symbol {
+    font-size: clamp(1rem, 2.8vw, 1.45rem);
+    line-height: 1;
 }
 
 .letter-grid-cell.done {
@@ -528,11 +549,15 @@
     }
 
     .grid-hunt-board {
-        gap: 5px;
+        gap: 3px;
     }
 
     .letter-grid-board {
-        gap: 5px;
+        gap: 3px;
+    }
+
+    .brain-lab-compact-panel {
+        padding: 8px;
     }
 
     .grid-hunt-mode-toggle {
@@ -565,6 +590,17 @@
     box-shadow: 0 10px 30px rgba(17, 52, 83, 0.15);
 }
 
+.brain-lab-hub-panel {
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.brain-lab-compact-panel {
+    padding: 12px;
+}
+
 .brain-lab-header {
     display: flex;
     align-items: center;
@@ -952,7 +988,7 @@
     margin-top: 10px;
     width: 100%;
     display: grid;
-    gap: 6px;
+    gap: 4px;
 }
 
 .grid-hunt-toggle-row {
@@ -992,6 +1028,11 @@
     padding: 0;
 }
 
+.grid-hunt-symbol {
+    font-size: clamp(1.08rem, 3vw, 1.6rem);
+    line-height: 1;
+}
+
 .grid-hunt-cell.done {
     border-color: #56b9ff;
     background: #eaf7ff;
@@ -1008,7 +1049,7 @@
     margin-top: 10px;
     width: 100%;
     display: grid;
-    gap: 6px;
+    gap: 4px;
 }
 
 .letter-grid-cell {
@@ -1024,6 +1065,11 @@
     justify-content: center;
     padding: 0;
     cursor: pointer;
+}
+
+.letter-grid-symbol {
+    font-size: clamp(1rem, 2.8vw, 1.45rem);
+    line-height: 1;
 }
 
 .letter-grid-cell.done {
@@ -1070,11 +1116,15 @@
     }
 
     .grid-hunt-board {
-        gap: 5px;
+        gap: 3px;
     }
 
     .letter-grid-board {
-        gap: 5px;
+        gap: 3px;
+    }
+
+    .brain-lab-compact-panel {
+        padding: 8px;
     }
 
     .grid-hunt-mode-toggle {

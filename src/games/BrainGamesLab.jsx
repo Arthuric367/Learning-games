@@ -14,7 +14,8 @@ const SEQUENCE_TOTAL_STEPS = 4;
 const COLOR_TWINS_TOTAL_ROUNDS = 8;
 const FLASH_TOTAL_ROUNDS = 8;
 const FLASH_REVEAL_SECONDS = 3;
-const COLOR_TRAIL_LENGTH = 5;
+const COLOR_TRAIL_LENGTH = 3;
+const COLOR_TRAIL_STEP_MS = 4000;
 const GRID_HUNT_EASY_SIZE = 8;
 const GRID_HUNT_ADV_SIZE = 10;
 const GRID_HUNT_TOTAL_ROUNDS = 8;
@@ -773,7 +774,7 @@ const BrainGamesLab = ({ onBack }) => {
 
         const id = window.setTimeout(() => {
             setTrailShowIndex((prev) => prev + 1);
-        }, 700);
+        }, COLOR_TRAIL_STEP_MS);
 
         return () => window.clearTimeout(id);
     }, [view, trailShowing, trailShowIndex, trailSequence]);
@@ -1411,7 +1412,7 @@ const BrainGamesLab = ({ onBack }) => {
             )}
 
             {view === 'hub' && (
-                <div className="brain-lab-panel">
+                <div className="brain-lab-panel brain-lab-hub-panel">
                     <div className="brain-lab-header">
                         <h2>Pick a Brain Game</h2>
                         <button className="game-btn-exit" onClick={onBack}>Exit</button>
@@ -2130,7 +2131,7 @@ const BrainGamesLab = ({ onBack }) => {
             )}
 
             {view === 'grid-hunt' && (
-                <div className="brain-lab-panel">
+                <div className="brain-lab-panel brain-lab-compact-panel">
                     <div className="brain-lab-header">
                         <h2>Grid Sequence Hunt</h2>
                         <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
@@ -2160,7 +2161,7 @@ const BrainGamesLab = ({ onBack }) => {
                                             onClick={() => handleGridHuntTap(cell.id)}
                                             aria-label={`Symbol ${cell.symbol}`}
                                         >
-                                            <span>{cell.symbol}</span>
+                                            <span className="grid-hunt-symbol">{cell.symbol}</span>
                                         </button>
                                     );
                                 })}
@@ -2188,7 +2189,7 @@ const BrainGamesLab = ({ onBack }) => {
             )}
 
             {view === 'letter-path' && (
-                <div className="brain-lab-panel">
+                <div className="brain-lab-panel brain-lab-compact-panel">
                     <div className="brain-lab-header">
                         <h2>Letter Path Builder</h2>
                         <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
@@ -2222,7 +2223,7 @@ const BrainGamesLab = ({ onBack }) => {
                                             onClick={() => handleLetterTap(cell.id, cell.letter)}
                                             aria-label={`Letter ${cell.letter}`}
                                         >
-                                            <span>{cell.letter}</span>
+                                            <span className="letter-grid-symbol">{cell.letter}</span>
                                         </button>
                                     );
                                 })}
@@ -2270,7 +2271,8 @@ const SEQUENCE_TOTAL_STEPS = 4;
 const COLOR_TWINS_TOTAL_ROUNDS = 8;
 const FLASH_TOTAL_ROUNDS = 8;
 const FLASH_REVEAL_SECONDS = 3;
-const COLOR_TRAIL_LENGTH = 5;
+const COLOR_TRAIL_LENGTH = 3;
+const COLOR_TRAIL_STEP_MS = 4000;
 const GRID_HUNT_EASY_SIZE = 8;
 const GRID_HUNT_ADV_SIZE = 10;
 const GRID_HUNT_TOTAL_ROUNDS = 8;
@@ -3029,7 +3031,7 @@ const BrainGamesLab = ({ onBack }) => {
 
         const id = window.setTimeout(() => {
             setTrailShowIndex((prev) => prev + 1);
-        }, 700);
+        }, COLOR_TRAIL_STEP_MS);
 
         return () => window.clearTimeout(id);
     }, [view, trailShowing, trailShowIndex, trailSequence]);
@@ -3667,7 +3669,7 @@ const BrainGamesLab = ({ onBack }) => {
             )}
 
             {view === 'hub' && (
-                <div className="brain-lab-panel">
+                <div className="brain-lab-panel brain-lab-hub-panel">
                     <div className="brain-lab-header">
                         <h2>Pick a Brain Game</h2>
                         <button className="game-btn-exit" onClick={onBack}>Exit</button>
@@ -4386,7 +4388,7 @@ const BrainGamesLab = ({ onBack }) => {
             )}
 
             {view === 'grid-hunt' && (
-                <div className="brain-lab-panel">
+                <div className="brain-lab-panel brain-lab-compact-panel">
                     <div className="brain-lab-header">
                         <h2>Grid Sequence Hunt</h2>
                         <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
@@ -4416,7 +4418,7 @@ const BrainGamesLab = ({ onBack }) => {
                                             onClick={() => handleGridHuntTap(cell.id)}
                                             aria-label={`Symbol ${cell.symbol}`}
                                         >
-                                            <span>{cell.symbol}</span>
+                                            <span className="grid-hunt-symbol">{cell.symbol}</span>
                                         </button>
                                     );
                                 })}
@@ -4444,7 +4446,7 @@ const BrainGamesLab = ({ onBack }) => {
             )}
 
             {view === 'letter-path' && (
-                <div className="brain-lab-panel">
+                <div className="brain-lab-panel brain-lab-compact-panel">
                     <div className="brain-lab-header">
                         <h2>Letter Path Builder</h2>
                         <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
@@ -4478,7 +4480,7 @@ const BrainGamesLab = ({ onBack }) => {
                                             onClick={() => handleLetterTap(cell.id, cell.letter)}
                                             aria-label={`Letter ${cell.letter}`}
                                         >
-                                            <span>{cell.letter}</span>
+                                            <span className="letter-grid-symbol">{cell.letter}</span>
                                         </button>
                                     );
                                 })}
