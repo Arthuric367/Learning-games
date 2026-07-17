@@ -74,6 +74,14 @@ function MainMenu({ onSelectGame }) {
             emoji: '🏗️📦',
             description: 'Match words by category to build your tower!',
             color: '#F39C12'
+        },
+        {
+            id: 'brain-games-lab',
+            title: 'Brain Games',
+            subtitle: 'Calm & Control',
+            emoji: '🧠🫧',
+            description: 'Train calm responses and flexible thinking.',
+            color: '#00A8E8'
         }
     ];
 
