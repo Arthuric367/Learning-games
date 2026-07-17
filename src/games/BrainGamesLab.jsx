@@ -2255,6 +2255,8 @@ const BrainGamesLab = ({ onBack }) => {
 
 export default BrainGamesLab;
 
+/*
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './BrainGamesLab.css';
 
@@ -4511,3 +4513,4 @@ const BrainGamesLab = ({ onBack }) => {
 };
 
 export default BrainGamesLab;
+*/
