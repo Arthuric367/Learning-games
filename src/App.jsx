@@ -9,6 +9,7 @@ import ListeningBridge from './games/ListeningBridge';
 import AdjectiveArtist from './games/AdjectiveArtist';
 import SpellingBeeGarden from './games/SpellingBeeGarden';
 import WordTowerBuilder from './games/WordTowerBuilder';
+import BrainGamesLab from './games/BrainGamesLab';
 import './App.css';
 import { useEffect } from 'react';
 
@@ -85,6 +86,10 @@ function App() {
 
       {currentView === 'word-tower' && (
         <WordTowerBuilder onBack={handleBackToMenu} />
+      )}
+
+      {currentView === 'brain-games-lab' && (
+        <BrainGamesLab onBack={handleBackToMenu} />
       )}
     </div>
   );
