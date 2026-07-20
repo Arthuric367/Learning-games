@@ -1,385 +1,432 @@
 # Game UI Style Guide
 
+This guide defines the shared interaction, layout, asset, and game-flow rules for touch-first educational games in this project.
+
+## Scope
+
+These rules are for:
+- iPhone Safari
+- iPad Safari
+- touch-first mobile browsers
+- responsive web play on phones and tablets
+
+Core interaction rule:
+- Horizontal scrolling must be blocked.
+- Vertical scrolling is allowed when content needs it.
+
 ## Buttons
 
-All games should use the following standard button styles and texts to ensure consistency.
+All games should reuse the shared button classes for visual consistency.
 
-### Exit Button
-- **Text**: "Exit"
-- **Style**: Orange background, White text.
-- **CSS Class**: `game-btn-exit`
-- **Usage**: Displayed in the game area (usually top-right or top-left) to allow the user to quit the current game.
+### Shared Button Classes
 
-### Game Start Button
-- **Text**: "Game Start"
-- **Style**: Green background, White text, Large font.
-- **CSS Class**: `game-btn-start`
-- **Usage**: Main action button on the Start Screen.
+#### Exit Button
+- Text: `Exit`
+- Style: Orange background, white text.
+- CSS class: `game-btn-exit`
+- Usage: Displayed in the game area header or corner to leave the current game.
 
-### Back to Main Menu Button
-- **Text**: "Back to Main Menu"
-- **Style**: Blue/Info background, White text.
-- **CSS Class**: `game-btn-back`
-- **Usage**: Secondary action on Start Screen, Win Screen, or Game Over Screen to return to the app's main menu.
+#### Primary Action Button
+- Style: Green background, white text, large font.
+- CSS class: `game-btn-start`
+- Usage: Main positive action such as start, play again, next level, or retry.
+
+#### Secondary Navigation Button
+- Style: Blue/info background, white text.
+- CSS class: `game-btn-back`
+- Usage: Returns to the main menu or game hub.
+
+### Button Text Standards
+
+There are 2 approved button-text systems.
+
+#### Standard Game Texts
+- `Game Start`
+- `Back to Main Menu`
+- `Play Again`
+- `Exit`
+
+#### Brain Games Lab Texts
+- `Enter Brain Lab`
+- `Play Again`
+- `Back to Games`
+- `Back`
+- `Exit`
+
+Rule:
+- Keep the shared CSS classes.
+- Allow text labels to vary by game family.
 
 ## Game Container Rules
-All games must adhere to the following CSS rules to ensure proper display and interaction on iPad devices.
 
-### Container Style
-- **CSS Class**: Game specific container (e.g., `.sentence-train-container`)
-- **Required Properties**:
-  ```css
-  width: 100%;
+Every game must choose the correct container pattern based on its interaction model.
+
+### Universal Container Requirements
+
+All game containers must satisfy these base rules:
+
+```css
+width: 100%;
+max-width: 100vw;
+min-height: 100vh;
+min-height: 100dvh;
+overflow-x: hidden;
+position: relative;
+box-sizing: border-box;
+padding-top: max(20px, env(safe-area-inset-top));
+-webkit-overflow-scrolling: touch;
+-webkit-tap-highlight-color: transparent;
+```
+
+Layout rule:
+- Internal content must use `box-sizing: border-box`, `max-width: 100%`, and responsive flex/grid layouts.
+- No child element should expand wider than the viewport.
+
+### Container Pattern A: Scrollable Page Games
+
+Use this for games where the page may need vertical scrolling on phones.
+
+Examples:
+- long menus
+- tall game boards
+- content-rich instruction screens
+
+```css
+.game-container {
+    overflow-x: hidden;
+    overflow-y: auto;
+    touch-action: pan-y;
+}
+```
+
+### Container Pattern B: Fixed-Screen Tap Games
+
+Use this for games that fully fit in one active play area and should not page-scroll during play.
+
+Examples:
+- fixed tap boards
+- simple matching games
+- compact response games
+
+```css
+.game-container {
+    overflow: hidden;
+    touch-action: manipulation;
+}
+```
+
+Note:
+- Use this only when the entire playing layout safely fits on target devices.
+
+### Container Pattern C: Drag, Trace, or Draw Games
+
+Use this for games with canvas, SVG, tracing, drawing, or free finger movement.
+
+Examples:
+- line tracing
+- path drawing
+- drag routing
+
+Outer container:
+
+```css
+.game-container {
+    overflow-x: hidden;
+    overflow-y: auto;
+    touch-action: pan-y;
+}
+```
+
+Interactive surface:
+
+```css
+.game-surface {
+    touch-action: none;
+}
+```
+
+Rule:
+- The page may allow vertical layout behavior.
+- The actual play surface must suppress browser gesture interference.
+
+## Global Browser Interaction Protection
+
+Long-press suppression should be handled globally, not repeated inside every game.
+
+### Global App-Shell Rule
+
+Apply these protections once at the app shell or root wrapper:
+
+```jsx
+<div
+    onContextMenu={(event) => event.preventDefault()}
+    onDragStart={(event) => event.preventDefault()}
+>
+```
+
+### Global CSS Rule
+
+```css
+body,
+#root {
+    overflow-x: hidden;
     max-width: 100vw;
-    min-height: 100vh;
-    min-height: 100dvh;
-    overflow-x: hidden; /* Never allow horizontal scrolling */
-    overflow-y: auto; /* Allow vertical scrolling when needed */
-    touch-action: pan-y; /* Allow vertical pan, block sideways gesture conflicts */
-  position: relative;
-  padding-top: max(20px, env(safe-area-inset-top)); /* Respect iPad Safe Area */
-  box-sizing: border-box;
-    -webkit-overflow-scrolling: touch;
-    -webkit-tap-highlight-color: transparent;
+}
+
+#root,
+#root * {
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-  ```
-- **Note**: Ensure internal content uses `box-sizing: border-box`, `max-width: 100%`, and responsive flex/grid layouts so no child element pushes the screen wider than the viewport.
+    -webkit-user-drag: none;
+}
+```
 
-### Global Browser Interaction Protection
-To reduce Safari long-press menus and accidental horizontal panning, all new games should follow these rules:
+### Per-Game Rule
 
-1.  **Disable browser context menu at the app or game wrapper**
-        ```jsx
-        <div
-            onContextMenu={(event) => event.preventDefault()}
-            onDragStart={(event) => event.preventDefault()}
-        >
-        ```
+Do not duplicate long-press suppression inside every game by default.
 
-2.  **Apply Safari-safe interaction CSS**
-        ```css
-        .game-container,
-        .game-container * {
-            -webkit-touch-callout: none;
-            -webkit-user-drag: none;
-        }
-        ```
+Only add local interaction overrides when:
+- a specific game has a special drawing surface
+- a child element still triggers browser behavior unexpectedly
+- a media element needs stricter control than the app shell already provides
 
-3.  **Prevent horizontal page drift globally**
-        ```css
-        body,
-        #root {
-            overflow-x: hidden;
-            max-width: 100vw;
-        }
-        ```
+### Important Limitation
 
-4.  **Important limitation**
-        - iPhone Safari cannot guarantee full suppression of every native long-press behavior in every case.
-        - This is the standard browser-side approach and should be applied consistently across all new games.
+- iPhone Safari cannot guarantee full suppression of every native long-press behavior in every case.
+- This is the standard browser-side approach and should be applied consistently.
 
 ## Start Screens
 
-All games should use the standard Start Screen layout to ensure consistency and prevent scrolling issues.
+All games should use the standard start screen layout unless a game family intentionally defines a different branded entry state.
 
 ### Layout Container
-- **CSS Class**: `.game-start-screen`
-- **Style**:
+- CSS class: `.game-start-screen`
+- Style:
     - Flexbox column, centered content.
-    - **Background**: White with high opacity (e.g., 90%).
-    - **Padding**: 30px 20px.
-    - **Max-Width**: 600px.
-    - **Border Radius**: 25px.
-- **Usage**: Wraps the entire content of the start screen state.
+    - Background: White with high opacity.
+    - Padding: `30px 20px`.
+    - Max-width: `600px`.
+    - Border radius: `25px`.
+- Usage: Wraps the entire content of the start screen state.
 
-### Elements
-1.  **Title**
-    - **CSS Class**: `.game-start-title`
-    - **Style**: Font size 2.5rem - 3rem, dark color.
-2.  **Image**
-    - **CSS Class**: `.game-start-image`
-    - **Style**: Max-height 250px, object-fit contain. Important to prevent header/footer overflow.
-3.  **Buttons Area**
-    - **Required Buttons**:
-        - "Game Start" (`.game-btn-start`)
-        - "Back to Main Menu" (`.game-btn-back`)
+### Start Screen Elements
+1. Title
+     - CSS class: `.game-start-title`
+     - Style: Font size `2.5rem - 3rem`, dark color.
+2. Image
+     - CSS class: `.game-start-image`
+     - Style: Max-height `250px`, `object-fit: contain`.
+3. Buttons Area
+     - Required actions depend on game family.
+
+### Start Screen Text Rules
+
+#### Standard Games
+- `Game Start`
+- `Back to Main Menu`
+
+#### Brain Games Lab
+- `Enter Brain Lab`
+- `Back to Main Menu`
 
 ## Game Action States
 
-Each game must be structured into independent states with specific UI requirements.
+Each game should be structured into clear states, but the exact pattern may vary by game type.
 
-### 1. Start Screen (`start_screen`)
-The entry point of the game.
-- **Visible Buttons**:
-    1.  **Game Start**
-    2.  **Back to Main Menu**
+### Common States
 
-### 2. Playing (`playing`)
-The active gameplay state.
-- **Visible Buttons**:
-    - **Exit** (`.game-btn-exit`): Positioned in the header/corner.
-- **Note**: No other navigation buttons should be visible.
+#### 1. Start Screen (`start_screen`)
+- Entry point of the game.
+- Typical buttons:
+    - primary start action
+    - back navigation action
 
-### 3. Next Question Overlay (`next_question`)
-An overlay or distinct state that appears after a round/question is completed correctly.
-- **Purpose**: Celebrates the success and gives the user a pause before the next challenge.
-- **Visual Requirements**:
-    - **Centered Overlay**: Darkened background with a centered, high-contrast popup.
-    - **Celebratory Text**: Encouraging messages with emojis (e.g., "You are correct! ✨").
-    - **Celebratory Image**: High-quality cartoon image (e.g., cake, star, trophy) to reward the child visually.
-    - **Single Action Button**: "Next Question" button to proceed.
+#### 2. Playing (`playing`)
+- Active gameplay state.
+- Visible button:
+    - `Exit` (`game-btn-exit`)
 
-### 3.5. Wrong Answer Screen (`wrong_answer`)
-An overlay that appears after a player answers incorrectly (in games with lives/HP systems).
-- **Purpose**: Provides feedback on incorrect answers and encourages the player to continue.
-- **Visual Requirements**:
-    - **Centered Overlay**: Similar layout to `next_question` with darkened background.
-    - **Feedback Text**: Clear indication of incorrect answer (e.g., "It is incorrect ❌").
-    - **Feedback Media**: Video or image showing failure animation (e.g., character falling, mistake animation).
-    - **Video Behavior**: If using video, should auto-play once (no loop).
-    - **Encouraging Message**: Supportive text to motivate continued play (e.g., "Try again on the next question! 💪").
-    - **Single Action Button**: "Next Question" button to proceed to the next challenge.
+#### 3. Next Question Overlay (`next_question`)
+- Optional state.
+- Good for round-based games that benefit from a celebration pause.
+- Visual requirements:
+    - centered overlay
+    - celebratory text
+    - celebratory image or reward media
+    - single next action button
 
-### 4. Win Screen (`win_screen`)
-Displayed when the game is successfully completed.
-- **Visible Buttons**:
-    1.  **Play Again** (Styled like Start Button)
-    2.  **Back to Main Menu**
+#### 3.5. Wrong Answer Screen (`wrong_answer`)
+- Optional state.
+- Best for HP/lives systems or games that need a visible failure beat.
+- Visual requirements:
+    - centered overlay
+    - clear incorrect message
+    - failure image or video when appropriate
+    - encouraging text
+    - single continue or next action button
 
-### 5. Game Over (`game_over`)
-Displayed when the player loses (if applicable).
-- **Purpose**: Shows the end of game due to failure condition (e.g., HP/lives depleted, time expired).
-- **Visual Requirements**:
-    - **Title**: Clear game over message (e.g., "🎮 Game Over 🎮").
-    - **Score Display** (for applicable games): Show player's performance (e.g., "You answered X out of Y questions correctly!").
-    - **Encouraging Message**: Supportive text to motivate retry (e.g., "Don't give up! Try again! 💪").
-- **Visible Buttons**:
-    1.  **Try Again** (Styled like Start Button) - Restarts the game from the beginning
-    2.  **Back to Main Menu** - Returns to main menu
+#### 4. Win Screen (`win_screen`)
+- Completion state.
+- Typical buttons:
+    - `Play Again`
+    - `Back to Main Menu` or `Back to Games`
+
+#### 5. Game Over (`game_over`)
+- Optional loss state.
+- Use only when the game truly has a fail condition.
+
+### Important Design Note
+
+These are common states, not mandatory for every future game.
+
+Other valid structures include:
+- calm retry loops
+- level ladder games
+- immediate next-round transitions
+- freeplay/no-fail activities
+- motor-control surfaces without overlay breaks
 
 ## Audio and Feedback
 
-To ensure a consistent and natural user experience, all games must use the central audio utility for speech synthesis and sound effects.
+All games should use the shared audio utilities for consistency.
 
 ### Speech Synthesis
-- **Utility**: Use `speakWithFemaleVoice` or `speakEncouraging` from `../utils/audio.js`.
-- **Consistency**: All spoken text (sentences, instructions, feedback) should use this utility to ensure the same high-quality voice is used across the entire application.
-- **Natural Sound**: The utility is configured to prioritize the browser's high-quality default voice. Avoid implementing local `speechSynthesis` calls within individual game components.
+- Utility: `speakWithFemaleVoice` or `speakEncouraging` from `../utils/audio.js`
+- Rule: Avoid raw local `speechSynthesis` calls inside individual game files.
 
 ### Sound Effects
-- **Utility**: Use `playSound(type)` from `../utils/audio.js`.
-- **Standard Types**:
-    - `'correct'`: Plays a success sound and an encouraging message.
-    - `'incorrect'`: Plays a "try again" message.
-    - `'win'`: Plays a victory sound (if defined).
+- Utility: `playSound(type)` from `../utils/audio.js`
+- Standard types:
+    - `'correct'`
+    - `'incorrect'`
+    - `'win'`
+
 ## Asset Organization
 
-To keep the project manageable and clean, all assets must be organized into specific subdirectories within `src/assets/`.
+All assets belong under `src/assets/`.
 
-### Directory Structure
-- **Root `src/assets/`**: Common assets used across multiple games or by the main application (e.g., `celebration_cake.png`, `main_menu_hero.png`, `shield_icon.png`).
-- **Game-Specific Folders**: Each major game has its own dedicated folder:
-    - `pronoun_adventure/`
-    - `question_word_racer/`
-    - `wonder_world_blaster/`
-    - `puzzle_matcher/`
-    - `listening_bridge/`
-    - `sentence_train/`
-    - `adjective_artist/`
-    - `spelling_bee/`
+### Root Shared Assets
 
-### Rules
-1.  **Isolation**: Game-specific sprites, backgrounds, and icons should live only in their respective folder.
-2.  **Naming**: Use descriptive, lowercase filenames with underscores (e.g., `race_car.png`).
-3.  **Imports**: Always point imports to the full path: `import myImg from '../assets/game_name/my_img.png'`.
-4.  **CSS**: Use relative paths in CSS: `background-image: url('../assets/game_name/bg.png')`.
+Use the root of `src/assets/` for reusable, cross-game, or application-level assets.
+
+Examples:
+- `celebration_cake.png`
+- `main_menu_hero.png`
+- `shield_icon.png`
+- `win_screen_celebration.png`
+
+### Game-Specific Asset Folders
+
+Use subfolders for assets tied to a specific game only.
+
+Current folder structure:
+- `adjective_artist/`
+- `listening_bridge/`
+- `pronoun_adventure/`
+- `puzzle_matcher/`
+- `question_word_racer/`
+- `sentence_train/`
+- `spelling_bee/`
+- `wonder_world_blaster/`
+- `word_tower/`
+
+### Asset Rules
+1. Isolation
+     - Game-specific images, audio, video, and animation files live only in that game's own folder.
+2. Shared root usage
+     - Universal celebration, menu, or application assets live in root `src/assets/`.
+3. Media types
+     - Game-specific folders may contain images, audio, or video.
+     - Example: a file like `Adventurer_Fall.mp4` belongs in that game's own asset folder, not the shared root.
+4. Naming
+     - Use descriptive lowercase filenames with underscores when practical.
+5. Imports
+     - Use full paths such as `import myImg from '../assets/game_name/my_img.png'`.
+6. CSS references
+     - Use relative asset paths in CSS when needed.
 
 ## Game Design Best Practices
 
 ### Randomization
-To ensure educational games remain engaging and prevent children from memorizing patterns:
-1.  **Randomize Answer Positions**: Always shuffle the order of options/choices so the correct answer appears in different positions each round.
-2.  **Session Randomization**: Randomly select a fixed number of questions (standard is 5) from the database at the start of each session or when "Try Again" is clicked.
-3.  **Round-by-Round Variety**: In interactive or theme-based games, ensure targets, colors, or themes are randomized for each round within the 5-round session.
-4.  **Implementation**: Use array shuffling (e.g., `.sort(() => Math.random() - 0.5)`) for both answer positions and session pools.
 
-## Round-Based Game Control Pattern
+Randomization is a configurable per-game design decision, but anti-memorization behavior is mandatory.
 
-For games with a fixed number of questions/rounds (e.g., 5 questions to win), follow this proven pattern based on the Spelling Bee Garden implementation.
+#### Mandatory Rule
 
-### Game Type Comparison
+Every fresh session must reshuffle or re-randomize the playable content.
 
-The application supports three main game control patterns:
+This applies when the user taps:
+- `Game Start`
+- `Play Again`
+- any button that begins a fresh session
 
-| Game Type | Win Condition | Lose Condition | Progress Indicator | Examples |
-|-----------|--------------|----------------|-------------------|----------|
-| **HP-based** | Complete objective before HP depletes | HP reaches 0 | Health bar/hearts | Pronoun Adventure, Listening Bridge |
-| **Time-based** | Complete objective before time expires | Timer reaches 0 | Countdown timer | Question Word Racer |
-| **Round-based** | Complete all N rounds (e.g., 5) | N/A (no fail state) | Round counter (e.g., "3/5") | Spelling Bee Garden |
+Purpose:
+- Prevent the child from memorizing a fixed order or answer pattern across plays.
 
-### Data Structure Pattern
+#### Recommended Randomization Options
 
-Separate game configuration from content in your data file (e.g., `spellingBeeData.js`):
+Use the combination that fits the game:
+1. Shuffle answer positions
+2. Shuffle session question pool
+3. Shuffle round order
+4. Shuffle targets, colors, boards, or tracks
+5. Shuffle prompt wording when applicable
+
+#### Configuration Rule
+
+- Round count, session size, difficulty pool, and board variation are per-game decisions.
+- Do not assume a universal default such as 5 rounds.
+
+## Round and Session Patterns
+
+Round-based control is one valid pattern, not the default for all future games.
+
+### Supported Pattern Types
+
+Examples include:
+- HP-based games
+- time-based games
+- round-based games
+- level ladder games
+- calm retry loop games
+- freeplay/no-fail games
+
+### Round-Based Pattern Example
+
+The Spelling Bee Garden style pattern remains a valid reference for games that benefit from:
+- a defined round count
+- between-round celebration overlays
+- explicit session progress indicators
+
+Example data pattern:
 
 ```javascript
 const GAME_DATA = {
-    roundsPerSession: 5,  // Configuration constant
-    vocabulary: [         // Content pool (larger than roundsPerSession)
-        { id: 'item1', /* question data */ },
-        { id: 'item2', /* question data */ },
-        // ... more items
+    roundsPerSession: 5,
+    vocabulary: [
+        { id: 'item1' },
+        { id: 'item2' }
     ]
 };
 ```
 
-**Key Principles**:
-- Define `roundsPerSession` as a constant at the data level
-- Keep the content pool larger than `roundsPerSession` for variety
-- Structure each item with a unique `id` and all necessary question data
-
-### State Management
-
-Implement these essential state variables:
+Example state pattern:
 
 ```javascript
-const [gameState, setGameState] = useState('start');  // start, playing, next_question, win
-const [currentRound, setCurrentRound] = useState(0);  // 1-indexed for display
-const [sessionVocabulary, setSessionVocabulary] = useState([]);  // Randomized subset
-const [currentWord, setCurrentWord] = useState(null);  // Current question data
+const [gameState, setGameState] = useState('start');
+const [currentRound, setCurrentRound] = useState(0);
+const [sessionVocabulary, setSessionVocabulary] = useState([]);
+const [currentWord, setCurrentWord] = useState(null);
 ```
 
-**State Descriptions**:
-- `gameState`: Controls which UI screen is displayed
-- `currentRound`: Tracks progress (1-indexed: 1, 2, 3, 4, 5)
-- `sessionVocabulary`: The randomized subset of questions for this session
-- `currentWord`: The active question/item being displayed
+### Round-Based Best Practices
 
-### Round Flow Control
+1. Use 0-indexed arrays and 1-indexed display labels.
+2. Shuffle both the session pool and answer/option order when needed.
+3. Re-randomize every new session.
+4. Choose overlays only when they improve pacing for that specific game.
+5. Prefer calm retry loops instead of hard fail states when educational flow matters more than punishment.
 
-#### 1. Session Initialization (`handleStart`)
+## Maintenance Rule
 
-```javascript
-const handleStart = () => {
-    // Shuffle the full pool and select N items
-    const shuffled = [...GAME_DATA.vocabulary].sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, GAME_DATA.roundsPerSession);
-    
-    setSessionVocabulary(selected);
-    setCurrentRound(1);  // Start at round 1 (1-indexed)
-    initRound(0, selected);  // Load first question (0-indexed array)
-};
-```
-
-#### 2. Round Initialization (`initRound`)
-
-```javascript
-const initRound = useCallback((roundIndex, vocab = null) => {
-    const currentVocab = vocab || sessionVocabulary;
-    const word = currentVocab[roundIndex];  // 0-indexed array access
-    
-    // Shuffle options for this round (additional randomization)
-    const shuffledOptions = [...word.options].sort(() => Math.random() - 0.5);
-    const wordWithShuffledOptions = { ...word, options: shuffledOptions };
-    
-    setCurrentWord(wordWithShuffledOptions);
-    setGameState('playing');
-    
-    // Optional: Speak instructions
-    setTimeout(() => speakWithFemaleVoice(`Instruction for ${word.name}`), 500);
-}, [sessionVocabulary]);
-```
-
-#### 3. Answer Validation and Round Completion
-
-```javascript
-const handleAnswer = (userAnswer) => {
-    if (userAnswer === currentWord.correctAnswer) {
-        playSound('correct');
-        
-        setTimeout(() => {
-            // Check if more rounds remain
-            if (currentRound < GAME_DATA.roundsPerSession) {
-                setGameState('next_question');  // Show celebration overlay
-            } else {
-                playSound('win');
-                setGameState('win');  // All rounds complete!
-            }
-        }, 1000);
-    } else {
-        playSound('incorrect');
-        // Allow retry (stay in 'playing' state)
-    }
-};
-```
-
-#### 4. Advancing to Next Round
-
-```javascript
-const handleNextRound = () => {
-    const nextRound = currentRound + 1;
-    setCurrentRound(nextRound);
-    initRound(nextRound - 1);  // Convert to 0-indexed for array access
-};
-```
-
-### UI Implementation
-
-#### Round Progress Display
-
-```jsx
-<div className="sb-header">
-    <div className="sb-round-info">
-        Round {currentRound} / {GAME_DATA.roundsPerSession}
-    </div>
-    <button className="game-btn-exit" onClick={onBack}>Exit</button>
-</div>
-```
-
-#### Next Question Overlay
-
-```jsx
-{gameState === 'next_question' && (
-    <div className="sb-overlay">
-        <div className="sb-overlay-content">
-            <img src={celebrationImg} alt="Success" className="sb-success-img" />
-            <h2 className="sb-success-text">Great Job! 🎉</h2>
-            <button className="game-btn-start" onClick={handleNextRound}>
-                Next Level
-            </button>
-        </div>
-    </div>
-)}
-```
-
-### Key Implementation Details
-
-1. **Index Management**: Use 0-indexed arrays but 1-indexed display
-   - `currentRound`: 1, 2, 3, 4, 5 (for UI display)
-   - Array access: `sessionVocabulary[currentRound - 1]`
-
-2. **Randomization Layers**:
-   - **Session level**: Shuffle and select N items from full pool
-   - **Round level**: Shuffle answer options for each question
-
-3. **State Transitions**:
-   - `start` → `playing` (on Game Start)
-   - `playing` → `next_question` (on correct answer, if rounds remain)
-   - `next_question` → `playing` (on Next Level button)
-   - `playing` → `win` (on correct answer, if last round)
-   - `win` → `playing` (on Play Again, resets session)
-
-4. **No Fail State**: Round-based games typically don't have a "game over" state. Players can retry incorrect answers until they succeed.
-
-5. **Session Reset**: On "Play Again", re-shuffle and select a new subset to ensure variety.
-
-### Best Practices
-
-- **Clear Separation**: Keep `next_question` celebration distinct from round advancement logic
-- **Callback Dependencies**: Include `sessionVocabulary` in `initRound` dependencies
-- **Audio Timing**: Use `setTimeout` to delay speech after state changes
-- **Vocabulary Passing**: Pass `selected` vocabulary to `initRound` on first call to avoid race conditions
-- **Progress Feedback**: Always show current round and total rounds in the UI
-- **Celebration**: Use the `next_question` state to give positive reinforcement between rounds
+When new interaction models are introduced, update this guide before scaling that pattern to multiple games.
 
