@@ -24,6 +24,17 @@ const GRID_HUNT_ADV_SEQUENCE_LENGTH = 6;
 const LETTER_GAME_TOTAL_ROUNDS = 8;
 const LETTER_GAME_EASY_SIZE = 8;
 const LETTER_GAME_ADV_SIZE = 10;
+const NEW_TRACK_GAMES_ROUNDS = 6;
+const LINE_MAZE_EASY_PATHS = 3;
+const LINE_MAZE_ADV_PATHS = 5;
+const MIRROR_EASY_GRID = 4;
+const MIRROR_ADV_GRID = 5;
+const MIRROR_EASY_SEQUENCE = 4;
+const MIRROR_ADV_SEQUENCE = 6;
+const TRAFFIC_EASY_STEPS = 8;
+const TRAFFIC_ADV_STEPS = 10;
+const TWIN_EASY_TARGET = 8;
+const TWIN_ADV_TARGET = 12;
 const BRAIN_PROGRESS_STORAGE_KEY = 'brain-games-progress-v1';
 
 const SHAPES = ['circle', 'square', 'triangle'];
@@ -350,6 +361,145 @@ function makeLetterRound(word, roundIndex, size) {
     };
 }
 
+function lineMazeConfig(advancedMode) {
+    return {
+        pathCount: advancedMode ? LINE_MAZE_ADV_PATHS : LINE_MAZE_EASY_PATHS,
+        tolerance: advancedMode ? 5 : 7
+    };
+}
+
+function makeLinePoints() {
+    const total = 6;
+    const points = [];
+    let y = 15 + Math.random() * 70;
+
+    for (let i = 0; i < total; i++) {
+        const x = 8 + (84 / (total - 1)) * i;
+        if (i > 0) {
+            y = Math.max(8, Math.min(92, y + (Math.random() * 36 - 18)));
+        }
+        points.push({ x, y });
+    }
+
+    return points;
+}
+
+function makeLineMazeRound(roundIndex, pathCount) {
+    const target = makeLinePoints();
+    const distractors = Array.from({ length: Math.max(1, pathCount - 1) }, () => makeLinePoints());
+    return {
+        roundIndex,
+        target,
+        distractors,
+        start: target[0],
+        end: target[target.length - 1]
+    };
+}
+
+function pointSegmentDistance(px, py, ax, ay, bx, by) {
+    const dx = bx - ax;
+    const dy = by - ay;
+    const lenSq = dx * dx + dy * dy;
+
+    if (lenSq === 0) {
+        return Math.hypot(px - ax, py - ay);
+    }
+
+    const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / lenSq));
+    const cx = ax + t * dx;
+    const cy = ay + t * dy;
+    return Math.hypot(px - cx, py - cy);
+}
+
+function polylineDistance(px, py, points) {
+    let best = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < points.length - 1; i++) {
+        const a = points[i];
+        const b = points[i + 1];
+        best = Math.min(best, pointSegmentDistance(px, py, a.x, a.y, b.x, b.y));
+    }
+    return best;
+}
+
+function polylineProgress(px, py, points) {
+    const segmentLengths = [];
+    let totalLen = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+        const len = Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+        segmentLengths.push(len);
+        totalLen += len;
+    }
+
+    if (totalLen === 0) {
+        return 0;
+    }
+
+    let bestDist = Number.POSITIVE_INFINITY;
+    let bestAlong = 0;
+    let along = 0;
+
+    for (let i = 0; i < points.length - 1; i++) {
+        const a = points[i];
+        const b = points[i + 1];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const lenSq = dx * dx + dy * dy;
+        const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1, ((px - a.x) * dx + (py - a.y) * dy) / lenSq));
+        const cx = a.x + t * dx;
+        const cy = a.y + t * dy;
+        const dist = Math.hypot(px - cx, py - cy);
+
+        if (dist < bestDist) {
+            bestDist = dist;
+            bestAlong = along + t * segmentLengths[i];
+        }
+        along += segmentLengths[i];
+    }
+
+    return bestAlong / totalLen;
+}
+
+function pointsToPath(points) {
+    return points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+}
+
+function mirrorConfig(advancedMode) {
+    return {
+        size: advancedMode ? MIRROR_ADV_GRID : MIRROR_EASY_GRID,
+        sequenceLength: advancedMode ? MIRROR_ADV_SEQUENCE : MIRROR_EASY_SEQUENCE
+    };
+}
+
+function makeMirrorRound(roundIndex, size, sequenceLength) {
+    const totalCells = size * size;
+    const sequence = shuffle(Array.from({ length: totalCells }, (_, i) => i)).slice(0, sequenceLength);
+    return {
+        roundIndex,
+        size,
+        sequence
+    };
+}
+
+function trafficConfig(advancedMode) {
+    return {
+        steps: advancedMode ? TRAFFIC_ADV_STEPS : TRAFFIC_EASY_STEPS
+    };
+}
+
+function makeTrafficRound(roundIndex, steps) {
+    const signals = Array.from({ length: steps }, () => (Math.random() < 0.55 ? 'go' : 'stop'));
+    return {
+        roundIndex,
+        signals
+    };
+}
+
+function twinConfig(advancedMode) {
+    return {
+        target: advancedMode ? TWIN_ADV_TARGET : TWIN_EASY_TARGET
+    };
+}
+
 function loadProgress() {
     try {
         const raw = window.localStorage.getItem(BRAIN_PROGRESS_STORAGE_KEY);
@@ -534,6 +684,47 @@ const BrainGamesLab = ({ onBack }) => {
 
     const activeLetterGameConfig = useMemo(() => letterGameConfig(letterGameAdvanced), [letterGameAdvanced]);
 
+    // Line Maze Runner Game
+    const [lineMazeAdvanced, setLineMazeAdvanced] = useState(false);
+    const [lineMazeRound, setLineMazeRound] = useState(0);
+    const [lineMazeScore, setLineMazeScore] = useState(0);
+    const [lineMazeTracing, setLineMazeTracing] = useState(false);
+    const [lineMazeProgress, setLineMazeProgress] = useState(0);
+    const [lineMazeMessage, setLineMazeMessage] = useState('Hold start and trace the correct line to the end.');
+    const [lineMazeData, setLineMazeData] = useState(() => makeLineMazeRound(0, LINE_MAZE_EASY_PATHS));
+    const activeLineMazeConfig = useMemo(() => lineMazeConfig(lineMazeAdvanced), [lineMazeAdvanced]);
+
+    // Mirror Path Copy Game
+    const [mirrorAdvanced, setMirrorAdvanced] = useState(false);
+    const [mirrorRound, setMirrorRound] = useState(0);
+    const [mirrorScore, setMirrorScore] = useState(0);
+    const [mirrorStep, setMirrorStep] = useState(0);
+    const [mirrorShowing, setMirrorShowing] = useState(true);
+    const [mirrorShowIndex, setMirrorShowIndex] = useState(0);
+    const [mirrorMessage, setMirrorMessage] = useState('Watch the path, then tap the same points in order.');
+    const [mirrorData, setMirrorData] = useState(() => makeMirrorRound(0, MIRROR_EASY_GRID, MIRROR_EASY_SEQUENCE));
+    const activeMirrorConfig = useMemo(() => mirrorConfig(mirrorAdvanced), [mirrorAdvanced]);
+
+    // Traffic Light Trail Game
+    const [trafficAdvanced, setTrafficAdvanced] = useState(false);
+    const [trafficRound, setTrafficRound] = useState(0);
+    const [trafficScore, setTrafficScore] = useState(0);
+    const [trafficStep, setTrafficStep] = useState(0);
+    const [trafficProgress, setTrafficProgress] = useState(0);
+    const [trafficMessage, setTrafficMessage] = useState('Move on green, wait on red to stay on track.');
+    const [trafficData, setTrafficData] = useState(() => makeTrafficRound(0, TRAFFIC_EASY_STEPS));
+    const activeTrafficConfig = useMemo(() => trafficConfig(trafficAdvanced), [trafficAdvanced]);
+
+    // Twin Finger Track Game
+    const [twinAdvanced, setTwinAdvanced] = useState(false);
+    const [twinRound, setTwinRound] = useState(0);
+    const [twinScore, setTwinScore] = useState(0);
+    const [twinLeft, setTwinLeft] = useState(0);
+    const [twinRight, setTwinRight] = useState(0);
+    const [twinExpected, setTwinExpected] = useState('left');
+    const [twinMessage, setTwinMessage] = useState('Alternate Left and Right taps to move both tracks.');
+    const activeTwinConfig = useMemo(() => twinConfig(twinAdvanced), [twinAdvanced]);
+
     const [progress, setProgress] = useState(() => loadProgress());
 
     const addProgressEntry = useCallback((bucket, entry) => {
@@ -674,6 +865,46 @@ const BrainGamesLab = ({ onBack }) => {
         setLetterData(makeLetterRound(nextWords[0] || 'write', 0, cfg.size));
     }, [letterGameAdvanced]);
 
+    const resetLineMaze = useCallback((advancedMode = lineMazeAdvanced) => {
+        const cfg = lineMazeConfig(advancedMode);
+        setLineMazeRound(0);
+        setLineMazeScore(0);
+        setLineMazeTracing(false);
+        setLineMazeProgress(0);
+        setLineMazeMessage('Hold start and trace the correct line to the end.');
+        setLineMazeData(makeLineMazeRound(0, cfg.pathCount));
+    }, [lineMazeAdvanced]);
+
+    const resetMirror = useCallback((advancedMode = mirrorAdvanced) => {
+        const cfg = mirrorConfig(advancedMode);
+        setMirrorRound(0);
+        setMirrorScore(0);
+        setMirrorStep(0);
+        setMirrorShowing(true);
+        setMirrorShowIndex(0);
+        setMirrorMessage('Watch the path, then tap the same points in order.');
+        setMirrorData(makeMirrorRound(0, cfg.size, cfg.sequenceLength));
+    }, [mirrorAdvanced]);
+
+    const resetTraffic = useCallback((advancedMode = trafficAdvanced) => {
+        const cfg = trafficConfig(advancedMode);
+        setTrafficRound(0);
+        setTrafficScore(0);
+        setTrafficStep(0);
+        setTrafficProgress(0);
+        setTrafficMessage('Move on green, wait on red to stay on track.');
+        setTrafficData(makeTrafficRound(0, cfg.steps));
+    }, [trafficAdvanced]);
+
+    const resetTwin = useCallback(() => {
+        setTwinRound(0);
+        setTwinScore(0);
+        setTwinLeft(0);
+        setTwinRight(0);
+        setTwinExpected('left');
+        setTwinMessage('Alternate Left and Right taps to move both tracks.');
+    }, []);
+
     const startLadderLevel = useCallback((extraSeconds = 0) => {
         const cfg = ladderConfig(ladderLevel);
         setLadderGoal(cfg.goal);
@@ -779,6 +1010,24 @@ const BrainGamesLab = ({ onBack }) => {
         return () => window.clearTimeout(id);
     }, [view, trailShowing, trailShowIndex, trailSequence]);
 
+    useEffect(() => {
+        if (view !== 'mirror' || !mirrorShowing) {
+            return undefined;
+        }
+
+        if (mirrorShowIndex >= mirrorData.sequence.length) {
+            setMirrorShowing(false);
+            setMirrorMessage('Now copy the same path by tapping in order.');
+            return undefined;
+        }
+
+        const id = window.setTimeout(() => {
+            setMirrorShowIndex((prev) => prev + 1);
+        }, 650);
+
+        return () => window.clearTimeout(id);
+    }, [view, mirrorShowing, mirrorShowIndex, mirrorData.sequence]);
+
     const calmZoneClass = useMemo(() => {
         if (calmMeter >= 35 && calmMeter <= 65) {
             return 'in-zone';
@@ -868,6 +1117,30 @@ const BrainGamesLab = ({ onBack }) => {
         if (gameId === 'letter-path') {
             resetLetterGame();
             setView('letter-path');
+            return;
+        }
+
+        if (gameId === 'line-maze') {
+            resetLineMaze();
+            setView('line-maze');
+            return;
+        }
+
+        if (gameId === 'mirror') {
+            resetMirror();
+            setView('mirror');
+            return;
+        }
+
+        if (gameId === 'traffic-trail') {
+            resetTraffic();
+            setView('traffic-trail');
+            return;
+        }
+
+        if (gameId === 'twin-track') {
+            resetTwin();
+            setView('twin-track');
             return;
         }
 
@@ -1270,6 +1543,195 @@ const BrainGamesLab = ({ onBack }) => {
         resetLetterGame(nextAdvanced);
     };
 
+    const getSvgPoint = (event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        return { x, y };
+    };
+
+    const handleLineMazeDown = (event) => {
+        if (lineMazeRound >= NEW_TRACK_GAMES_ROUNDS) {
+            return;
+        }
+
+        const point = getSvgPoint(event);
+        const distToStart = Math.hypot(point.x - lineMazeData.start.x, point.y - lineMazeData.start.y);
+        if (distToStart <= 8) {
+            setLineMazeTracing(true);
+            setLineMazeProgress(0);
+            setLineMazeMessage('Great start. Keep tracing to the finish.');
+        }
+    };
+
+    const handleLineMazeMove = (event) => {
+        if (!lineMazeTracing || lineMazeRound >= NEW_TRACK_GAMES_ROUNDS) {
+            return;
+        }
+
+        const point = getSvgPoint(event);
+        const distTarget = polylineDistance(point.x, point.y, lineMazeData.target);
+        const closestDistractor = Math.min(...lineMazeData.distractors.map((line) => polylineDistance(point.x, point.y, line)));
+
+        if (distTarget > activeLineMazeConfig.tolerance || closestDistractor + 1 < distTarget) {
+            setLineMazeTracing(false);
+            setLineMazeProgress(0);
+            setLineMazeMessage('Wrong track. Breathe and start again from the green dot.');
+            return;
+        }
+
+        const progress = polylineProgress(point.x, point.y, lineMazeData.target);
+        setLineMazeProgress((prev) => Math.max(prev, progress));
+
+        const distToEnd = Math.hypot(point.x - lineMazeData.end.x, point.y - lineMazeData.end.y);
+        if (progress >= 0.95 && distToEnd <= 8) {
+            const nextRound = lineMazeRound + 1;
+            setLineMazeScore((prev) => prev + 1);
+            setLineMazeRound(nextRound);
+            setLineMazeTracing(false);
+            setLineMazeProgress(0);
+            setLineMazeMessage('Nice tracing. Calm eyes, next maze.');
+
+            if (nextRound < NEW_TRACK_GAMES_ROUNDS) {
+                setLineMazeData(makeLineMazeRound(nextRound, activeLineMazeConfig.pathCount));
+            }
+        }
+    };
+
+    const handleLineMazeUp = () => {
+        if (lineMazeTracing) {
+            setLineMazeTracing(false);
+        }
+    };
+
+    const handleLineMazeModeToggle = () => {
+        const nextAdvanced = !lineMazeAdvanced;
+        setLineMazeAdvanced(nextAdvanced);
+        resetLineMaze(nextAdvanced);
+    };
+
+    const handleMirrorTap = (cellIndex) => {
+        if (mirrorRound >= NEW_TRACK_GAMES_ROUNDS || mirrorShowing) {
+            return;
+        }
+
+        const expected = mirrorData.sequence[mirrorStep];
+        if (cellIndex === expected) {
+            const nextStep = mirrorStep + 1;
+            setMirrorStep(nextStep);
+
+            if (nextStep >= mirrorData.sequence.length) {
+                const nextRound = mirrorRound + 1;
+                setMirrorScore((prev) => prev + 1);
+                setMirrorRound(nextRound);
+                setMirrorStep(0);
+                setMirrorMessage('Excellent copy. Next pattern loading.');
+
+                if (nextRound < NEW_TRACK_GAMES_ROUNDS) {
+                    setMirrorData(makeMirrorRound(nextRound, activeMirrorConfig.size, activeMirrorConfig.sequenceLength));
+                    setMirrorShowing(true);
+                    setMirrorShowIndex(0);
+                }
+                return;
+            }
+
+            setMirrorMessage(`Good memory. Step ${nextStep + 1} next.`);
+            return;
+        }
+
+        setMirrorStep(0);
+        setMirrorMessage('Oops. Slow breath and retry the same pattern.');
+    };
+
+    const handleMirrorModeToggle = () => {
+        const nextAdvanced = !mirrorAdvanced;
+        setMirrorAdvanced(nextAdvanced);
+        resetMirror(nextAdvanced);
+    };
+
+    const handleTrafficAction = (action) => {
+        if (trafficRound >= NEW_TRACK_GAMES_ROUNDS) {
+            return;
+        }
+
+        const signal = trafficData.signals[trafficStep];
+        const isCorrect = (signal === 'go' && action === 'move') || (signal === 'stop' && action === 'wait');
+
+        if (!isCorrect) {
+            setTrafficStep(0);
+            setTrafficProgress(0);
+            setTrafficMessage('Wrong move. Pause, breathe, and restart this trail.');
+            return;
+        }
+
+        const nextStep = trafficStep + 1;
+        setTrafficStep(nextStep);
+        setTrafficProgress((prev) => prev + 1);
+
+        if (nextStep >= trafficData.signals.length) {
+            const nextRound = trafficRound + 1;
+            setTrafficScore((prev) => prev + 1);
+            setTrafficRound(nextRound);
+            setTrafficStep(0);
+            setTrafficProgress(0);
+            setTrafficMessage('Great control. Next trail ready.');
+
+            if (nextRound < NEW_TRACK_GAMES_ROUNDS) {
+                setTrafficData(makeTrafficRound(nextRound, activeTrafficConfig.steps));
+            }
+            return;
+        }
+
+        setTrafficMessage('Nice control. Keep following the signal.');
+    };
+
+    const handleTrafficModeToggle = () => {
+        const nextAdvanced = !trafficAdvanced;
+        setTrafficAdvanced(nextAdvanced);
+        resetTraffic(nextAdvanced);
+    };
+
+    const handleTwinTap = (side) => {
+        if (twinRound >= NEW_TRACK_GAMES_ROUNDS) {
+            return;
+        }
+
+        if (side !== twinExpected) {
+            setTwinLeft(0);
+            setTwinRight(0);
+            setTwinExpected('left');
+            setTwinMessage('Use alternating taps: Left then Right. Calm reset.');
+            return;
+        }
+
+        const target = activeTwinConfig.target;
+        const nextLeft = side === 'left' ? twinLeft + 1 : twinLeft;
+        const nextRight = side === 'right' ? twinRight + 1 : twinRight;
+
+        setTwinLeft(nextLeft);
+        setTwinRight(nextRight);
+        setTwinExpected(side === 'left' ? 'right' : 'left');
+
+        if (nextLeft >= target && nextRight >= target) {
+            const nextRound = twinRound + 1;
+            setTwinScore((prev) => prev + 1);
+            setTwinRound(nextRound);
+            setTwinLeft(0);
+            setTwinRight(0);
+            setTwinExpected('left');
+            setTwinMessage('Balanced control complete. Next track.');
+            return;
+        }
+
+        setTwinMessage(`Great. Next tap: ${side === 'left' ? 'Right' : 'Left'}.`);
+    };
+
+    const handleTwinModeToggle = () => {
+        const nextAdvanced = !twinAdvanced;
+        setTwinAdvanced(nextAdvanced);
+        resetTwin();
+    };
+
     const calmFinished = calmAttempts >= CALM_TARGET_ATTEMPTS;
     const switchFinished = switchRound >= SWITCH_TOTAL_ROUNDS;
     const oopsFinished = oopsRound >= OOPS_TOTAL_ROUNDS;
@@ -1291,6 +1753,10 @@ const BrainGamesLab = ({ onBack }) => {
     const letterFinished = letterRound >= LETTER_GAME_TOTAL_ROUNDS;
     const letterCurrentWord = (letterWords[letterRound] || '').toUpperCase();
     const letterBuiltPart = letterCurrentWord.slice(0, letterStep);
+    const lineMazeFinished = lineMazeRound >= NEW_TRACK_GAMES_ROUNDS;
+    const mirrorFinished = mirrorRound >= NEW_TRACK_GAMES_ROUNDS;
+    const trafficFinished = trafficRound >= NEW_TRACK_GAMES_ROUNDS;
+    const twinFinished = twinRound >= NEW_TRACK_GAMES_ROUNDS;
 
     useEffect(() => {
         if (!calmFinished || calmSaved) {
@@ -1491,6 +1957,26 @@ const BrainGamesLab = ({ onBack }) => {
                         <button className="brain-game-card" onClick={() => handleStartGame('letter-path')}>
                             <h3>15. Letter Path Builder</h3>
                             <p>Spell daily words by tapping letters in order.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('line-maze')}>
+                            <h3>16. Line Maze Runner</h3>
+                            <p>Trace from start to end through tangled lines.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('mirror')}>
+                            <h3>17. Mirror Path Copy</h3>
+                            <p>Watch a point path and tap the same order.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('traffic-trail')}>
+                            <h3>18. Traffic Light Trail</h3>
+                            <p>Move on green, wait on red, and finish the trail.</p>
+                        </button>
+
+                        <button className="brain-game-card" onClick={() => handleStartGame('twin-track')}>
+                            <h3>19. Twin Finger Track</h3>
+                            <p>Alternate left and right taps to move two tracks.</p>
                         </button>
                     </div>
 
@@ -2249,6 +2735,227 @@ const BrainGamesLab = ({ onBack }) => {
                             <p>Correct words: {letterScore}/{LETTER_GAME_TOTAL_ROUNDS}</p>
                             <div className="brain-result-actions">
                                 <button className="game-btn-start" onClick={resetLetterGame}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'line-maze' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Line Maze Runner</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!lineMazeFinished && (
+                        <>
+                            <p className="brain-instruction">Trace from the green start dot to the blue finish dot. No timer.</p>
+                            <p className="oops-message">{lineMazeMessage}</p>
+
+                            <div className="grid-hunt-toggle-row">
+                                <span>Mode: <strong>{lineMazeAdvanced ? 'Advanced' : 'Easy'}</strong></span>
+                                <button className="grid-hunt-mode-toggle" onClick={handleLineMazeModeToggle}>
+                                    {lineMazeAdvanced ? 'Switch to Easy' : 'Switch to Advanced'}
+                                </button>
+                            </div>
+
+                            <svg
+                                className="line-maze-svg"
+                                viewBox="0 0 100 100"
+                                onPointerDown={handleLineMazeDown}
+                                onPointerMove={handleLineMazeMove}
+                                onPointerUp={handleLineMazeUp}
+                                onPointerLeave={handleLineMazeUp}
+                            >
+                                {lineMazeData.distractors.map((line, idx) => (
+                                    <path key={`d-${idx}`} d={pointsToPath(line)} className="line-maze-distractor" />
+                                ))}
+                                <path d={pointsToPath(lineMazeData.target)} className="line-maze-target" />
+                                <circle cx={lineMazeData.start.x} cy={lineMazeData.start.y} r="3.6" className="line-maze-start" />
+                                <circle cx={lineMazeData.end.x} cy={lineMazeData.end.y} r="3.6" className="line-maze-end" />
+                            </svg>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {lineMazeRound + 1}/{NEW_TRACK_GAMES_ROUNDS}</span>
+                                <span>Path score: {lineMazeScore}</span>
+                                <span>Progress: {Math.round(lineMazeProgress * 100)}%</span>
+                            </div>
+                        </>
+                    )}
+
+                    {lineMazeFinished && (
+                        <div className="brain-result">
+                            <h3>Maze focus complete</h3>
+                            <p>Completed paths: {lineMazeScore}/{NEW_TRACK_GAMES_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetLineMaze}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'mirror' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Mirror Path Copy</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!mirrorFinished && (
+                        <>
+                            <p className="brain-instruction">Watch highlighted points, then tap the same sequence.</p>
+                            <p className="oops-message">{mirrorMessage}</p>
+
+                            <div className="grid-hunt-toggle-row">
+                                <span>Mode: <strong>{mirrorAdvanced ? 'Advanced' : 'Easy'}</strong></span>
+                                <button className="grid-hunt-mode-toggle" onClick={handleMirrorModeToggle}>
+                                    {mirrorAdvanced ? 'Switch to Easy' : 'Switch to Advanced'}
+                                </button>
+                            </div>
+
+                            <div className="mirror-grid" style={{ gridTemplateColumns: `repeat(${mirrorData.size}, minmax(0, 1fr))` }}>
+                                {Array.from({ length: mirrorData.size * mirrorData.size }, (_, cellIndex) => {
+                                    const isShow = mirrorShowing && mirrorData.sequence[mirrorShowIndex] === cellIndex;
+                                    const isDone = !mirrorShowing && mirrorData.sequence.slice(0, mirrorStep).includes(cellIndex);
+                                    return (
+                                        <button
+                                            key={`m-${mirrorRound}-${cellIndex}`}
+                                            className={`mirror-cell ${isShow ? 'show' : ''} ${isDone ? 'done' : ''}`}
+                                            onClick={() => handleMirrorTap(cellIndex)}
+                                            disabled={mirrorShowing}
+                                            aria-label={`Mirror point ${cellIndex + 1}`}
+                                        />
+                                    );
+                                })}
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {mirrorRound + 1}/{NEW_TRACK_GAMES_ROUNDS}</span>
+                                <span>Step: {mirrorStep}/{mirrorData.sequence.length}</span>
+                                <span>Score: {mirrorScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {mirrorFinished && (
+                        <div className="brain-result">
+                            <h3>Mirror memory complete</h3>
+                            <p>Copied patterns: {mirrorScore}/{NEW_TRACK_GAMES_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetMirror}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'traffic-trail' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Traffic Light Trail</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!trafficFinished && (
+                        <>
+                            <p className="brain-instruction">Choose Move on green and Wait on red.</p>
+                            <p className="oops-message">{trafficMessage}</p>
+
+                            <div className="grid-hunt-toggle-row">
+                                <span>Mode: <strong>{trafficAdvanced ? 'Advanced' : 'Easy'}</strong></span>
+                                <button className="grid-hunt-mode-toggle" onClick={handleTrafficModeToggle}>
+                                    {trafficAdvanced ? 'Switch to Easy' : 'Switch to Advanced'}
+                                </button>
+                            </div>
+
+                            <div className={`traffic-signal ${trafficData.signals[trafficStep] === 'go' ? 'go' : 'stop'}`}>
+                                {trafficData.signals[trafficStep] === 'go' ? 'GREEN GO' : 'RED STOP'}
+                            </div>
+
+                            <div className="delay-actions">
+                                <button className="brain-action-btn" onClick={() => handleTrafficAction('move')}>Move</button>
+                                <button className="brain-action-btn" onClick={() => handleTrafficAction('wait')}>Wait</button>
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {trafficRound + 1}/{NEW_TRACK_GAMES_ROUNDS}</span>
+                                <span>Step: {trafficStep}/{trafficData.signals.length}</span>
+                                <span>Trail score: {trafficScore}</span>
+                            </div>
+
+                            <div className="traffic-progress-track">
+                                <div className="traffic-progress-fill" style={{ width: `${Math.round((trafficProgress / trafficData.signals.length) * 100)}%` }} />
+                            </div>
+                        </>
+                    )}
+
+                    {trafficFinished && (
+                        <div className="brain-result">
+                            <h3>Signal control complete</h3>
+                            <p>Completed trails: {trafficScore}/{NEW_TRACK_GAMES_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetTraffic}>Play Again</button>
+                                <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {view === 'twin-track' && (
+                <div className="brain-lab-panel">
+                    <div className="brain-lab-header">
+                        <h2>Twin Finger Track</h2>
+                        <button className="game-btn-exit" onClick={() => setView('hub')}>Back</button>
+                    </div>
+
+                    {!twinFinished && (
+                        <>
+                            <p className="brain-instruction">Alternate taps: Left then Right. This is the two-finger fallback mode.</p>
+                            <p className="oops-message">{twinMessage}</p>
+
+                            <div className="grid-hunt-toggle-row">
+                                <span>Mode: <strong>{twinAdvanced ? 'Advanced' : 'Easy'}</strong></span>
+                                <button className="grid-hunt-mode-toggle" onClick={handleTwinModeToggle}>
+                                    {twinAdvanced ? 'Switch to Easy' : 'Switch to Advanced'}
+                                </button>
+                            </div>
+
+                            <div className="twin-track-row">
+                                <div>
+                                    <span>Left Track</span>
+                                    <div className="twin-track-bar"><div style={{ width: `${Math.round((twinLeft / activeTwinConfig.target) * 100)}%` }} /></div>
+                                </div>
+                                <div>
+                                    <span>Right Track</span>
+                                    <div className="twin-track-bar"><div style={{ width: `${Math.round((twinRight / activeTwinConfig.target) * 100)}%` }} /></div>
+                                </div>
+                            </div>
+
+                            <div className="delay-actions">
+                                <button className="brain-action-btn" onClick={() => handleTwinTap('left')}>Left Tap</button>
+                                <button className="brain-action-btn" onClick={() => handleTwinTap('right')}>Right Tap</button>
+                            </div>
+
+                            <div className="brain-stats-row">
+                                <span>Round: {twinRound + 1}/{NEW_TRACK_GAMES_ROUNDS}</span>
+                                <span>Next: {twinExpected === 'left' ? 'Left' : 'Right'}</span>
+                                <span>Score: {twinScore}</span>
+                            </div>
+                        </>
+                    )}
+
+                    {twinFinished && (
+                        <div className="brain-result">
+                            <h3>Twin track complete</h3>
+                            <p>Balanced rounds: {twinScore}/{NEW_TRACK_GAMES_ROUNDS}</p>
+                            <div className="brain-result-actions">
+                                <button className="game-btn-start" onClick={resetTwin}>Play Again</button>
                                 <button className="game-btn-back" onClick={() => setView('hub')}>Back to Games</button>
                             </div>
                         </div>
