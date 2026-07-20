@@ -29,12 +29,25 @@ function App() {
       e.preventDefault();
     };
 
+    // Reduce long-press browser menus such as Copy/Search on mobile Safari.
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    const handleDragStart = (e) => {
+      e.preventDefault();
+    };
+
     document.addEventListener('touchstart', handleTouchStart, { passive: false });
     document.addEventListener('gesturestart', handleGestureStart, { passive: false });
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('dragstart', handleDragStart);
 
     return () => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('gesturestart', handleGestureStart);
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('dragstart', handleDragStart);
     };
   }, []);
 
@@ -47,7 +60,7 @@ function App() {
   };
 
   return (
-    <div id="root">
+    <div id="root" onContextMenu={(event) => event.preventDefault()} onDragStart={(event) => event.preventDefault()}>
       {currentView === 'menu' && (
         <MainMenu onSelectGame={handleSelectGame} />
       )}

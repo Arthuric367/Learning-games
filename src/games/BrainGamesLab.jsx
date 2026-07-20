@@ -1865,7 +1865,11 @@ const BrainGamesLab = ({ onBack }) => {
     }, [addProgressEntry, sequenceFinished, sequenceSaved, sequenceScore]);
 
     return (
-        <div className="brain-lab-container">
+        <div
+            className="brain-lab-container"
+            onContextMenu={(event) => event.preventDefault()}
+            onDragStart={(event) => event.preventDefault()}
+        >
             {view === 'start' && (
                 <div className="game-start-screen">
                     <h1 className="game-start-title">Brain Games</h1>

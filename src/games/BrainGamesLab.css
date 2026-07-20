@@ -1,5 +1,6 @@
 .brain-lab-container {
     width: 100%;
+    max-width: 100vw;
     min-height: 100vh;
     min-height: 100dvh;
     padding: max(16px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
@@ -8,13 +9,23 @@
     align-items: center;
     justify-content: center;
     background: linear-gradient(145deg, #f9fbff 0%, #e5f4ff 45%, #fff3dd 100%);
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.brain-lab-container * {
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
 }
 
 .brain-lab-panel {
     width: min(920px, 100%);
+    max-width: 100%;
     background: rgba(255, 255, 255, 0.94);
     border: 3px solid #a8d7ff;
     border-radius: 22px;

@@ -1,9 +1,21 @@
 #root {
   width: 100%;
+  max-width: 100vw;
   height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
   touch-action: pan-y;
   overscroll-behavior: none;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#root,
+#root * {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 }

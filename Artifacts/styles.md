@@ -30,19 +30,55 @@ All games must adhere to the following CSS rules to ensure proper display and in
 - **Required Properties**:
   ```css
   width: 100%;
-  height: 90vh; /* Viewport height for iPad */
-  overflow: hidden; /* Prevent scrolling */
-  touch-action: none; /* Prevent browser gestures like scroll/zoom */
-  position: relative;
-  width: 100%;
-  height: 90vh; /* Viewport height for iPad */
-  overflow: hidden; /* Prevent scrolling */
-  touch-action: none; /* Prevent browser gestures like scroll/zoom */
+    max-width: 100vw;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden; /* Never allow horizontal scrolling */
+    overflow-y: auto; /* Allow vertical scrolling when needed */
+    touch-action: pan-y; /* Allow vertical pan, block sideways gesture conflicts */
   position: relative;
   padding-top: max(20px, env(safe-area-inset-top)); /* Respect iPad Safe Area */
   box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   ```
-- **Note**: Ensure internal content uses `box-sizing: border-box` and appropriate flexbox layouts to fit within this fixed 90vh container.
+- **Note**: Ensure internal content uses `box-sizing: border-box`, `max-width: 100%`, and responsive flex/grid layouts so no child element pushes the screen wider than the viewport.
+
+### Global Browser Interaction Protection
+To reduce Safari long-press menus and accidental horizontal panning, all new games should follow these rules:
+
+1.  **Disable browser context menu at the app or game wrapper**
+        ```jsx
+        <div
+            onContextMenu={(event) => event.preventDefault()}
+            onDragStart={(event) => event.preventDefault()}
+        >
+        ```
+
+2.  **Apply Safari-safe interaction CSS**
+        ```css
+        .game-container,
+        .game-container * {
+            -webkit-touch-callout: none;
+            -webkit-user-drag: none;
+        }
+        ```
+
+3.  **Prevent horizontal page drift globally**
+        ```css
+        body,
+        #root {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        ```
+
+4.  **Important limitation**
+        - iPhone Safari cannot guarantee full suppression of every native long-press behavior in every case.
+        - This is the standard browser-side approach and should be applied consistently across all new games.
 
 ## Start Screens
 
