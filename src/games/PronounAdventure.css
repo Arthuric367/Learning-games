@@ -1,23 +1,27 @@
 .app-container {
     width: 100%;
-    height: 90vh;
-    /* Viewport height for iPad */
+    max-width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
     /* Sky blue background */
     display: flex;
     justify-content: center;
     align-items: center;
     font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-    overflow: hidden;
-    /* Prevent scrolling */
-    touch-action: none;
-    /* Prevent browser gestures */
+    overflow-x: hidden;
+    overflow-y: hidden;
+    touch-action: manipulation;
     padding: 20px;
     /* Add general padding */
     padding-top: max(20px, env(safe-area-inset-top));
     /* Respect safe area */
     box-sizing: border-box;
     position: relative;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .start-screen,

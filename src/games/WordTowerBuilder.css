@@ -1,13 +1,20 @@
 /* ===== CONTAINER ===== */
-/* Main game container - follows styles.md guidelines */
+/* Main fixed-screen tap container using the Pattern B mobile rules. */
 .word-tower-container {
     width: 100%;
-    height: 90vh;
-    overflow: hidden;
-    touch-action: none;
+    max-width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    touch-action: manipulation;
     position: relative;
     padding-top: max(20px, env(safe-area-inset-top));
     box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
     background-size: cover;
     background-position: center;
     display: flex;

@@ -1,7 +1,10 @@
 .sentence-train-container {
     width: 100%;
-    height: 90vh;
-    /* Viewport height for iPad */
+    max-width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     background: url('../assets/sentence_train/village_bg.png') repeat-x bottom center;
     background-size: cover;
     display: flex;
@@ -10,11 +13,12 @@
     justify-content: space-between;
     padding: 20px;
     box-sizing: border-box;
-    overflow: hidden;
-    /* Prevent scrolling */
-    touch-action: none;
-    /* Prevent browser gestures */
+    overflow-x: hidden;
+    overflow-y: auto;
+    touch-action: pan-y;
     position: relative;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
     animation: moveBackground 60s linear infinite;
 }
 

@@ -1,6 +1,10 @@
 .puzzle-container {
   width: 100%;
-  height: 90vh;
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
   display: flex;
   flex-direction: column;
@@ -10,8 +14,11 @@
   box-sizing: border-box;
   font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
   position: relative;
-  overflow: hidden;
-  touch-action: none;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .puzzle-start-screen {
